@@ -1,0 +1,35 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.okheart.android">
+
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <!--
+
+          -->
+    <application
+        android:launchMode="singleInstance"
+        android:allowBackup="true"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme" >
+        <activity
+            android:theme="@style/AppTheme"
+            android:exported="true"
+            android:name="io.okheart.android.OkHeartActivity">
+
+            <!--
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+-->
+
+        </activity>
+        <provider
+            android:authorities="${applicationId}.OkHeart"
+            android:exported="true"
+            android:enabled="true"
+            android:name=".OkHi" />
+    </application>
+</manifest>
