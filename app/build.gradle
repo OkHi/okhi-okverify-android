@@ -1,5 +1,7 @@
 apply plugin: 'com.android.library'
+apply plugin: 'com.github.dcendents.android-maven'
 //apply plugin: 'com.android.application'
+group = 'com.github.okhi-android-sdk'
 
 android {
     compileSdkVersion 28
