@@ -118,6 +118,7 @@ Returned after the user has successfully completed address creation.
     "Response": "Address creation completed successfully"
   }
 }
+
 Returned after the user has successfully completed address creation.
 
 When the user does not go through the address creation process successfully, the following json object is returned in the callback.
