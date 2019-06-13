@@ -131,6 +131,7 @@ public class OkHeartActivity extends AppCompatActivity {
 
         }
 
+
         /*
         firstname = "Ramogi";
         lastname = "Ochola";
@@ -138,6 +139,7 @@ public class OkHeartActivity extends AppCompatActivity {
         apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
         */
+
 
 
         myWebView = io.okheart.android.OkHeartActivity.this.findViewById(R.id.webview);
@@ -227,16 +229,16 @@ public class OkHeartActivity extends AppCompatActivity {
             }
             if(logo != null){
                 if(logo.length() > 0) {
-                    base.put("logo", Uri.encode(logo));
+                    base.put("logo", Uri.parse(logo));
                 }
                 else{
                     String url = "https://cdn.okhi.co/okhi-logo-white.svg";
-                    base.put("logo", Uri.encode(url));
+                    base.put("logo", Uri.parse(url));
                 }
             }
             else{
                 String url = "https://cdn.okhi.co/okhi-logo-white.svg";
-                base.put("logo", Uri.encode(url));
+                base.put("logo", Uri.parse(url));
             }
             JSONObject style = new JSONObject();
             style.put("base",base);
@@ -265,6 +267,7 @@ public class OkHeartActivity extends AppCompatActivity {
             jsonObject = new JSONObject();
             jsonObject.put("message","app_state");
             jsonObject.put("payload",payload);
+            displayLog("url "+jsonObject.getJSONObject("payload").getJSONObject("style").getJSONObject("base").getString("logo"));
 
             displayLog(""+jsonObject.toString());
 
