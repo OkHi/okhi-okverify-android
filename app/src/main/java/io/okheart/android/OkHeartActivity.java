@@ -219,7 +219,8 @@ public class OkHeartActivity extends AppCompatActivity {
                 base.put("logo",logo);
             }
             else{
-                base.put("logo","https://cdn.okhi.co/okhi-logo-white.svg");
+                String url = "https://cdn.okhi.co/okhi-logo-white.svg";
+                base.put("logo", url);
             }
             JSONObject style = new JSONObject();
             style.put("base",base);
@@ -324,15 +325,10 @@ public class OkHeartActivity extends AppCompatActivity {
                 // This is my website, so do not override; let my WebView load the page
 
                 return false;
-            }
-            else if (Uri.parse(url).getHost().equals("https://manager-v4.okhi.dev")) {
-
-                return false ;
-            }
+            } else return !Uri.parse(url).getHost().equals("https://manager-v4.okhi.dev");
             // Otherwise, the link is not for a page on my site, so launch another Activity that handles URLs
             //Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
             //startActivity(intent);
-            return true;
         }
 
         @Override
