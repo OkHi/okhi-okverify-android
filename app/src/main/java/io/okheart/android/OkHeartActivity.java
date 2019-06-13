@@ -204,23 +204,39 @@ public class OkHeartActivity extends AppCompatActivity {
 
             JSONObject base = new JSONObject();
             if(color != null){
-                base.put("color",color);
+                if(color.length() > 0) {
+                    base.put("color", color);
+                }
+                else{
+                    base.put("color","rgb(0, 131, 143)");
+                }
             }
             else{
                 base.put("color","rgb(0, 131, 143)");
             }
             if(name != null){
-                base.put("name",name);
+                if( name.length() > 0) {
+                    base.put("name", name);
+                }
+                else{
+                    base.put("name" ,"OkHi");
+                }
             }
             else{
                 base.put("name" ,"OkHi");
             }
             if(logo != null){
-                base.put("logo",logo);
+                if(logo.length() > 0) {
+                    base.put("logo", Uri.encode(logo));
+                }
+                else{
+                    String url = "https://cdn.okhi.co/okhi-logo-white.svg";
+                    base.put("logo", Uri.encode(url));
+                }
             }
             else{
                 String url = "https://cdn.okhi.co/okhi-logo-white.svg";
-                base.put("logo", url);
+                base.put("logo", Uri.encode(url));
             }
             JSONObject style = new JSONObject();
             style.put("base",base);
