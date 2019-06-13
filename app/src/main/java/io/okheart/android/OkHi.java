@@ -49,14 +49,19 @@ public final class OkHi extends ContentProvider {
                     jsonObject.put("name", name);
                 }
             }
+
             if(logo != null){
                 if(logo.length() > 0){
                     jsonObject.put("logo", logo);
                 }
             }
             String customString = jsonObject.toString();
+            displayLog("logo "+jsonObject.get("logo"));
+            String testString = "{\"color\":\""+color+"\", \"name\": \""+name+"\",\"logo\": \""+logo+"\"}";
+
             displayLog("custom string "+customString);
-            writeToFileCustomize(customString);
+            displayLog(testString);
+            writeToFileCustomize(testString);
         } catch (Exception io){
 
         } finally {

@@ -52,6 +52,10 @@ public class OkHeartActivity extends AppCompatActivity {
         name = null;
         logo = null;
 
+
+        //OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a");
+        //OkHi.customize("rgb(0,179,255)", "Mula", "https://cdn.okhi.co/okhi-logo-white.svg");
+
         try{
             Bundle bundle = getIntent().getExtras();
             try {
@@ -130,14 +134,17 @@ public class OkHeartActivity extends AppCompatActivity {
         catch (Exception e){
 
         }
+        displayLog("color "+color+" name "+name+" logo "+logo);
 
         /*
+
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
         apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
         */
+
 
         myWebView = io.okheart.android.OkHeartActivity.this.findViewById(R.id.webview);
         myWebView.setWebViewClient(new MyWebViewClient());
@@ -196,6 +203,7 @@ public class OkHeartActivity extends AppCompatActivity {
 
         try{
 
+            /*
             JSONObject user = new JSONObject();
             user.put("firstName",firstname);
             user.put("lastName", lastname);
@@ -229,14 +237,16 @@ public class OkHeartActivity extends AppCompatActivity {
                     base.put("logo", Uri.parse(logo));
                 }
                 else{
-                    String url = "https://cdn.okhi.co/okhi-logo-white.svg";
-                    base.put("logo", Uri.parse(url));
+                    logo = "https://cdn.okhi.co/okhi-logo-white.svg";
+                    base.put("logo", Uri.parse(logo));
                 }
             }
             else{
-                String url = "https://cdn.okhi.co/okhi-logo-white.svg";
-                base.put("logo", Uri.parse(url));
+                logo = "https://cdn.okhi.co/okhi-logo-white.svg";
+                base.put("logo", Uri.parse(logo));
             }
+            */
+            /*
             JSONObject style = new JSONObject();
             style.put("base",base);
 
@@ -267,12 +277,74 @@ public class OkHeartActivity extends AppCompatActivity {
             displayLog("url "+jsonObject.getJSONObject("payload").getJSONObject("style").getJSONObject("base").getString("logo"));
 
             displayLog(""+jsonObject.toString());
+            */
 
+            if(color != null){
+                if(color.length() > 0) {
+                }
+                else{
+                    color = "rgb(0, 131, 143)";
+                }
+            }
+            else{
+                color = "rgb(0, 131, 143)";
+            }
+            if(name != null){
+                if( name.length() > 0) {
+
+                }
+                else{
+                    name = "OkHi";
+                }
+            }
+            else{
+                name = "OkHi";
+            }
+            if(logo != null){
+                if(logo.length() > 0) {
+
+                }
+                else{
+                    logo = "https://cdn.okhi.co/okhi-logo-white.svg";
+                }
+            }
+            else{
+                logo = "https://cdn.okhi.co/okhi-logo-white.svg";
+            }
+
+            String stuff = "{\n" +
+                    "  \"message\": \"app_state\",\n" +
+                    "  \"payload\": {\n" +
+                    "    \"user\": {\n" +
+                    "      \"firstName\": \""+firstname+"\",\n" +
+                    "      \"lastName\": \""+lastname+"\",\n" +
+                    "      \"phone\": \""+phonenumber+"\"\n" +
+                    "    },\n" +
+                    "    \"style\": {\n" +
+                    "      \"base\": {\n" +
+                    "        \"color\": \""+color+"\",\n" +
+                    "        \"name\": \""+name+"\",\n" +
+                    "        \"logo\": \""+logo+"\"\n" +
+                    "      }\n" +
+                    "    },\n" +
+                    "    \"auth\": {\n" +
+                    "      \"apiKey\": \""+apiKey+"\"\n" +
+                    "    },\n" +
+                    "    \"parent\": {\n" +
+                    "      \"name\": \"okHeartAndroidSDK\",\n" +
+                    "      \"version\": \""+BuildConfig.VERSION_NAME+"\",\n" +
+                    "      \"build\": \""+BuildConfig.VERSION_CODE+"\",\n" +
+                    "      \"namespace\": \"com.develop.okheartandroidsdk.okhi\"\n" +
+                    "    }\n" +
+                    "  }\n" +
+                    "}";
+            displayLog(stuff);
+            myWebView.evaluateJavascript("javascript:receiveAndroidMessage("+stuff+")" , null);
         }
-        catch (JSONException e){
+        catch (Exception e){
             displayLog("jsonexception error "+e.toString());
         }
-        myWebView.evaluateJavascript("javascript:receiveAndroidMessage("+jsonObject.toString()+")" , null);
+
 
     }
 
