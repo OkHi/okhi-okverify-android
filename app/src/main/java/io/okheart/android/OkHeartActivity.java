@@ -131,7 +131,6 @@ public class OkHeartActivity extends AppCompatActivity {
 
         }
 
-
         /*
         firstname = "Ramogi";
         lastname = "Ochola";
@@ -139,8 +138,6 @@ public class OkHeartActivity extends AppCompatActivity {
         apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
         */
-
-
 
         myWebView = io.okheart.android.OkHeartActivity.this.findViewById(R.id.webview);
         myWebView.setWebViewClient(new MyWebViewClient());
