@@ -14,7 +14,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -136,15 +135,15 @@ public class OkHeartActivity extends AppCompatActivity {
         }
         displayLog("color "+color+" name "+name+" logo "+logo);
 
-        /*
 
+        /*
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
-        apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
-        //apiKey = "r:b4877fc0324225741db19553d67f147b";
+        apiKey = "r:b4877fc0324225741db19553d67f147b";
         */
-
+        //apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
+        //apiKey = "r:b4877fc0324225741db19553d67f147b";
 
         myWebView = io.okheart.android.OkHeartActivity.this.findViewById(R.id.webview);
         myWebView.setWebViewClient(new MyWebViewClient());
@@ -313,7 +312,7 @@ public class OkHeartActivity extends AppCompatActivity {
             }
 
             String stuff = "{\n" +
-                    "  \"message\": \"app_state\",\n" +
+                    "  \"message\": \"start_app\",\n" +
                     "  \"payload\": {\n" +
                     "    \"user\": {\n" +
                     "      \"firstName\": \""+firstname+"\",\n" +
@@ -344,8 +343,6 @@ public class OkHeartActivity extends AppCompatActivity {
         catch (Exception e){
             displayLog("jsonexception error "+e.toString());
         }
-
-
     }
 
     public void sendGPSLocation(JSONObject jsonObject) {
