@@ -312,7 +312,7 @@ public class OkHeartActivity extends AppCompatActivity {
             }
 
             String stuff = "{\n" +
-                    "  \"message\": \"start_app\",\n" +
+                    "  \"message\": \"select_location\",\n" +
                     "  \"payload\": {\n" +
                     "    \"user\": {\n" +
                     "      \"firstName\": \""+firstname+"\",\n" +
