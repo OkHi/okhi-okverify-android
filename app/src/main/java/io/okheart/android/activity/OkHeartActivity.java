@@ -1,8 +1,9 @@
-package io.okheart.android;
+package io.okheart.android.activity;
 
 import android.Manifest;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +15,7 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -22,6 +24,15 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+
+import io.okheart.android.BuildConfig;
+import io.okheart.android.OkHi;
+import io.okheart.android.asynctask.SegmentIdentifyTask;
+import io.okheart.android.asynctask.SegmentTrackTask;
+import io.okheart.android.callback.OkHiCallback;
+import io.okheart.android.R;
+import io.okheart.android.callback.SegmentIdentifyCallBack;
+import io.okheart.android.callback.SegmentTrackCallBack;
 
 import static io.okheart.android.OkHi.checkInternet;
 
@@ -50,7 +61,6 @@ public class OkHeartActivity extends AppCompatActivity {
         color = null;
         name = null;
         logo = null;
-
 
         //OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a");
         //OkHi.customize("rgb(0,179,255)", "Mula", "https://cdn.okhi.co/okhi-logo-white.svg");
@@ -136,16 +146,15 @@ public class OkHeartActivity extends AppCompatActivity {
         displayLog("color "+color+" name "+name+" logo "+logo);
 
 
-        /*
+
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
-        apiKey = "r:b4877fc0324225741db19553d67f147b";
-        */
-        //apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
+
+        apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
 
-        myWebView = io.okheart.android.OkHeartActivity.this.findViewById(R.id.webview);
+        myWebView = OkHeartActivity.this.findViewById(R.id.webview);
         myWebView.setWebViewClient(new MyWebViewClient());
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
@@ -159,8 +168,8 @@ public class OkHeartActivity extends AppCompatActivity {
         webSettings.setAppCacheEnabled(true);
         webSettings.setDatabaseEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        myWebView.addJavascriptInterface(new io.okheart.android.WebAppInterface(
-                io.okheart.android.OkHeartActivity.this), "Android");
+        myWebView.addJavascriptInterface(new WebAppInterface(
+                OkHeartActivity.this, apiKey), "Android");
         //myWebView.loadUrl("https://manager-v4.okhi.dev");
         //myWebView.loadUrl("https://7b70b228.ngrok.io");
         if(apiKey != null) {
@@ -195,89 +204,99 @@ public class OkHeartActivity extends AppCompatActivity {
         catch (Exception e){
             displayLog("error calling back "+e.toString());
         }
+
+        try {
+            Boolean production = false;
+            if(apiKey != null) {
+                if( apiKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a" ) ){
+
+                }
+                else{
+                    production = true;
+                }
+            } else {
+                production = true;
+            }
+
+            final Boolean productionVersion = production;
+
+            JSONObject identifyjson = new JSONObject();
+            //identifyjson.put("userId", userId);
+            try {
+                SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
+                    @Override
+                    public void querycomplete(String response, boolean status) {
+                        if(status){
+                            displayLog("things went ok with send to omtm identify");
+
+                            try {
+                                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                                    @Override
+                                    public void querycomplete(String response, boolean status) {
+                                        if(status){
+                                            displayLog("things went ok with send to omtm track");
+                                        }
+                                        else{
+                                            displayLog("something went wrong with send to omtm track");
+                                        }
+                                    }
+                                };
+                                JSONObject eventjson = new JSONObject();
+                                //eventjson.put("userId", userId);
+                                eventjson.put("event", "SDK Initialization");
+
+                                JSONObject trackjson = new JSONObject();
+
+                                if(productionVersion){
+                                    trackjson.put("environment", "PROD");
+                                }
+                                else{
+                                    trackjson.put("environment", "DEVMASTER");
+
+                                }
+                                trackjson.put("event", "SDK start");
+
+                                trackjson.put("action", "start");
+                                trackjson.put("actionSubtype", "start");
+                                trackjson.put("clientProduct", "okHeartAndroidSDK");
+                                trackjson.put("clientProductVersion",BuildConfig.VERSION_NAME);
+                                trackjson.put("clientKey", apiKey);
+                                trackjson.put("appLayer", "client");
+                                trackjson.put("onObject", "sdk");
+                                trackjson.put("product", "okHeartAndroidSDK");
+
+
+
+                                eventjson.put("properties", trackjson);
+                                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                                segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            }
+                            catch (JSONException e){
+                                displayLog("track error omtm error "+e.toString());
+                            }
+                        }
+                        else{
+                            displayLog("something went wrong with send to omtm identify");
+                        }
+
+                    }
+                };
+                SegmentIdentifyTask segmentIdentifyTask = new SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
+                segmentIdentifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+            } catch (Exception e) {
+                displayLog("Error initializing analytics_omtm " + e.toString());
+            }
+        } catch (Exception jse){
+            displayLog("jsonexception jse "+jse.toString());
+        }
+
     }
 
     public void startApp() {
         checkInternet();
 
         try{
-
-            /*
-            JSONObject user = new JSONObject();
-            user.put("firstName",firstname);
-            user.put("lastName", lastname);
-            user.put("phone",phonenumber);
-
-            JSONObject base = new JSONObject();
-            if(color != null){
-                if(color.length() > 0) {
-                    base.put("color", color);
-                }
-                else{
-                    base.put("color","rgb(0, 131, 143)");
-                }
-            }
-            else{
-                base.put("color","rgb(0, 131, 143)");
-            }
-            if(name != null){
-                if( name.length() > 0) {
-                    base.put("name", name);
-                }
-                else{
-                    base.put("name" ,"OkHi");
-                }
-            }
-            else{
-                base.put("name" ,"OkHi");
-            }
-            if(logo != null){
-                if(logo.length() > 0) {
-                    base.put("logo", Uri.parse(logo));
-                }
-                else{
-                    logo = "https://cdn.okhi.co/okhi-logo-white.svg";
-                    base.put("logo", Uri.parse(logo));
-                }
-            }
-            else{
-                logo = "https://cdn.okhi.co/okhi-logo-white.svg";
-                base.put("logo", Uri.parse(logo));
-            }
-            */
-            /*
-            JSONObject style = new JSONObject();
-            style.put("base",base);
-
-            JSONObject auth = new JSONObject();
-            //auth.put( "apiKey", "r:66ae2e0d6e79d8ae06b8b692c2724609");
-            //auth.put( "apiKey", "r:b59a93ba7d80a95d89dff8e4c52e259a");
-            auth.put( "apiKey", apiKey);
-
-            JSONObject parent = new JSONObject();
-            parent.put( "name", "okHeartAndroidSDK");
-            parent.put( "version", BuildConfig.VERSION_NAME);
-            parent.put( "build", BuildConfig.VERSION_CODE);
-            parent.put( "namespace", "com.develop.okheartandroidsdk.okhi");
-
-            JSONObject location = new JSONObject();
-            location.put("id", "x5yMOop8rY");
-
-            JSONObject payload = new JSONObject();
-            payload.put("user",user);
-            payload.put("style",style);
-            payload.put("auth", auth);
-            payload.put("parent", parent);
-            //payload.put("location",location);
-
-            jsonObject = new JSONObject();
-            jsonObject.put("message","app_state");
-            jsonObject.put("payload",payload);
-            displayLog("url "+jsonObject.getJSONObject("payload").getJSONObject("style").getJSONObject("base").getString("logo"));
-
-            displayLog(""+jsonObject.toString());
-            */
-
             if(color != null){
                 if(color.length() > 0) {
                 }
@@ -331,7 +350,7 @@ public class OkHeartActivity extends AppCompatActivity {
                     "    },\n" +
                     "    \"parent\": {\n" +
                     "      \"name\": \"okHeartAndroidSDK\",\n" +
-                    "      \"version\": \""+BuildConfig.VERSION_NAME+"\",\n" +
+                    "      \"version\": \""+ BuildConfig.VERSION_NAME+"\",\n" +
                     "      \"build\": \""+BuildConfig.VERSION_CODE+"\",\n" +
                     "      \"namespace\": \"com.develop.okheartandroidsdk.okhi\"\n" +
                     "    }\n" +
@@ -480,7 +499,7 @@ public class OkHeartActivity extends AppCompatActivity {
     }
 
     public static void setFirstname(String firstname) {
-        io.okheart.android.OkHeartActivity.firstname = firstname;
+        OkHeartActivity.firstname = firstname;
     }
 
     public static String getLastname() {
@@ -488,7 +507,7 @@ public class OkHeartActivity extends AppCompatActivity {
     }
 
     public static void setLastname(String lastname) {
-        io.okheart.android.OkHeartActivity.lastname = lastname;
+        OkHeartActivity.lastname = lastname;
     }
 
     public static String getPhonenumber() {
@@ -496,7 +515,7 @@ public class OkHeartActivity extends AppCompatActivity {
     }
 
     public static void setPhonenumber(String phonenumber) {
-        io.okheart.android.OkHeartActivity.phonenumber = phonenumber;
+        OkHeartActivity.phonenumber = phonenumber;
     }
 
     public static Double getLat() {

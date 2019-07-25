@@ -1,4 +1,4 @@
-package io.okheart.android;
+package io.okheart.android.callback;
 
 /**
  * Created by ramogiochola on 6/21/16.

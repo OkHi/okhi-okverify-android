@@ -1,4 +1,4 @@
-package io.okheart.android;
+package io.okheart.android.callback;
 
 import org.json.JSONObject;
 

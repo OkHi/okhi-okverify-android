@@ -1,4 +1,4 @@
-package io.okheart.android;
+package io.okheart.android.asynctask;
 
 import android.os.AsyncTask;
 import android.util.Log;
@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+import io.okheart.android.callback.HeartBeatCallBack;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
