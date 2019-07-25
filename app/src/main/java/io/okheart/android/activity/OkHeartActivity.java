@@ -27,10 +27,10 @@ import java.io.InputStreamReader;
 
 import io.okheart.android.BuildConfig;
 import io.okheart.android.OkHi;
+import io.okheart.android.R;
 import io.okheart.android.asynctask.SegmentIdentifyTask;
 import io.okheart.android.asynctask.SegmentTrackTask;
 import io.okheart.android.callback.OkHiCallback;
-import io.okheart.android.R;
 import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
 
@@ -145,13 +145,13 @@ public class OkHeartActivity extends AppCompatActivity {
         }
         displayLog("color "+color+" name "+name+" logo "+logo);
 
-
-
+/*
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
 
         apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
+        */
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
 
         myWebView = OkHeartActivity.this.findViewById(R.id.webview);
