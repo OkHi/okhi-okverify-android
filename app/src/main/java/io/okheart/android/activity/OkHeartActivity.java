@@ -114,8 +114,8 @@ public class OkHeartActivity extends AppCompatActivity {
                             String tempName = jsonObject.optString("name");
                             String tempLogo = jsonObject.optString("logo");
                             String tempappbarcolor = jsonObject.optString("appbarcolor", "#f0f0f0");
-                            Boolean tempappbarvisible = jsonObject.optBoolean("appbarvisible", false);
-                            Boolean tempstreetview = jsonObject.optBoolean("enablestreetview", true);
+                            Boolean tempappbarvisible = jsonObject.optBoolean("appbarvisibility", false);
+                            Boolean tempstreetview = jsonObject.optBoolean("enablestreetview", false);
                             if(tempColor != null){
                                 if(tempColor.length() > 0){
                                     color = tempColor;

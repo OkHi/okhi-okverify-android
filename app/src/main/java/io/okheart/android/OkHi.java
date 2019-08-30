@@ -214,7 +214,7 @@ public final class OkHi extends ContentProvider {
             }
 
             if (streetview != null) {
-                jsonObject.put("appbarvisible", streetview);
+                jsonObject.put("enablestreetview", streetview);
             }
             String customString = jsonObject.toString();
             //displayLog("logo "+jsonObject.get("logo"));
