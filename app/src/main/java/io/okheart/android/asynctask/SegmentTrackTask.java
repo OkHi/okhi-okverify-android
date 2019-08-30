@@ -33,13 +33,45 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private int responseCode;
     private Boolean production;
+    public static final String appLayer = "client";
+    public static final String product = "okHeartAndroidSDK";
+    public static final String formFactor = "mobile";
+    public static final String appType = "native";
+    public static final String librarytrackerwaybill = "OkAnalytics.java";
+    public static final String versiontrackerwaybill = "2.0.0";
 
 
     public SegmentTrackTask(SegmentTrackCallBack segmentTrackCallBack, JSONObject jsonObject, Boolean production) {
         displayLog("SegmentIdentifyTask called");
 
+        try {
+            jsonObject.put("formFactor", formFactor);
+        } catch (Exception e) {
+            displayLog(" formFactor error " + e.toString());
+        }
+        try {
+            jsonObject.put("appType", appType);
+        } catch (Exception e) {
+            displayLog(" appType error " + e.toString());
+        }
+
+        try {
+            JSONObject trackerWaybill = new JSONObject();
+            trackerWaybill.put("library", librarytrackerwaybill);
+            trackerWaybill.put("version", versiontrackerwaybill);
+            JSONObject waybill = new JSONObject();
+            waybill.put("tracker", trackerWaybill);
+            jsonObject.put("waybill", waybill);
+            JSONObject payload = new JSONObject();
+            payload.put("okAnalyticsEvent", jsonObject);
+            this.jsonObject = payload;
+
+        } catch (Exception e) {
+            displayLog(" waybill error " + e.toString());
+        }
+
         this.segmentTrackCallBack = segmentTrackCallBack;
-        this.jsonObject = jsonObject;
+        //this.jsonObject = jsonObject;
         this.production = production;
     }
 
@@ -62,6 +94,8 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
             b.writeTimeout(15, TimeUnit.SECONDS);
             b.readTimeout(15, TimeUnit.SECONDS);
             OkHttpClient client = b.build();
+
+            displayLog(jsonObject.toString());
 
             RequestBody requestBody = RequestBody.create(JSON, jsonObject.toString());
 
@@ -86,6 +120,7 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
+        displayLog(result);
         if ((200 <= responseCode) && (responseCode < 300)) {
 
             segmentTrackCallBack.querycomplete(result, true);

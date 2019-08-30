@@ -184,7 +184,7 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    public static void customize(String color, String name, String logo){
+    public static void customize(String color, String name, String logo, String appbarcolor, Boolean appbarvisibility, Boolean streetview) {
         try {
             displayLog("okhi customized");
             JSONObject jsonObject = new JSONObject();
@@ -204,8 +204,20 @@ public final class OkHi extends ContentProvider {
                     jsonObject.put("logo", logo);
                 }
             }
+            if (appbarcolor != null) {
+                if (appbarcolor.length() > 0) {
+                    jsonObject.put("appbarcolor", appbarcolor);
+                }
+            }
+            if (appbarvisibility != null) {
+                jsonObject.put("appbarvisibility", appbarvisibility);
+            }
+
+            if (streetview != null) {
+                jsonObject.put("appbarvisible", streetview);
+            }
             String customString = jsonObject.toString();
-            displayLog("logo "+jsonObject.get("logo"));
+            //displayLog("logo "+jsonObject.get("logo"));
             String testString = "{\"color\":\""+color+"\", \"name\": \""+name+"\",\"logo\": \""+logo+"\"}";
 
             displayLog("custom string "+customString);
@@ -232,7 +244,8 @@ public final class OkHi extends ContentProvider {
             }
 
             final Boolean productionVersion = production;
-
+//
+            /*
             JSONObject identifyjson = new JSONObject();
             //identifyjson.put("userId", userId);
             try {
@@ -240,6 +253,9 @@ public final class OkHi extends ContentProvider {
                     @Override
                     public void querycomplete(String response, boolean status) {
                         if(status){
+                            */
+
+            ////
                             displayLog("things went ok with send to omtm identify");
 
                             try {
@@ -287,6 +303,8 @@ public final class OkHi extends ContentProvider {
                             catch (JSONException e){
                                 displayLog("track error omtm error "+e.toString());
                             }
+            /////
+                            /*
                         }
                         else{
                             displayLog("something went wrong with send to omtm identify");
@@ -300,6 +318,8 @@ public final class OkHi extends ContentProvider {
             } catch (Exception e) {
                 displayLog("Error initializing analytics_omtm " + e.toString());
             }
+            */
+            ///
         } catch (Exception jse){
             displayLog("jsonexception jse "+jse.toString());
         }

@@ -43,7 +43,8 @@ public class OkHeartActivity extends AppCompatActivity {
     private static JSONObject jsonObject;
     private static Double lat, lng;
     private static Float acc;
-    private static String firstname,lastname, phonenumber, apiKey, color, name, logo;
+    private static String firstname, lastname, phonenumber, apiKey, color, name, logo, appbarcolor;
+    private static Boolean appbarvisible, enablestreetview;
     private static OkHiCallback okHiCallback;
     private static boolean completedWell, isWebInterface;
 
@@ -112,6 +113,9 @@ public class OkHeartActivity extends AppCompatActivity {
                             String tempColor = jsonObject.optString("color");
                             String tempName = jsonObject.optString("name");
                             String tempLogo = jsonObject.optString("logo");
+                            String tempappbarcolor = jsonObject.optString("appbarcolor", "#f0f0f0");
+                            Boolean tempappbarvisible = jsonObject.optBoolean("appbarvisible", false);
+                            Boolean tempstreetview = jsonObject.optBoolean("enablestreetview", true);
                             if(tempColor != null){
                                 if(tempColor.length() > 0){
                                     color = tempColor;
@@ -127,6 +131,19 @@ public class OkHeartActivity extends AppCompatActivity {
                                     logo = tempLogo;
                                 }
                             }
+
+                            if (tempappbarcolor != null) {
+                                if (tempappbarcolor.length() > 0) {
+                                    appbarcolor = tempappbarcolor;
+                                }
+                            }
+                            if (tempappbarvisible != null) {
+                                appbarvisible = tempappbarvisible;
+                            }
+                            if (tempstreetview != null) {
+                                enablestreetview = tempstreetview;
+                            }
+
                         }
                     }
                 } catch (Exception e) {
@@ -144,14 +161,18 @@ public class OkHeartActivity extends AppCompatActivity {
 
         }
         displayLog("color "+color+" name "+name+" logo "+logo);
+        displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
 
-/*
+        /*
+
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
-
-        apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
         */
+
+        //apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
+        //apiKey = "r:ee30a6552f7e5dfab48f4234bd1ffc1b";
+
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
 
         myWebView = OkHeartActivity.this.findViewById(R.id.webview);
@@ -168,15 +189,15 @@ public class OkHeartActivity extends AppCompatActivity {
         webSettings.setAppCacheEnabled(true);
         webSettings.setDatabaseEnabled(true);
         webSettings.setDomStorageEnabled(true);
-        myWebView.addJavascriptInterface(new WebAppInterface(
-                OkHeartActivity.this, apiKey), "Android");
+        myWebView.addJavascriptInterface(new WebAppInterface(OkHeartActivity.this, apiKey), "Android");
         //myWebView.loadUrl("https://manager-v4.okhi.dev");
         //myWebView.loadUrl("https://7b70b228.ngrok.io");
         if(apiKey != null) {
             if( apiKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a" ) ){
                 myWebView.loadUrl("https://manager-v4.okhi.dev");
-            }
-            else{
+            } else if (apiKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
+                myWebView.loadUrl("https://sandbox-manager-v4.okhi.dev");
+            } else{
                 myWebView.loadUrl("https://manager-v4.okhi.co");
             }
         } else {
@@ -210,8 +231,9 @@ public class OkHeartActivity extends AppCompatActivity {
             if(apiKey != null) {
                 if( apiKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a" ) ){
 
-                }
-                else{
+                } else if (apiKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
+
+                } else{
                     production = true;
                 }
             } else {
@@ -221,7 +243,7 @@ public class OkHeartActivity extends AppCompatActivity {
             final Boolean productionVersion = production;
 
             JSONObject identifyjson = new JSONObject();
-            //identifyjson.put("userId", userId);
+            identifyjson.put("userId", "8VXRqG8YhN");
             try {
                 SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
                     @Override
@@ -242,7 +264,7 @@ public class OkHeartActivity extends AppCompatActivity {
                                     }
                                 };
                                 JSONObject eventjson = new JSONObject();
-                                //eventjson.put("userId", userId);
+                                eventjson.put("userId", "8VXRqG8YhN");
                                 eventjson.put("event", "SDK Initialization");
 
                                 JSONObject trackjson = new JSONObject();
@@ -264,7 +286,8 @@ public class OkHeartActivity extends AppCompatActivity {
                                 trackjson.put("appLayer", "client");
                                 trackjson.put("onObject", "sdk");
                                 trackjson.put("product", "okHeartAndroidSDK");
-
+                                trackjson.put("type", "start");
+                                trackjson.put("subtype", "start");
 
 
                                 eventjson.put("properties", trackjson);
@@ -330,6 +353,29 @@ public class OkHeartActivity extends AppCompatActivity {
                 logo = "https://cdn.okhi.co/okhi-logo-white.svg";
             }
 
+            if (appbarcolor != null) {
+                if (appbarcolor.length() > 0) {
+                } else {
+                    appbarcolor = "#f0f0f0";
+                }
+            } else {
+                appbarcolor = "#f0f0f0";
+            }
+            if (appbarvisible != null) {
+
+            } else {
+                appbarvisible = false;
+            }
+            if (enablestreetview != null) {
+            } else {
+                enablestreetview = false;
+            }
+
+
+            displayLog("color " + color + " name " + name + " logo " + logo);
+            displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
+
+
             String stuff = "{\n" +
                     "  \"message\": \"select_location\",\n" +
                     "  \"payload\": {\n" +
@@ -345,6 +391,15 @@ public class OkHeartActivity extends AppCompatActivity {
                     "        \"logo\": \""+logo+"\"\n" +
                     "      }\n" +
                     "    },\n" +
+
+                    "    \"config\": {\n" +
+                    "      \"appBar\": {\n" +
+                    "        \"color\": \"" + appbarcolor + "\",\n" +
+                    "        \"visible\": " + appbarvisible + "\n" +
+                    "      },\n" +
+                    "    \"streetView\": " + enablestreetview + "\n" +
+                    "    },\n" +
+
                     "    \"auth\": {\n" +
                     "      \"apiKey\": \""+apiKey+"\"\n" +
                     "    },\n" +

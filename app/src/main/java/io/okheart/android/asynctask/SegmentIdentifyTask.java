@@ -32,14 +32,78 @@ public class SegmentIdentifyTask extends AsyncTask<Void, Void, String> {
     private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
     private int responseCode;
     private Boolean production;
+    public static final String appLayer = "client";
+    public static final String product = "okHeartAndroidSDK";
+    public static final String formFactor = "mobile";
+    public static final String appType = "native";
+    public static final String librarytrackerwaybill = "OkAnalytics.java";
+    public static final String versiontrackerwaybill = "2.0.0";
 
 
     public SegmentIdentifyTask(SegmentIdentifyCallBack segmentIdentifyCallBack, JSONObject jsonObject, Boolean production) {
         displayLog("SegmentIdentifyTask called");
 
         this.segmentIdentifyCallBack = segmentIdentifyCallBack;
-        this.jsonObject = jsonObject;
+        //this.jsonObject = jsonObject;
         this.production = production;
+
+        /*
+        try {
+            jsonObject.put("height", getHeightScreen());
+        } catch (Exception e) {
+            displayLog(" height error " + e.toString());
+        }
+        try {
+            jsonObject.put("width", getWidthScreen());
+        } catch (Exception e) {
+            displayLog(" width error " + e.toString());
+        }
+         try {
+            jsonObject.put("screen", screen);
+        } catch (Exception e) {
+            displayLog(" versiontrackerwaybill error " + e.toString());
+        }
+        try {
+            jsonObject.put("model", model);
+        } catch (Exception e) {
+            displayLog(" versiontrackerwaybill error " + e.toString());
+        }
+        try {
+            contextdeviceandproduct.putValue("cookieToken", OkDriverApplication.getDeviceid());
+        } catch (Exception e) {
+            displayLog(" versiontrackerwaybill error " + e.toString());
+        }
+
+        try {
+            contextdeviceandproduct.putValue("device", device);
+        } catch (Exception e) {
+            displayLog(" versiontrackerwaybill error " + e.toString());
+        }
+        */
+        try {
+            jsonObject.put("formFactor", formFactor);
+        } catch (Exception e) {
+            displayLog(" formFactor error " + e.toString());
+        }
+        try {
+            jsonObject.put("appType", appType);
+        } catch (Exception e) {
+            displayLog(" appType error " + e.toString());
+        }
+
+        try {
+            JSONObject trackerWaybill = new JSONObject();
+            trackerWaybill.put("library", librarytrackerwaybill);
+            trackerWaybill.put("version", versiontrackerwaybill);
+            JSONObject waybill = new JSONObject();
+            waybill.put("tracker", trackerWaybill);
+            jsonObject.put("waybill", waybill);
+            JSONObject payload = new JSONObject();
+            payload.put("okAnalyticsEvent", jsonObject);
+            this.jsonObject = payload;
+        } catch (Exception e) {
+            displayLog(" waybill error " + e.toString());
+        }
     }
 
     @Override

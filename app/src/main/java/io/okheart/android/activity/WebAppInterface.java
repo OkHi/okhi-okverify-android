@@ -9,11 +9,9 @@ import org.json.JSONObject;
 
 import io.okheart.android.BuildConfig;
 import io.okheart.android.OkHi;
-import io.okheart.android.activity.OkHeartActivity;
-import io.okheart.android.asynctask.SegmentIdentifyTask;
 import io.okheart.android.asynctask.SegmentTrackTask;
-import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
+import io.okheart.android.utilities.Constants;
 
 public class WebAppInterface {
     private static final String TAG = "WebAppInterface";
@@ -91,8 +89,8 @@ public class WebAppInterface {
                             displayLog("error sending event "+e.toString());
                         }
                         finally {
-                            mContext.setCompletedWell(true);
-                            mContext.setIsWebInterface(true);
+                            OkHeartActivity.setCompletedWell(true);
+                            OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
                         }
 
@@ -112,8 +110,8 @@ public class WebAppInterface {
                             displayLog("error sending event "+e.toString());
                         }
                         finally {
-                            mContext.setCompletedWell(true);
-                            mContext.setIsWebInterface(true);
+                            OkHeartActivity.setCompletedWell(true);
+                            OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
                         }
                         break;
@@ -132,8 +130,8 @@ public class WebAppInterface {
                             displayLog("error sending event "+e.toString());
                         }
                         finally {
-                            mContext.setCompletedWell(true);
-                            mContext.setIsWebInterface(true);
+                            OkHeartActivity.setCompletedWell(true);
+                            OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
                         }
                         break;
@@ -153,8 +151,8 @@ public class WebAppInterface {
                             displayLog("error sending event "+e.toString());
                         }
                         finally {
-                            mContext.setCompletedWell(true);
-                            mContext.setIsWebInterface(true);
+                            OkHeartActivity.setCompletedWell(true);
+                            OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
                         }
                         break;
@@ -236,13 +234,16 @@ public class WebAppInterface {
 
             final Boolean productionVersion = production;
 
+            /*
             JSONObject identifyjson = new JSONObject();
-            //identifyjson.put("userId", userId);
+            identifyjson.put("userId", "8VXRqG8YhN");
             try {
                 SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
                     @Override
                     public void querycomplete(String response, boolean status) {
                         if(status){
+                            */
+
                             displayLog("things went ok with send to omtm identify");
 
                             try {
@@ -250,15 +251,15 @@ public class WebAppInterface {
                                     @Override
                                     public void querycomplete(String response, boolean status) {
                                         if(status){
-                                            displayLog("things went ok with send to omtm track");
+                                            displayLog("things went ok with send to omtm track " + response);
                                         }
                                         else{
-                                            displayLog("something went wrong with send to omtm track");
+                                            displayLog("something went wrong with send to omtm track " + response);
                                         }
                                     }
                                 };
                                 JSONObject eventjson = new JSONObject();
-                                //eventjson.put("userId", userId);
+                                eventjson.put("userId", "8VXRqG8YhN");
                                 eventjson.put("event", "SDK Events");
 
                                 JSONObject trackjson = new JSONObject();
@@ -267,7 +268,7 @@ public class WebAppInterface {
                                     trackjson.put("environment", "PROD");
                                 }
                                 else{
-                                    trackjson.put("environment", "DEVMASTER");
+                                    trackjson.put("environment", "DEV");
 
                                 }
                                 trackjson.put("event", "SDK Events");
@@ -280,7 +281,14 @@ public class WebAppInterface {
                                 trackjson.put("appLayer", "client");
                                 trackjson.put("onObject", "sdk");
                                 trackjson.put("product", "okHeartAndroidSDK");
+                                trackjson.put("type", action);
+                                trackjson.put("subtype", action);
 
+                                try {
+                                    trackjson.put("timestamp", Constants.getUTCtimestamp());
+                                } catch (Exception e) {
+                                    displayLog(" Constants.getUTCtimestamp() error " + e.toString());
+                                }
 
 
                                 eventjson.put("properties", trackjson);
@@ -290,6 +298,7 @@ public class WebAppInterface {
                             catch (JSONException e){
                                 displayLog("track error omtm error "+e.toString());
                             }
+                            /*
                         }
                         else{
                             displayLog("something went wrong with send to omtm identify");
@@ -303,6 +312,7 @@ public class WebAppInterface {
             } catch (Exception e) {
                 displayLog("Error initializing analytics_omtm " + e.toString());
             }
+            */
         } catch (Exception jse){
             displayLog("jsonexception jse "+jse.toString());
         }
