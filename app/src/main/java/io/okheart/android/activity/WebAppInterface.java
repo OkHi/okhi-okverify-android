@@ -15,36 +15,38 @@ import io.okheart.android.utilities.Constants;
 
 public class WebAppInterface {
     private static final String TAG = "WebAppInterface";
-    OkHeartActivity mContext;
     private static String appkey;
+    OkHeartActivity mContext;
 
-    /** Instantiate the interface and set the context */
+    /**
+     * Instantiate the interface and set the context
+     */
     WebAppInterface(OkHeartActivity c, String applicationKey) {
         mContext = c;
         appkey = applicationKey;
     }
 
-    /** Show a message from the web page */
+    /**
+     * Show a message from the web page
+     */
     @JavascriptInterface
     public void receiveMessage(String results) {
-        displayLog("receiveMessage called "+results);
+        displayLog("receiveMessage called " + results);
 
-        try{
+        try {
             final JSONObject jsonObject = new JSONObject(results);
 
             String message = jsonObject.optString("message");
             JSONObject payload = jsonObject.optJSONObject("payload");
-            if(payload != null){
-                displayLog("payload is not null "+payload);
-            }
-            else{
-                displayLog("payload is null "+payload);
+            if (payload != null) {
+                displayLog("payload is not null " + payload);
+            } else {
+                displayLog("payload is null " + payload);
                 String backuppayload = jsonObject.optString("payload");
-                if(backuppayload != null){
+                if (backuppayload != null) {
                     payload = new JSONObject();
-                    payload.put("Error",backuppayload);
-                }
-                else{
+                    payload.put("Error", backuppayload);
+                } else {
 
                 }
             }
@@ -54,15 +56,14 @@ public class WebAppInterface {
                 switch (message) {
                     case "app_state":
                         displayLog("app_state");
-                        if(payload != null){
+                        if (payload != null) {
                             Boolean ready = payload.optBoolean("ready");
-                            if(ready != null) {
+                            if (ready != null) {
                                 if (ready) {
-                                    try{
+                                    try {
                                         sendEvent(appkey, "app_state");
-                                    }
-                                    catch (Exception e){
-                                        displayLog("error sending event "+e.toString());
+                                    } catch (Exception e) {
+                                        displayLog("error sending event " + e.toString());
                                     }
                                     mContext.runOnUiThread(new Runnable() {
                                         @Override
@@ -76,19 +77,16 @@ public class WebAppInterface {
                         break;
                     case "location_created":
                         displayLog("location_created");
-                        try{
+                        try {
                             OkHi.getCallback().querycomplete(jsonObject);
+                        } catch (Exception e) {
+                            displayLog("error calling back " + e.toString());
                         }
-                        catch (Exception e){
-                            displayLog("error calling back "+e.toString());
-                        }
-                        try{
+                        try {
                             sendEvent(appkey, "location_created");
-                        }
-                        catch (Exception e){
-                            displayLog("error sending event "+e.toString());
-                        }
-                        finally {
+                        } catch (Exception e) {
+                            displayLog("error sending event " + e.toString());
+                        } finally {
                             OkHeartActivity.setCompletedWell(true);
                             OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
@@ -97,19 +95,16 @@ public class WebAppInterface {
                         break;
                     case "location_updated":
                         displayLog("location_updated");
-                        try{
+                        try {
                             OkHi.getCallback().querycomplete(jsonObject);
+                        } catch (Exception e) {
+                            displayLog("error calling back " + e.toString());
                         }
-                        catch (Exception e){
-                            displayLog("error calling back "+e.toString());
-                        }
-                        try{
+                        try {
                             sendEvent(appkey, "location_updated");
-                        }
-                        catch (Exception e){
-                            displayLog("error sending event "+e.toString());
-                        }
-                        finally {
+                        } catch (Exception e) {
+                            displayLog("error sending event " + e.toString());
+                        } finally {
                             OkHeartActivity.setCompletedWell(true);
                             OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
@@ -117,19 +112,16 @@ public class WebAppInterface {
                         break;
                     case "location_selected":
                         displayLog("location_selected");
-                        try{
+                        try {
                             OkHi.getCallback().querycomplete(jsonObject);
+                        } catch (Exception e) {
+                            displayLog("error calling back " + e.toString());
                         }
-                        catch (Exception e){
-                            displayLog("error calling back "+e.toString());
-                        }
-                        try{
+                        try {
                             sendEvent(appkey, "location_selected");
-                        }
-                        catch (Exception e){
-                            displayLog("error sending event "+e.toString());
-                        }
-                        finally {
+                        } catch (Exception e) {
+                            displayLog("error sending event " + e.toString());
+                        } finally {
                             OkHeartActivity.setCompletedWell(true);
                             OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
@@ -137,20 +129,17 @@ public class WebAppInterface {
                         break;
                     case "fatal_exit":
                         displayLog("fatal_exit");
-                        try{
+                        try {
                             OkHi.getCallback().querycomplete(jsonObject);
-                        }
-                        catch (Exception e){
-                            displayLog("error calling back "+e.toString());
+                        } catch (Exception e) {
+                            displayLog("error calling back " + e.toString());
 
                         }
-                        try{
+                        try {
                             sendEvent(appkey, "fatal_exit");
-                        }
-                        catch (Exception e){
-                            displayLog("error sending event "+e.toString());
-                        }
-                        finally {
+                        } catch (Exception e) {
+                            displayLog("error sending event " + e.toString());
+                        } finally {
                             OkHeartActivity.setCompletedWell(true);
                             OkHeartActivity.setIsWebInterface(true);
                             mContext.finish();
@@ -208,24 +197,21 @@ public class WebAppInterface {
                         break;
 
                 }
+            } catch (Exception e) {
+                displayLog("switch error " + e.toString());
             }
-            catch (Exception e){
-                displayLog("switch error "+e.toString());
-            }
-        }
-        catch (JSONException e){
+        } catch (JSONException e) {
             displayLog("");
         }
     }
 
-    private void sendEvent(final String appkey, final String action){
+    private void sendEvent(final String appkey, final String action) {
         try {
             Boolean production = false;
-            if(appkey != null) {
-                if( appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a" ) ){
+            if (appkey != null) {
+                if (appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
 
-                }
-                else{
+                } else {
                     production = true;
                 }
             } else {
@@ -244,60 +230,57 @@ public class WebAppInterface {
                         if(status){
                             */
 
-                            displayLog("things went ok with send to omtm identify");
+            displayLog("things went ok with send to omtm identify");
 
-                            try {
-                                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
-                                    @Override
-                                    public void querycomplete(String response, boolean status) {
-                                        if(status){
-                                            displayLog("things went ok with send to omtm track " + response);
-                                        }
-                                        else{
-                                            displayLog("something went wrong with send to omtm track " + response);
-                                        }
-                                    }
-                                };
-                                JSONObject eventjson = new JSONObject();
-                                eventjson.put("userId", "8VXRqG8YhN");
-                                eventjson.put("event", "SDK Events");
+            try {
+                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                    @Override
+                    public void querycomplete(String response, boolean status) {
+                        if (status) {
+                            displayLog("things went ok with send to omtm track " + response);
+                        } else {
+                            displayLog("something went wrong with send to omtm track " + response);
+                        }
+                    }
+                };
+                JSONObject eventjson = new JSONObject();
+                eventjson.put("userId", "8VXRqG8YhN");
+                eventjson.put("event", "SDK Events");
 
-                                JSONObject trackjson = new JSONObject();
+                JSONObject trackjson = new JSONObject();
 
-                                if(productionVersion){
-                                    trackjson.put("environment", "PROD");
-                                }
-                                else{
-                                    trackjson.put("environment", "DEV");
+                if (productionVersion) {
+                    trackjson.put("environment", "PROD");
+                } else {
+                    trackjson.put("environment", "DEV");
 
-                                }
-                                trackjson.put("event", "SDK Events");
+                }
+                trackjson.put("event", "SDK Events");
 
-                                trackjson.put("action", action);
-                                trackjson.put("actionSubtype", action);
-                                trackjson.put("clientProduct", "okHeartAndroidSDK");
-                                trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
-                                trackjson.put("clientKey",appkey);
-                                trackjson.put("appLayer", "client");
-                                trackjson.put("onObject", "sdk");
-                                trackjson.put("product", "okHeartAndroidSDK");
-                                trackjson.put("type", action);
-                                trackjson.put("subtype", action);
+                trackjson.put("action", action);
+                trackjson.put("actionSubtype", action);
+                trackjson.put("clientProduct", "okHeartAndroidSDK");
+                trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+                trackjson.put("clientKey", appkey);
+                trackjson.put("appLayer", "client");
+                trackjson.put("onObject", "sdk");
+                trackjson.put("product", "okHeartAndroidSDK");
+                trackjson.put("type", action);
+                trackjson.put("subtype", action);
 
-                                try {
-                                    trackjson.put("timestamp", Constants.getUTCtimestamp());
-                                } catch (Exception e) {
-                                    displayLog(" Constants.getUTCtimestamp() error " + e.toString());
-                                }
+                try {
+                    trackjson.put("timestamp", Constants.getUTCtimestamp());
+                } catch (Exception e) {
+                    displayLog(" Constants.getUTCtimestamp() error " + e.toString());
+                }
 
 
-                                eventjson.put("properties", trackjson);
-                                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
-                                segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            }
-                            catch (JSONException e){
-                                displayLog("track error omtm error "+e.toString());
-                            }
+                eventjson.put("properties", trackjson);
+                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } catch (JSONException e) {
+                displayLog("track error omtm error " + e.toString());
+            }
                             /*
                         }
                         else{
@@ -313,14 +296,14 @@ public class WebAppInterface {
                 displayLog("Error initializing analytics_omtm " + e.toString());
             }
             */
-        } catch (Exception jse){
-            displayLog("jsonexception jse "+jse.toString());
+        } catch (Exception jse) {
+            displayLog("jsonexception jse " + jse.toString());
         }
 
     }
 
-    private void displayLog(String log){
-        Log.i(TAG,log);
+    private void displayLog(String log) {
+        Log.i(TAG, log);
     }
 }
 

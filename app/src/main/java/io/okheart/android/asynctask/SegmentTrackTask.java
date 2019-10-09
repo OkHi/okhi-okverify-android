@@ -27,18 +27,18 @@ import static io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_PROD_OM
  */
 public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
 
-    private static final String TAG = "SegmentTrackTask";
-    private SegmentTrackCallBack segmentTrackCallBack;
-    private JSONObject jsonObject;
-    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-    private int responseCode;
-    private Boolean production;
     public static final String appLayer = "client";
     public static final String product = "okHeartAndroidSDK";
     public static final String formFactor = "mobile";
     public static final String appType = "native";
     public static final String librarytrackerwaybill = "OkAnalytics.java";
     public static final String versiontrackerwaybill = "2.0.0";
+    private static final String TAG = "SegmentTrackTask";
+    private static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
+    private SegmentTrackCallBack segmentTrackCallBack;
+    private JSONObject jsonObject;
+    private int responseCode;
+    private Boolean production;
 
 
     public SegmentTrackTask(SegmentTrackCallBack segmentTrackCallBack, JSONObject jsonObject, Boolean production) {
@@ -132,6 +132,6 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String me) {
-        Log.i(TAG, "% "+me);
+        Log.i(TAG, "% " + me);
     }
 }

@@ -8,27 +8,28 @@
 
           -->
     <application
-        android:launchMode="singleInstance"
         android:allowBackup="true"
+        android:launchMode="singleInstance"
         android:supportsRtl="true">
         <activity
-            android:theme="@style/AppTheme"
+            android:name="io.okheart.android.activity.OkHeartActivity"
             android:exported="true"
-            android:name="io.okheart.android.activity.OkHeartActivity">
+            android:theme="@style/AppTheme">
 
-            <intent-filter>
+            <!--
+                        <intent-filter>
                             <action android:name="android.intent.action.MAIN" />
 
                             <category android:name="android.intent.category.LAUNCHER" />
                         </intent-filter>
 
-
+            -->
         </activity>
 
         <provider
+            android:name=".OkHi"
             android:authorities="${applicationId}.OkHeart"
-            android:exported="true"
             android:enabled="true"
-            android:name=".OkHi" />
+            android:exported="true" />
     </application>
 </manifest>

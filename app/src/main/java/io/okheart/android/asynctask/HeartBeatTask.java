@@ -86,7 +86,7 @@ public class HeartBeatTask extends AsyncTask<Void, Void, Boolean> {
 
     @Override
     protected void onPostExecute(Boolean result) {
-        displayLog("heartbeat postexecute " + responseCode + " message "+message);
+        displayLog("heartbeat postexecute " + responseCode + " message " + message);
         if ((200 <= responseCode) && (responseCode < 300)) {
             heartBeatCallBack.querycomplete(true);
         } else {

@@ -7,8 +7,9 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.support.annotation.Nullable;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -28,16 +29,19 @@ import io.okheart.android.callback.SegmentTrackCallBack;
 public final class OkHi extends ContentProvider {
 
     private static final String TAG = "OkHi";
-    private static String firstname,lastname, phonenumber, color, name, logo;
+    private static String firstname, lastname, phonenumber, color, name, logo;
     private static Context mContext;
     private static OkHiCallback callback;
-    private static String appkey ;
+    private static String appkey;
 
-    public static void initialize(final String applicationKey){
+    public OkHi() {
+    }
+
+    public static void initialize(final String applicationKey) {
         try {
             displayLog("okhi initialized");
             writeToFile(applicationKey);
-        } catch (Exception io){
+        } catch (Exception io) {
 
         } finally {
 
@@ -47,11 +51,10 @@ public final class OkHi extends ContentProvider {
 
         try {
             Boolean production = false;
-            if(applicationKey != null) {
-                if( applicationKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a" ) ){
+            if (applicationKey != null) {
+                if (applicationKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
 
-                }
-                else{
+                } else {
                     production = true;
                 }
             } else {
@@ -66,17 +69,16 @@ public final class OkHi extends ContentProvider {
                 SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
                     @Override
                     public void querycomplete(String response, boolean status) {
-                        if(status){
+                        if (status) {
                             displayLog("things went ok with send to omtm identify");
 
                             try {
                                 SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
                                     @Override
                                     public void querycomplete(String response, boolean status) {
-                                        if(status){
+                                        if (status) {
                                             displayLog("things went ok with send to omtm track");
-                                        }
-                                        else{
+                                        } else {
                                             displayLog("something went wrong with send to omtm track");
                                         }
                                     }
@@ -87,10 +89,9 @@ public final class OkHi extends ContentProvider {
 
                                 JSONObject trackjson = new JSONObject();
 
-                                if(productionVersion){
+                                if (productionVersion) {
                                     trackjson.put("environment", "PROD");
-                                }
-                                else{
+                                } else {
                                     trackjson.put("environment", "DEVMASTER");
 
                                 }
@@ -99,8 +100,8 @@ public final class OkHi extends ContentProvider {
                                 trackjson.put("action", "initialization");
                                 trackjson.put("actionSubtype", "initialization");
                                 trackjson.put("clientProduct", "okHeartAndroidSDK");
-                                trackjson.put("clientProductVersion",BuildConfig.VERSION_NAME);
-                                trackjson.put("clientKey",applicationKey);
+                                trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+                                trackjson.put("clientKey", applicationKey);
                                 //trackjson.put("crudOp", "create");
                                 //trackjson.put("actionSubtype", "directionsUpdated/okhiGatePhotoUpdated/mapPinUpdated/customNameUpdated/locationInformationUpdated/");
                                 //trackjson.put("crudOp", "create/update");
@@ -155,16 +156,13 @@ public final class OkHi extends ContentProvider {
                                 trackjson.put("product", "okHeartAndroidSDK");
 
 
-
                                 eventjson.put("properties", trackjson);
                                 SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
                                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                            } catch (JSONException e) {
+                                displayLog("track error omtm error " + e.toString());
                             }
-                            catch (JSONException e){
-                                displayLog("track error omtm error "+e.toString());
-                            }
-                        }
-                        else{
+                        } else {
                             displayLog("something went wrong with send to omtm identify");
                         }
 
@@ -176,10 +174,9 @@ public final class OkHi extends ContentProvider {
             } catch (Exception e) {
                 displayLog("Error initializing analytics_omtm " + e.toString());
             }
-        } catch (Exception jse){
-            displayLog("jsonexception jse "+jse.toString());
+        } catch (Exception jse) {
+            displayLog("jsonexception jse " + jse.toString());
         }
-
 
 
     }
@@ -188,19 +185,19 @@ public final class OkHi extends ContentProvider {
         try {
             displayLog("okhi customized");
             JSONObject jsonObject = new JSONObject();
-            if(color != null){
-                if(color.length() > 0){
+            if (color != null) {
+                if (color.length() > 0) {
                     jsonObject.put("color", color);
                 }
             }
-            if(name != null){
-                if(name.length() > 0){
+            if (name != null) {
+                if (name.length() > 0) {
                     jsonObject.put("name", name);
                 }
             }
 
-            if(logo != null){
-                if(logo.length() > 0){
+            if (logo != null) {
+                if (logo.length() > 0) {
                     jsonObject.put("logo", logo);
                 }
             }
@@ -218,12 +215,12 @@ public final class OkHi extends ContentProvider {
             }
             String customString = jsonObject.toString();
             //displayLog("logo "+jsonObject.get("logo"));
-            String testString = "{\"color\":\""+color+"\", \"name\": \""+name+"\",\"logo\": \""+logo+"\"}";
+            String testString = "{\"color\":\"" + color + "\", \"name\": \"" + name + "\",\"logo\": \"" + logo + "\"}";
 
-            displayLog("custom string "+customString);
+            displayLog("custom string " + customString);
             displayLog(testString);
             writeToFileCustomize(testString);
-        } catch (Exception io){
+        } catch (Exception io) {
 
         } finally {
 
@@ -232,11 +229,10 @@ public final class OkHi extends ContentProvider {
 
         try {
             Boolean production = false;
-            if(appkey != null) {
-                if( appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a" ) ){
+            if (appkey != null) {
+                if (appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
 
-                }
-                else{
+                } else {
                     production = true;
                 }
             } else {
@@ -256,53 +252,49 @@ public final class OkHi extends ContentProvider {
                             */
 
             ////
-                            displayLog("things went ok with send to omtm identify");
+            displayLog("things went ok with send to omtm identify");
 
-                            try {
-                                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
-                                    @Override
-                                    public void querycomplete(String response, boolean status) {
-                                        if(status){
-                                            displayLog("things went ok with send to omtm track");
-                                        }
-                                        else{
-                                            displayLog("something went wrong with send to omtm track");
-                                        }
-                                    }
-                                };
-                                JSONObject eventjson = new JSONObject();
-                                //eventjson.put("userId", userId);
-                                eventjson.put("event", "SDK Initialization");
+            try {
+                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                    @Override
+                    public void querycomplete(String response, boolean status) {
+                        if (status) {
+                            displayLog("things went ok with send to omtm track");
+                        } else {
+                            displayLog("something went wrong with send to omtm track");
+                        }
+                    }
+                };
+                JSONObject eventjson = new JSONObject();
+                //eventjson.put("userId", userId);
+                eventjson.put("event", "SDK Initialization");
 
-                                JSONObject trackjson = new JSONObject();
+                JSONObject trackjson = new JSONObject();
 
-                                if(productionVersion){
-                                    trackjson.put("environment", "PROD");
-                                }
-                                else{
-                                    trackjson.put("environment", "DEVMASTER");
+                if (productionVersion) {
+                    trackjson.put("environment", "PROD");
+                } else {
+                    trackjson.put("environment", "DEVMASTER");
 
-                                }
-                                trackjson.put("event", "SDK Customize");
+                }
+                trackjson.put("event", "SDK Customize");
 
-                                trackjson.put("action", "customization");
-                                trackjson.put("actionSubtype", "customization");
-                                trackjson.put("clientProduct", "okHeartAndroidSDK");
-                                trackjson.put("clientProductVersion",BuildConfig.VERSION_NAME);
-                                trackjson.put("clientKey",appkey);
-                                trackjson.put("appLayer", "client");
-                                trackjson.put("onObject", "sdk");
-                                trackjson.put("product", "okHeartAndroidSDK");
+                trackjson.put("action", "customization");
+                trackjson.put("actionSubtype", "customization");
+                trackjson.put("clientProduct", "okHeartAndroidSDK");
+                trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+                trackjson.put("clientKey", appkey);
+                trackjson.put("appLayer", "client");
+                trackjson.put("onObject", "sdk");
+                trackjson.put("product", "okHeartAndroidSDK");
 
 
-
-                                eventjson.put("properties", trackjson);
-                                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
-                                segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                            }
-                            catch (JSONException e){
-                                displayLog("track error omtm error "+e.toString());
-                            }
+                eventjson.put("properties", trackjson);
+                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } catch (JSONException e) {
+                displayLog("track error omtm error " + e.toString());
+            }
             /////
                             /*
                         }
@@ -320,17 +312,16 @@ public final class OkHi extends ContentProvider {
             }
             */
             ///
-        } catch (Exception jse){
-            displayLog("jsonexception jse "+jse.toString());
+        } catch (Exception jse) {
+            displayLog("jsonexception jse " + jse.toString());
         }
 
 
     }
 
-
     public static void displayClient(OkHiCallback okHiCallback, JSONObject jsonObject) {
 
-        displayLog("display client "+jsonObject.toString());
+        displayLog("display client " + jsonObject.toString());
 
         callback = okHiCallback;
         firstname = jsonObject.optString("firstName");
@@ -339,7 +330,7 @@ public final class OkHi extends ContentProvider {
 
 
         try {
-            Intent intent = new Intent( mContext, OkHeartActivity.class);
+            Intent intent = new Intent(mContext, OkHeartActivity.class);
             intent.putExtra("firstname", firstname);
             intent.putExtra("lastname", lastname);
             intent.putExtra("phone", phonenumber);
@@ -350,56 +341,40 @@ public final class OkHi extends ContentProvider {
         }
     }
 
-    public static void checkInternet(){
-        try{
+    public static void checkInternet() {
+        try {
             HeartBeatCallBack heartBeatCallBack = new HeartBeatCallBack() {
                 @Override
                 public void querycomplete(Boolean response) {
-                    if(response){
+                    if (response) {
 
-                    }
-                    else{
+                    } else {
                         try {
                             JSONObject jsonObject = new JSONObject();
                             jsonObject.put("message", "fatal_exit");
                             JSONObject jsonObject1 = new JSONObject();
-                            jsonObject1.put("Error","Network error");
-                            jsonObject.put("payload",jsonObject1);
+                            jsonObject1.put("Error", "Network error");
+                            jsonObject.put("payload", jsonObject1);
                             displayLog(jsonObject.toString());
                             callback.querycomplete(jsonObject);
-                        }
-                        catch (JSONException jse){
-                            displayLog("json error "+jse.toString());
+                        } catch (JSONException jse) {
+                            displayLog("json error " + jse.toString());
                         }
                     }
                 }
             };
             HeartBeatTask heartBeatTask = new HeartBeatTask(heartBeatCallBack);
             heartBeatTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } catch (Exception e) {
+            displayLog("check internet error " + e.toString());
         }
-        catch (Exception e){
-            displayLog("check internet error "+e.toString());
-        }
     }
 
-    private static void displayLog(String log){
-        Log.i(TAG,log);
+    private static void displayLog(String log) {
+        Log.i(TAG, log);
     }
 
-
-    public OkHi() {
-    }
-
-    @Override
-    public boolean onCreate() {
-        // get the context (Application context)
-        mContext = getContext();
-        //initialize whatever you need
-        return true;
-
-    }
-
-    private static void writeToFile(String customString ){
+    private static void writeToFile(String customString) {
         try {
             File path = mContext.getFilesDir();
             File file = new File(path, "okheart.txt");
@@ -413,8 +388,7 @@ public final class OkHi extends ContentProvider {
                 } finally {
                     stream.close();
                 }
-            }
-            else{
+            } else {
                 file.delete();
                 FileOutputStream stream = new FileOutputStream(file);
                 try {
@@ -427,16 +401,14 @@ public final class OkHi extends ContentProvider {
                 }
             }
 
-        }
-        catch (Exception e){
-            displayLog("write to file error "+e.toString());
+        } catch (Exception e) {
+            displayLog("write to file error " + e.toString());
 
         }
 
     }
 
-
-    private static void writeToFileCustomize(String apiKey ){
+    private static void writeToFileCustomize(String apiKey) {
         try {
             File path = mContext.getFilesDir();
             File file = new File(path, "custom.txt");
@@ -450,8 +422,7 @@ public final class OkHi extends ContentProvider {
                 } finally {
                     stream.close();
                 }
-            }
-            else{
+            } else {
                 file.delete();
                 FileOutputStream stream = new FileOutputStream(file);
                 try {
@@ -464,11 +435,27 @@ public final class OkHi extends ContentProvider {
                 }
             }
 
-        }
-        catch (Exception e){
-            displayLog("write to file error "+e.toString());
+        } catch (Exception e) {
+            displayLog("write to file error " + e.toString());
 
         }
+
+    }
+
+    public static OkHiCallback getCallback() {
+        return callback;
+    }
+
+    public static void setCallback(OkHiCallback callback) {
+        OkHi.callback = callback;
+    }
+
+    @Override
+    public boolean onCreate() {
+        // get the context (Application context)
+        mContext = getContext();
+        //initialize whatever you need
+        return true;
 
     }
 
@@ -498,13 +485,5 @@ public final class OkHi extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
-    }
-
-    public static OkHiCallback getCallback() {
-        return callback;
-    }
-
-    public static void setCallback(OkHiCallback callback) {
-        OkHi.callback = callback;
     }
 }
