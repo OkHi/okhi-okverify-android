@@ -1,22 +1,39 @@
 package io.okheart.android.activity;
 
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
+import androidx.annotation.NonNull;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.SetOptions;
+
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.okheart.android.BuildConfig;
 import io.okheart.android.OkHi;
 import io.okheart.android.asynctask.SegmentTrackTask;
 import io.okheart.android.callback.SegmentTrackCallBack;
 import io.okheart.android.utilities.Constants;
+import io.okheart.android.utilities.OkAnalytics;
 
 public class WebAppInterface {
     private static final String TAG = "WebAppInterface";
     private static String appkey;
     OkHeartActivity mContext;
+    private FirebaseFirestore mFirestore;
+    private String uniqueId;
 
     /**
      * Instantiate the interface and set the context
@@ -24,6 +41,8 @@ public class WebAppInterface {
     WebAppInterface(OkHeartActivity c, String applicationKey) {
         mContext = c;
         appkey = applicationKey;
+        mFirestore = FirebaseFirestore.getInstance();
+        uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
     /**
@@ -32,6 +51,21 @@ public class WebAppInterface {
     @JavascriptInterface
     public void receiveMessage(String results) {
         displayLog("receiveMessage called " + results);
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            //loans.put("phonenumber",postDataParams.get("phone"));
+            //loans.put("ualId", model.getUalId());
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "okHeartResponse");
+            parameters.put("subtype", results);
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "app");
+            parameters.put("appKey", "" + appkey);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
 
         try {
             final JSONObject jsonObject = new JSONObject(results);
@@ -56,10 +90,27 @@ public class WebAppInterface {
                 switch (message) {
                     case "app_state":
                         displayLog("app_state");
+
+
                         if (payload != null) {
                             Boolean ready = payload.optBoolean("ready");
                             if (ready != null) {
                                 if (ready) {
+                                    try {
+                                        HashMap<String, String> loans = new HashMap<>();
+                                        //loans.put("phonenumber",postDataParams.get("phone"));
+                                        //loans.put("ualId", model.getUalId());
+                                        HashMap<String, String> parameters = new HashMap<>();
+                                        parameters.put("eventName", "Android SDK");
+                                        parameters.put("type", "okHeartResponse");
+                                        parameters.put("subtype", "app_state");
+                                        parameters.put("onObject", "okHeartAndroidSDK");
+                                        parameters.put("view", "ready");
+                                        parameters.put("appKey", "" + appkey);
+                                        sendEvent(parameters, loans);
+                                    } catch (Exception e1) {
+                                        displayLog("error attaching afl to ual " + e1.toString());
+                                    }
                                     try {
                                         sendEvent(appkey, "app_state");
                                     } catch (Exception e) {
@@ -72,11 +123,63 @@ public class WebAppInterface {
                                         }
                                     });
                                 }
+                            } else {
+                                try {
+                                    HashMap<String, String> loans = new HashMap<>();
+                                    //loans.put("phonenumber",postDataParams.get("phone"));
+                                    //loans.put("ualId", model.getUalId());
+                                    HashMap<String, String> parameters = new HashMap<>();
+                                    parameters.put("eventName", "Android SDK");
+                                    parameters.put("type", "okHeartResponse");
+                                    parameters.put("subtype", "app_state");
+                                    parameters.put("onObject", "okHeartAndroidSDK");
+                                    parameters.put("view", "notReady");
+                                    parameters.put("appKey", "" + appkey);
+                                    sendEvent(parameters, loans);
+                                } catch (Exception e1) {
+                                    displayLog("error attaching afl to ual " + e1.toString());
+                                }
+                            }
+                        } else {
+                            try {
+                                HashMap<String, String> loans = new HashMap<>();
+                                //loans.put("phonenumber",postDataParams.get("phone"));
+                                //loans.put("ualId", model.getUalId());
+                                HashMap<String, String> parameters = new HashMap<>();
+                                parameters.put("eventName", "Android SDK");
+                                parameters.put("type", "okHeartResponse");
+                                parameters.put("subtype", "app_state");
+                                parameters.put("onObject", "okHeartAndroidSDK");
+                                parameters.put("view", "noPayload");
+                                parameters.put("appKey", "" + appkey);
+                                sendEvent(parameters, loans);
+                            } catch (Exception e1) {
+                                displayLog("error attaching afl to ual " + e1.toString());
                             }
                         }
                         break;
                     case "location_created":
                         displayLog("location_created");
+                        try {
+                            saveAddressToFirestore(payload);
+                        } catch (Exception e) {
+                            displayLog("error saveAddressToFirestore " + e.toString());
+                        }
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            //loans.put("phonenumber",postDataParams.get("phone"));
+                            //loans.put("ualId", model.getUalId());
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Android SDK");
+                            parameters.put("type", "okHeartResponse");
+                            parameters.put("subtype", "location_created");
+                            parameters.put("onObject", "okHeartAndroidSDK");
+                            parameters.put("view", "callBackView");
+                            parameters.put("appKey", "" + appkey);
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
                         try {
                             OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
@@ -96,6 +199,26 @@ public class WebAppInterface {
                     case "location_updated":
                         displayLog("location_updated");
                         try {
+                            saveAddressToFirestore(payload);
+                        } catch (Exception e) {
+                            displayLog("error saveAddressToFirestore " + e.toString());
+                        }
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            //loans.put("phonenumber",postDataParams.get("phone"));
+                            //loans.put("ualId", model.getUalId());
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Android SDK");
+                            parameters.put("type", "okHeartResponse");
+                            parameters.put("subtype", "location_updated");
+                            parameters.put("onObject", "okHeartAndroidSDK");
+                            parameters.put("view", "callBackView");
+                            parameters.put("appKey", "" + appkey);
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
+                        try {
                             OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
@@ -113,6 +236,21 @@ public class WebAppInterface {
                     case "location_selected":
                         displayLog("location_selected");
                         try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            //loans.put("phonenumber",postDataParams.get("phone"));
+                            //loans.put("ualId", model.getUalId());
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Android SDK");
+                            parameters.put("type", "okHeartResponse");
+                            parameters.put("subtype", "location_selected");
+                            parameters.put("onObject", "okHeartAndroidSDK");
+                            parameters.put("view", "callBackView");
+                            parameters.put("appKey", "" + appkey);
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
+                        try {
                             OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
@@ -129,6 +267,21 @@ public class WebAppInterface {
                         break;
                     case "fatal_exit":
                         displayLog("fatal_exit");
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            //loans.put("phonenumber",postDataParams.get("phone"));
+                            //loans.put("ualId", model.getUalId());
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Android SDK");
+                            parameters.put("type", "okHeartResponse");
+                            parameters.put("subtype", "fatal_exit");
+                            parameters.put("onObject", "okHeartAndroidSDK");
+                            parameters.put("view", "callBackView");
+                            parameters.put("appKey", "" + appkey);
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
                         try {
                             OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
@@ -204,6 +357,86 @@ public class WebAppInterface {
             displayLog("");
         }
     }
+
+
+    private void saveAddressToFirestore(JSONObject payload) {
+
+        displayLog("saveAddressToFirestore");
+
+        JSONObject location = payload.optJSONObject("location");
+        JSONObject user = payload.optJSONObject("user");
+        String firstName = user.optString("firstName");
+        String lastName = user.optString("lastName");
+        String phone = user.optString("phone");
+        String streetName = location.optString("streetName");
+        String propertyName = location.optString("propertyName");
+        String directions = location.optString("directions");
+        String placeId = location.optString("placeId");
+        String ualId = location.optString("id");
+        String url = location.optString("url");
+        String title = location.optString("title");
+        String plusCode = location.optString("plusCode");
+        String branch = "okhi";
+        Double lat = location.optDouble("lat");
+        Double lng = location.optDouble("lng");
+
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("latitude", lat);
+        data.put("longitude", lng);
+        data.put("timestamp", new Timestamp(new Date()));
+        GeoPoint geoPoint = new GeoPoint(lat, lng);
+        data.put("geoPoint", geoPoint);
+        data.put("firstName", firstName);
+        data.put("lastName", lastName);
+        data.put("phone", phone);
+        data.put("streetName", streetName);
+        data.put("propertyName", propertyName);
+
+        data.put("directions", directions);
+        data.put("placeId", placeId);
+        data.put("ualId", ualId);
+        data.put("url", url);
+        data.put("title", title);
+        data.put("plusCode", plusCode);
+        data.put("appKey", appkey);
+
+        Map<String, Object> users = new HashMap<>();
+        users.put("firstName", firstName);
+        users.put("lastName", lastName);
+        users.put("phone", phone);
+        users.put("uniqueId", uniqueId);
+        users.put("appKey", appkey);
+
+        mFirestore.collection("users").document(uniqueId).set(users, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        displayLog("Document written successfully");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                displayLog("Document write failure " + e.getMessage());
+            }
+        });
+
+        mFirestore.collection("addresses").document(uniqueId).collection("addresses")
+                .document(ualId).set(data, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        displayLog("Document written successfully");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                displayLog("Document write failure " + e.getMessage());
+            }
+        });
+
+    }
+
 
     private void sendEvent(final String appkey, final String action) {
         try {
@@ -300,6 +533,15 @@ public class WebAppInterface {
             displayLog("jsonexception jse " + jse.toString());
         }
 
+    }
+
+    private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
+        try {
+            OkAnalytics okAnalytics = new OkAnalytics(mContext);
+            okAnalytics.sendToAnalytics(parameters, loans);
+        } catch (Exception e) {
+            displayLog("error sending photoexpanded analytics event " + e.toString());
+        }
     }
 
     private void displayLog(String log) {

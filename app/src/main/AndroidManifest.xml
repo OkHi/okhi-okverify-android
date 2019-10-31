@@ -2,12 +2,20 @@
     package="io.okheart.android">
 
     <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
     <!--
 
           -->
     <application
+        android:name="io.okheart.android.ApplicationClass"
+        android:label="OkHi"
         android:allowBackup="true"
         android:launchMode="singleInstance"
         android:supportsRtl="true">
@@ -16,13 +24,12 @@
             android:exported="true"
             android:theme="@style/AppTheme">
 
-            <!--
-                                    <intent-filter>
-                                        <action android:name="android.intent.action.MAIN" />
 
-                                        <category android:name="android.intent.category.LAUNCHER" />
-                                    </intent-filter>
-            -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
 
         </activity>
 
@@ -31,5 +38,22 @@
             android:authorities="${applicationId}.OkHeart"
             android:enabled="true"
             android:exported="true" />
+
+        <receiver
+            android:name="io.okheart.android.receivers.BootReceiver"
+            android:enabled="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name="io.okheart.android.receivers.MyBroadcastReceiver"></receiver>
+
+        <service
+            android:name="io.okheart.android.services.ForegroundService"
+            android:enabled="true"
+            android:exported="true"
+            android:foregroundServiceType="location" />
+
     </application>
 </manifest>

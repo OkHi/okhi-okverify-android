@@ -7,15 +7,27 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.Timestamp;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.SetOptions;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 import io.okheart.android.activity.OkHeartActivity;
 import io.okheart.android.asynctask.HeartBeatTask;
@@ -25,6 +37,7 @@ import io.okheart.android.callback.HeartBeatCallBack;
 import io.okheart.android.callback.OkHiCallback;
 import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
+import io.okheart.android.utilities.OkAnalytics;
 
 public final class OkHi extends ContentProvider {
 
@@ -33,11 +46,46 @@ public final class OkHi extends ContentProvider {
     private static Context mContext;
     private static OkHiCallback callback;
     private static String appkey;
+    private static String uniqueId;
+    private static FirebaseFirestore mFirestore;
 
     public OkHi() {
     }
 
     public static void initialize(final String applicationKey) {
+
+        mFirestore = FirebaseFirestore.getInstance();
+        uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        Map<String, Object> users = new HashMap<>();
+        users.put("appKey", applicationKey);
+
+        mFirestore.collection("affiliations").document(uniqueId).set(users, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        displayLog("Document written successfully");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                displayLog("Document write failure " + e.getMessage());
+            }
+        });
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            //loans.put("phonenumber",postDataParams.get("phone"));
+            //loans.put("ualId", model.getUalId());
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "initialize");
+            parameters.put("subtype", "initialize");
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "app");
+            parameters.put("appKey", "" + applicationKey);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
         try {
             displayLog("okhi initialized");
             writeToFile(applicationKey);
@@ -182,6 +230,24 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void customize(String color, String name, String logo, String appbarcolor, Boolean appbarvisibility, Boolean streetview) {
+
+
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            //loans.put("phonenumber",postDataParams.get("phone"));
+            //loans.put("ualId", model.getUalId());
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "initialize");
+            parameters.put("subtype", "customize");
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "app");
+            parameters.put("appKey", "" + appkey);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
+
         try {
             displayLog("okhi customized");
             JSONObject jsonObject = new JSONObject();
@@ -327,6 +393,23 @@ public final class OkHi extends ContentProvider {
         firstname = jsonObject.optString("firstName");
         lastname = jsonObject.optString("lastName");
         phonenumber = jsonObject.optString("phone");
+
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("phonenumber", phonenumber);
+            loans.put("firstname", firstname);
+            loans.put("lastname", lastname);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "initialize");
+            parameters.put("subtype", "displayClient");
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "app");
+            parameters.put("appKey", "" + appkey);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
 
 
         try {
@@ -485,5 +568,92 @@ public final class OkHi extends ContentProvider {
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
+    }
+
+    private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
+        try {
+            OkAnalytics okAnalytics = new OkAnalytics(mContext);
+            okAnalytics.sendToAnalytics(parameters, loans);
+        } catch (Exception e) {
+            displayLog("error sending photoexpanded analytics event " + e.toString());
+        }
+    }
+
+    private void saveInfoToFirestore(JSONObject payload) {
+
+        displayLog("saveAddressToFirestore");
+
+        JSONObject location = payload.optJSONObject("location");
+        JSONObject user = payload.optJSONObject("user");
+        String firstName = user.optString("firstName");
+        String lastName = user.optString("lastName");
+        String phone = user.optString("phone");
+        String streetName = location.optString("streetName");
+        String propertyName = location.optString("propertyName");
+        String directions = location.optString("directions");
+        String placeId = location.optString("placeId");
+        String ualId = location.optString("id");
+        String url = location.optString("url");
+        String title = location.optString("title");
+        String plusCode = location.optString("plusCode");
+        String branch = "okhi";
+        Double lat = location.optDouble("lat");
+        Double lng = location.optDouble("lng");
+
+
+        Map<String, Object> data = new HashMap<>();
+        data.put("latitude", lat);
+        data.put("longitude", lng);
+        data.put("timestamp", new Timestamp(new Date()));
+        GeoPoint geoPoint = new GeoPoint(lat, lng);
+        data.put("geoPoint", geoPoint);
+        data.put("firstName", firstName);
+        data.put("lastName", lastName);
+        data.put("phone", phone);
+        data.put("streetName", streetName);
+        data.put("propertyName", propertyName);
+
+        data.put("directions", directions);
+        data.put("placeId", placeId);
+        data.put("ualId", ualId);
+        data.put("url", url);
+        data.put("title", title);
+        data.put("plusCode", plusCode);
+        data.put("appKey", appkey);
+
+        Map<String, Object> users = new HashMap<>();
+        users.put("firstName", firstName);
+        users.put("lastName", lastName);
+        users.put("phone", phone);
+        users.put("uniqueId", uniqueId);
+        users.put("appKey", appkey);
+
+        mFirestore.collection("users").document(uniqueId).set(users, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        displayLog("Document written successfully");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                displayLog("Document write failure " + e.getMessage());
+            }
+        });
+
+        mFirestore.collection("addresses").document(uniqueId).collection("addresses")
+                .document(ualId).set(data, SetOptions.merge())
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        displayLog("Document written successfully");
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                displayLog("Document write failure " + e.getMessage());
+            }
+        });
+
     }
 }

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?><!-- START xml_defaults -->
+<defaultsMap>
+    <entry>
+        <key>background_frequency</key>
+        <value>30000</value>
+    </entry>
+    <entry>
+        <key>address_frequency</key>
+        <value>5</value>
+    </entry>
+    <entry>
+        <key>geosearch_radius</key>
+        <value>0.1</value>
+    </entry>
+    <entry>
+        <key>gps_accuracy</key>
+        <value>50</value>
+    </entry>
+    <entry>
+        <key>sms_template</key>
+        <value>https://hypertrack-996a0.firebaseapp.com/?id=</value>
+    </entry>
+    <entry>
+        <key>ping_frequency</key>
+        <value>180000</value>
+    </entry>
+
+    <entry>
+        <key>kill_switch</key>
+        <value>false</value>
+    </entry>
+
+    <entry>
+        <key>auto_stop</key>
+        <value>false</value>
+    </entry>
+
+</defaultsMap><!-- END xml_defaults -->
