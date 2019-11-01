@@ -66,7 +66,7 @@ public class Constants {
     public static final String TABLE_NAME_STUFF = "artcaffestuff";
 
     public static final String appLayer = "client";
-    public static final String product = "okVerify";
+    public static final String product = "okHeartAndroidSDK";
     public static final String formFactor = "mobile";
     public static final String appType = "native";
     public static final String librarytrackerwaybill = "OkAnalytics.java";

@@ -211,18 +211,16 @@ public class ApplicationClass extends Application {
             displayLog("my worker error " + e.toString());
         }
 
-
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(new Intent(this, ForegroundService.class));
+                startForegroundService(new Intent(this.getApplicationContext(), ForegroundService.class));
             } else {
-                startService(new Intent(this, ForegroundService.class));
+                startService(new Intent(this.getApplicationContext(), ForegroundService.class));
             }
 
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
-
 
     }
 

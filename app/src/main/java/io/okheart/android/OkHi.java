@@ -59,7 +59,7 @@ public final class OkHi extends ContentProvider {
         Map<String, Object> users = new HashMap<>();
         users.put("appKey", applicationKey);
 
-        mFirestore.collection("affiliations").document(uniqueId).set(users, SetOptions.merge())
+        mFirestore.collection("affiliations").document(applicationKey).set(users, SetOptions.merge())
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
