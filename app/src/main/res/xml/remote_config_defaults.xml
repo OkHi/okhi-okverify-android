@@ -22,7 +22,7 @@
     </entry>
     <entry>
         <key>ping_frequency</key>
-        <value>180000</value>
+        <value>3600000</value>
     </entry>
 
     <entry>
@@ -33,6 +33,10 @@
     <entry>
         <key>auto_stop</key>
         <value>false</value>
+    </entry>
+    <entry>
+        <key>resume_ping_frequency</key>
+        <value>72000000</value>
     </entry>
 
 </defaultsMap><!-- END xml_defaults -->

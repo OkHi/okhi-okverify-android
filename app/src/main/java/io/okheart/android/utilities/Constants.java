@@ -18,6 +18,7 @@ public class Constants {
     public static final String REMOTE_GEOSEARCH_RADIUS = "geosearch_radius";
     public static final String REMOTE_GPS_ACCURACY = "gps_accuracy";
     public static final String REMOTE_PING_FREQUENCY = "ping_frequency";
+    public static final String REMOTE_RESUME_PING_FREQUENCY = "resume_ping_frequency";
     public static final String REMOTE_KILL_SWITCH = "kill_switch";
     public static final String REMOTE_AUTO_STOP = "auto_stop";
     public static final String COLUMN_PHONECUSTOMER = "phonecustomer";
@@ -72,6 +73,9 @@ public class Constants {
     public static final String librarytrackerwaybill = "OkAnalytics.java";
     public static final String versiontrackerwaybill = "2.0.0";
     public static final String ANALYTICS_WRITE_KEY = "1WVXBz8WdoFA29enq6zH0dQ33c3rxzPQ";
+    public static final String DEVMASTER_APPLICATION_ID = "39qx0cn6q1IZM7XCA0H2uYstqwLazABGupEUTMg0";
+    public static final String DEVMASTER_REST_KEY = "RZPpMBEsL9S6rfcTAyXEp623AxZwXxQeHXFAJT4R";
+    public static final String DEVMASTER_CLIENT_ID = "2s23x3Bsqhattvq2VzPNJwnNCbpoja2DkoN2v4OR";
 
 
     public static String getUTCtimestamp() {

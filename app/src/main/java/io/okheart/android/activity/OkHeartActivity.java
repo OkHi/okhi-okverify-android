@@ -48,6 +48,7 @@ public class OkHeartActivity extends AppCompatActivity {
     private static Boolean appbarvisible, enablestreetview;
     private static OkHiCallback okHiCallback;
     private static boolean completedWell, isWebInterface;
+    private static String uniqueId;
 
     public static String convertStreamToString(InputStream is) throws IOException {
         displayLog("convertStreamToString1");
@@ -169,18 +170,23 @@ public class OkHeartActivity extends AppCompatActivity {
             try {
                 firstname = bundle.getString("firstname");
             } catch (Exception e) {
-                displayLog("buildingname error " + e.toString());
+                displayLog("firstname error " + e.toString());
             }
 
             try {
                 lastname = bundle.getString("lastname");
             } catch (Exception e) {
-                displayLog("buildingname error " + e.toString());
+                displayLog("lastname error " + e.toString());
             }
             try {
                 phonenumber = bundle.getString("phone");
             } catch (Exception e) {
-                displayLog("buildingname error " + e.toString());
+                displayLog("phonenumber error " + e.toString());
+            }
+            try {
+                uniqueId = bundle.getString("uniqueId");
+            } catch (Exception e) {
+                displayLog("uniqueId error " + e.toString());
             }
 
             File filesDir = new File(getFilesDir() + "/okheart.txt");
@@ -255,8 +261,8 @@ public class OkHeartActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
-        displayLog("color " + color + " name " + name + " logo " + logo);
-        displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
+        //displayLog("color " + color + " name " + name + " logo " + logo);
+        //displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
 
 /*
         firstname = "Ramogi";
@@ -296,7 +302,7 @@ public class OkHeartActivity extends AppCompatActivity {
                 myWebView.loadUrl("https://manager-v4.okhi.co");
             }
         } else {
-            myWebView.loadUrl("https://manager-v4.okhi.co");
+            // myWebView.loadUrl("https://manager-v4.okhi.co");
         }
 
 
@@ -329,7 +335,7 @@ public class OkHeartActivity extends AppCompatActivity {
                     production = true;
                 }
             } else {
-                production = true;
+                //production = true;
             }
 
             final Boolean productionVersion = production;
@@ -378,7 +384,7 @@ public class OkHeartActivity extends AppCompatActivity {
                                 trackjson.put("product", "okHeartAndroidSDK");
                                 trackjson.put("type", "start");
                                 trackjson.put("subtype", "start");
-
+                                trackjson.put("uniqueId", uniqueId);
 
                                 eventjson.put("properties", trackjson);
                                 SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);

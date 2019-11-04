@@ -88,6 +88,8 @@ import static io.okheart.android.utilities.Constants.REMOTE_BACKGROUND_LOCATION_
 import static io.okheart.android.utilities.Constants.REMOTE_GEOSEARCH_RADIUS;
 import static io.okheart.android.utilities.Constants.REMOTE_GPS_ACCURACY;
 import static io.okheart.android.utilities.Constants.REMOTE_KILL_SWITCH;
+import static io.okheart.android.utilities.Constants.REMOTE_PING_FREQUENCY;
+import static io.okheart.android.utilities.Constants.REMOTE_RESUME_PING_FREQUENCY;
 
 public class ForegroundService extends Service {
 
@@ -112,13 +114,12 @@ public class ForegroundService extends Service {
     private Query query, queryAlarm;
     private List<Map<String, Object>> addresses;
     private FirebaseRemoteConfig mFirebaseRemoteConfig;
-    private Integer remotelocationfrequency, remoteaddressfrequency;
+    private Integer remotelocationfrequency, remoteaddressfrequency, remotePingFrequency, remoteresumepingfrequency;
     private Double remotegeosearchradius;
     private Double remotegpsaccuracy;
     private Boolean remotekillswitch;
     private Boolean remoteautostop;
     private NotificationManager notificationManager;
-    //private MainActivity mainActivity;
     private Boolean firestore;
     private Boolean parsedb;
     private AlarmManager alarmManager;
@@ -148,8 +149,7 @@ public class ForegroundService extends Service {
 
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "destroy");
@@ -163,13 +163,29 @@ public class ForegroundService extends Service {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
-        if (notificationManager != null) {
-            notificationManager.cancelAll();
+
+        try {
+            if (notificationManager != null) {
+                notificationManager.cancelAll();
+            }
+        } catch (Exception e) {
+
         }
 
-        stopLocationUpdates();
+        try {
+            stopLocationUpdates();
+        } catch (Exception e) {
 
-        startAlert();
+        }
+
+
+        if (remoteautostop) {
+            startAlert(remoteresumepingfrequency);
+        } else {
+            startAlert(remotePingFrequency);
+        }
+
+
 
         /*
         if(status.equalsIgnoreCase("false")) {
@@ -182,14 +198,13 @@ public class ForegroundService extends Service {
         */
     }
 
-    public void startAlert() {
-        //EditText text = findViewById(R.id.time);
-        int i = Integer.parseInt("3600");
+    public void startAlert(Integer pingTime) {
+
         Intent intent = new Intent(this, MyBroadcastReceiver.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 987623224, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 987623224, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         alarmManager.setExact(AlarmManager.RTC_WAKEUP,
-                System.currentTimeMillis() + (i * 1000),
+                System.currentTimeMillis() + (pingTime),
                 pendingIntent);
 
 
@@ -203,6 +218,7 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
 
         }
+
 
         /*
         Map<String, Object> city = new HashMap<>();
@@ -222,7 +238,7 @@ public class ForegroundService extends Service {
                     }
                 });
         */
-        displayLog("Alarm set in " + i + " seconds");
+        displayLog("Alarm set in " + remotePingFrequency + " seconds");
     }
 
     @Override
@@ -232,15 +248,9 @@ public class ForegroundService extends Service {
         firestore = false;
         parsedb = false;
         //Constants.scheduleJob(ForegroundService.this, "Foreground service");
+
         alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         uniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        //status = "false";
-
-
-        //OneTimeWorkRequest oneTimeWorkRequest = new OneTimeWorkRequest.Builder(MyWorker.class).setInitialDelay(3600, TimeUnit.SECONDS).build();
-        //WorkManager.getInstance(this).enqueueUniqueWork("ramogi", ExistingWorkPolicy.REPLACE, oneTimeWorkRequest);
-
 
         try {
             ComponentName receiver = new ComponentName(this, BootReceiver.class);
@@ -255,8 +265,7 @@ public class ForegroundService extends Service {
 
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -278,6 +287,18 @@ public class ForegroundService extends Service {
         try {
             Double tempFrequency = mFirebaseRemoteConfig.getDouble(REMOTE_BACKGROUND_LOCATION_FREQUENCY);
             remotelocationfrequency = tempFrequency.intValue();
+        } catch (Exception e) {
+            displayLog("error getting remotelocationfrequency " + e.toString());
+        }
+        try {
+            Double tempPingFrequency = mFirebaseRemoteConfig.getDouble(REMOTE_PING_FREQUENCY);
+            remotePingFrequency = tempPingFrequency.intValue();
+        } catch (Exception e) {
+            displayLog("error getting remotelocationfrequency " + e.toString());
+        }
+        try {
+            Double tempResumePingFrequency = mFirebaseRemoteConfig.getDouble(REMOTE_RESUME_PING_FREQUENCY);
+            remoteresumepingfrequency = tempResumePingFrequency.intValue();
         } catch (Exception e) {
             displayLog("error getting remotelocationfrequency " + e.toString());
         }
@@ -509,8 +530,7 @@ public class ForegroundService extends Service {
 
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "start");
@@ -586,15 +606,21 @@ public class ForegroundService extends Service {
         // Start foreground service.
         startForeground(1, notification);
 
-        startLocationUpdates();
+        if (remoteautostop) {
+            stopSelf(true, true);
+
+        } else {
+            startLocationUpdates();
+        }
+
+
 
     }
 
     private void stopLocationUpdates() {
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "stop");
@@ -605,15 +631,18 @@ public class ForegroundService extends Service {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-        mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        try {
+            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
+        } catch (Exception e) {
+
+        }
     }
 
     private void startLocationUpdates() {
         displayLog("startLocationUpdates");
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "start");
@@ -635,8 +664,7 @@ public class ForegroundService extends Service {
                             displayLog("addOnCompleteListener 1 ");
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
-                                //loans.put("phonenumber",postDataParams.get("phone"));
-                                //loans.put("ualId", model.getUalId());
+                                loans.put("uniqueId", uniqueId);
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Data Collection Service");
                                 parameters.put("subtype", "complete");
@@ -657,8 +685,7 @@ public class ForegroundService extends Service {
                     displayLog("addOnSuccessListener 3");
                     try {
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put("phonenumber",postDataParams.get("phone"));
-                        //loans.put("ualId", model.getUalId());
+                        loans.put("uniqueId", uniqueId);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "success");
@@ -679,8 +706,7 @@ public class ForegroundService extends Service {
                     displayLog("addOnFailureListener 2 " + e.getMessage());
                     try {
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put("phonenumber",postDataParams.get("phone"));
-                        //loans.put("ualId", model.getUalId());
+                        loans.put("uniqueId", uniqueId);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "failure");
@@ -694,7 +720,7 @@ public class ForegroundService extends Service {
                         displayLog("error attaching afl to ual " + e1.toString());
                     }
                     sendSMS("location callback failure");
-                    startAlert();
+                    startAlert(remotePingFrequency);
 
                 }
             });
@@ -712,8 +738,7 @@ public class ForegroundService extends Service {
         displayLog("frequency " + remotelocationfrequency);
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -735,8 +760,7 @@ public class ForegroundService extends Service {
 
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -758,8 +782,7 @@ public class ForegroundService extends Service {
                     sendSMS("with null location");
                     try {
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put("phonenumber",postDataParams.get("phone"));
-                        //loans.put("ualId", model.getUalId());
+                        loans.put("uniqueId", uniqueId);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "result");
@@ -781,8 +804,7 @@ public class ForegroundService extends Service {
 
                     try {
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put("phonenumber",postDataParams.get("phone"));
-                        //loans.put("ualId", model.getUalId());
+                        loans.put("uniqueId", uniqueId);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "result");
@@ -818,8 +840,7 @@ public class ForegroundService extends Service {
         displayLog("buildLocationSettingsRequest");
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -834,12 +855,6 @@ public class ForegroundService extends Service {
         builder.addLocationRequest(mLocationRequest);
         builder.setNeedBle(true);
         mLocationSettingsRequest = builder.build();
-
-        try {
-            //OkVerifyApplication.getMainActivity().checkLocationSettings();
-        } catch (Exception e) {
-            displayLog("error checking location settings " + e.toString());
-        }
 
     }
 
@@ -924,9 +939,7 @@ public class ForegroundService extends Service {
 
 
         HashMap<String, String> loans = new HashMap<>();
-        //loans.put(PROP_ACTORNAME, loginname);
-        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-        //loans.put("error", "Location settings are not satisfied. Attempting to upgrade location settings");
+        loans.put("uniqueId", uniqueId);
         HashMap<String, String> parameters = new HashMap<>();
 
         final Long timemilliseconds = System.currentTimeMillis();
@@ -1187,8 +1200,7 @@ public class ForegroundService extends Service {
                         displayLog("Documentsnapshot successfully written!");
                         try {
                             HashMap<String, String> loans = new HashMap<>();
-                            //loans.put("phonenumber",postDataParams.get("phone"));
-                            //loans.put("ualId", model.getUalId());
+                            loans.put("uniqueId", uniqueId);
                             HashMap<String, String> parameters = new HashMap<>();
                             parameters.put("eventName", "Data Collection Service");
                             parameters.put("subtype", "saveData");
@@ -1214,8 +1226,7 @@ public class ForegroundService extends Service {
                         displayLog("Error writing document " + e.toString());
                         try {
                             HashMap<String, String> loans = new HashMap<>();
-                            //loans.put("phonenumber",postDataParams.get("phone"));
-                            //loans.put("ualId", model.getUalId());
+                            loans.put("uniqueId", uniqueId);
                             HashMap<String, String> parameters = new HashMap<>();
                             parameters.put("eventName", "Data Collection Service");
                             parameters.put("subtype", "saveData");
@@ -1245,8 +1256,7 @@ public class ForegroundService extends Service {
                     displayLog("save parseobject success ");
                     try {
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put("phonenumber",postDataParams.get("phone"));
-                        //loans.put("ualId", model.getUalId());
+                        loans.put("uniqueId", uniqueId);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "saveData");
@@ -1268,8 +1278,7 @@ public class ForegroundService extends Service {
                 } else {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put("phonenumber",postDataParams.get("phone"));
-                        //loans.put("ualId", model.getUalId());
+                        loans.put("uniqueId", uniqueId);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "saveData");
@@ -1335,8 +1344,7 @@ public class ForegroundService extends Service {
             displayLog("if stop self");
             try {
                 HashMap<String, String> loans = new HashMap<>();
-                //loans.put("phonenumber",postDataParams.get("phone"));
-                //loans.put("ualId", model.getUalId());
+                loans.put("uniqueId", uniqueId);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "stop");
@@ -1354,8 +1362,7 @@ public class ForegroundService extends Service {
             displayLog("else stop self");
             try {
                 HashMap<String, String> loans = new HashMap<>();
-                //loans.put("phonenumber",postDataParams.get("phone"));
-                //loans.put("ualId", model.getUalId());
+                loans.put("uniqueId", uniqueId);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "stop");
@@ -1369,52 +1376,6 @@ public class ForegroundService extends Service {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
         }
-
-        /*
-        if (remoteautostop) {
-            if (firestore && parsedb) {
-                displayLog("if stop self");
-                try {
-                    HashMap<String, String> loans = new HashMap<>();
-                    //loans.put("phonenumber",postDataParams.get("phone"));
-                    //loans.put("ualId", model.getUalId());
-                    HashMap<String, String> parameters = new HashMap<>();
-                    parameters.put("eventName", "Data Collection Service");
-                    parameters.put("subtype", "stop");
-                    parameters.put("type", "stopSelf");
-                    parameters.put("onObject", "stopped");
-                    parameters.put("view", "foregroundService");
-                    parameters.put("firestore", "" + firestore);
-                    parameters.put("parse", "" + parsedb);
-                    sendEvent(parameters, loans);
-                } catch (Exception e1) {
-                    displayLog("error attaching afl to ual " + e1.toString());
-                }
-                stopSelf();
-            } else {
-                displayLog("else stop self");
-                try {
-                    HashMap<String, String> loans = new HashMap<>();
-                    //loans.put("phonenumber",postDataParams.get("phone"));
-                    //loans.put("ualId", model.getUalId());
-                    HashMap<String, String> parameters = new HashMap<>();
-                    parameters.put("eventName", "Data Collection Service");
-                    parameters.put("subtype", "stop");
-                    parameters.put("type", "stopSelf");
-                    parameters.put("onObject", "notStopped");
-                    parameters.put("view", "foregroundService");
-                    parameters.put("firestore", "" + firestore);
-                    parameters.put("parse", "" + parsedb);
-                    sendEvent(parameters, loans);
-                } catch (Exception e1) {
-                    displayLog("error attaching afl to ual " + e1.toString());
-                }
-            }
-        } else {
-
-        }
-        */
-
 
     }
 

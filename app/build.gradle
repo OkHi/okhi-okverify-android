@@ -49,6 +49,7 @@ dependencies {
     implementation 'com.google.firebase:firebase-firestore:21.2.1'
     implementation 'com.google.firebase:firebase-config:19.0.3'
     implementation 'com.segment.analytics.android:analytics:4.3.1'
+    implementation 'com.google.firebase:firebase-config:19.0.3'
 
 }
 apply plugin: 'com.google.gms.google-services'

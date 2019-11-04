@@ -1,24 +1,36 @@
 package io.okheart.android;
 
+import android.Manifest;
+import android.app.Activity;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.Timestamp;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.GeoPoint;
+import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.SetOptions;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -33,29 +45,36 @@ import io.okheart.android.activity.OkHeartActivity;
 import io.okheart.android.asynctask.HeartBeatTask;
 import io.okheart.android.asynctask.SegmentIdentifyTask;
 import io.okheart.android.asynctask.SegmentTrackTask;
+import io.okheart.android.asynctask.SendCustomLinkSmsTask;
 import io.okheart.android.callback.HeartBeatCallBack;
 import io.okheart.android.callback.OkHiCallback;
 import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
+import io.okheart.android.callback.SendCustomLinkSmsCallBack;
+import io.okheart.android.datamodel.VerifyDataItem;
 import io.okheart.android.utilities.OkAnalytics;
+
+import static io.okheart.android.utilities.Constants.REMOTE_SMS_TEMPLATE;
 
 public final class OkHi extends ContentProvider {
 
     private static final String TAG = "OkHi";
-    private static String firstname, lastname, phonenumber, color, name, logo;
+    private static String firstname, lastname, phonenumber, color, name, logo, requestSource;
     private static Context mContext;
     private static OkHiCallback callback;
     private static String appkey;
     private static String uniqueId;
     private static FirebaseFirestore mFirestore;
+    private static Query query;
+    private static String remoteSmsTemplate;
+    private static FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     public OkHi() {
     }
 
     public static void initialize(final String applicationKey) {
 
-        mFirestore = FirebaseFirestore.getInstance();
-        uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
         Map<String, Object> users = new HashMap<>();
         users.put("appKey", applicationKey);
 
@@ -73,8 +92,7 @@ public final class OkHi extends ContentProvider {
         });
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Android SDK");
             parameters.put("type", "initialize");
@@ -150,7 +168,7 @@ public final class OkHi extends ContentProvider {
                                 trackjson.put("clientProduct", "okHeartAndroidSDK");
                                 trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
                                 trackjson.put("clientKey", applicationKey);
-                                //trackjson.put("crudOp", "create");
+                                trackjson.put("uniqueId", uniqueId);
                                 //trackjson.put("actionSubtype", "directionsUpdated/okhiGatePhotoUpdated/mapPinUpdated/customNameUpdated/locationInformationUpdated/");
                                 //trackjson.put("crudOp", "create/update");
                                 //trackjson.put("action", "viewUserAddres/updateUserAddress");
@@ -234,8 +252,7 @@ public final class OkHi extends ContentProvider {
 
         try {
             HashMap<String, String> loans = new HashMap<>();
-            //loans.put("phonenumber",postDataParams.get("phone"));
-            //loans.put("ualId", model.getUalId());
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Android SDK");
             parameters.put("type", "initialize");
@@ -353,6 +370,7 @@ public final class OkHi extends ContentProvider {
                 trackjson.put("appLayer", "client");
                 trackjson.put("onObject", "sdk");
                 trackjson.put("product", "okHeartAndroidSDK");
+                trackjson.put("uniqueId", uniqueId);
 
 
                 eventjson.put("properties", trackjson);
@@ -393,12 +411,14 @@ public final class OkHi extends ContentProvider {
         firstname = jsonObject.optString("firstName");
         lastname = jsonObject.optString("lastName");
         phonenumber = jsonObject.optString("phone");
+        requestSource = jsonObject.optString("phone");
 
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("phonenumber", phonenumber);
             loans.put("firstname", firstname);
             loans.put("lastname", lastname);
+            loans.put("uniqueId", uniqueId);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Android SDK");
             parameters.put("type", "initialize");
@@ -417,11 +437,86 @@ public final class OkHi extends ContentProvider {
             intent.putExtra("firstname", firstname);
             intent.putExtra("lastname", lastname);
             intent.putExtra("phone", phonenumber);
+            intent.putExtra("uniqueId", uniqueId);
             intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             mContext.startActivity(intent);
         } catch (Exception e) {
             displayLog("error calling receiveActivity activity " + e.toString());
         }
+    }
+
+
+    public static void manualPing(OkHiCallback okHiCallback, JSONObject jsonObject) {
+
+        //displayLog("display client " + jsonObject.toString());
+
+
+        callback = okHiCallback;
+        firstname = jsonObject.optString("firstName");
+        lastname = jsonObject.optString("lastName");
+        phonenumber = jsonObject.optString("phone");
+
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("phonenumber", phonenumber);
+            loans.put("firstname", firstname);
+            loans.put("lastname", lastname);
+            loans.put("uniqueId", uniqueId);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "initialize");
+            parameters.put("subtype", "manualPing");
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "app");
+            parameters.put("appKey", "" + appkey);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
+
+        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    if (task.getResult().size() > 0) {
+                        VerifyDataItem verifyDataItem = task.getResult().getDocuments().get(0).toObject(VerifyDataItem.class);
+
+                        try {
+                            String message = remoteSmsTemplate + uniqueId;
+                            final HashMap<String, String> jsonObject = new HashMap<>();
+                            jsonObject.put("userId", "GrlaR3LHUP");
+                            jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
+                            jsonObject.put("customName", "test");
+                            jsonObject.put("ualId", verifyDataItem.getUalId());
+                            jsonObject.put("phoneNumber", verifyDataItem.getPhone());
+                            jsonObject.put("phone", verifyDataItem.getPhone());
+                            jsonObject.put("message", message);
+                            jsonObject.put("uniqueId", uniqueId);
+                            SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new SendCustomLinkSmsCallBack() {
+                                @Override
+                                public void querycomplete(String response, boolean status) {
+                                    if (status) {
+                                        displayLog("send sms success " + response);
+                                        displayToast("SMS sent", true);
+                                    } else {
+                                        displayToast("Error! " + response, true);
+                                    }
+                                }
+                            };
+                            SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject);
+                            sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        } catch (Exception jse) {
+                            displayLog("jsonexception " + jse.toString());
+                        }
+                    } else {
+                        displayToast("Create an address first", true);
+                    }
+                } else {
+                    displayToast("Create an address first", true);
+                }
+            }
+        });
+
     }
 
     public static void checkInternet() {
@@ -533,13 +628,97 @@ public final class OkHi extends ContentProvider {
         OkHi.callback = callback;
     }
 
-    @Override
-    public boolean onCreate() {
-        // get the context (Application context)
-        mContext = getContext();
-        //initialize whatever you need
-        return true;
+    public static void checkLocationPermission(Activity activity, int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
 
+        boolean permissionAccessFineLocationApproved =
+                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        if (permissionAccessFineLocationApproved) {
+            try {
+                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
+                        "permission", "mainActivityView", null, loans);
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+            } catch (Exception e) {
+                displayLog("event.submit okanalytics error " + e.toString());
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                boolean backgroundLocationPermissionApproved =
+                        ActivityCompat.checkSelfPermission(mContext,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED;
+
+                if (backgroundLocationPermissionApproved) {
+                    // App can access location both in the foreground and in the background.
+                    // Start your service that doesn't have a foreground service type
+                    // defined.
+                    try {
+                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        HashMap<String, String> loans = new HashMap<>();
+                        loans.put("uniqueId", uniqueId);
+                        loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
+                                "permission", "mainActivityView", null, loans);
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                    } catch (Exception e) {
+                        displayLog("event.submit okanalytics error " + e.toString());
+                    }
+                    //Constants.scheduleJob(MainActivity.this);
+                    checkLocationSettings();
+                } else {
+                    // App can only access location in the foreground. Display a dialog
+                    // warning the user that your app must have all-the-time access to
+                    // location in order to function properly. Then, request background
+                    // location.
+                    try {
+                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        HashMap<String, String> loans = new HashMap<>();
+                        loans.put("uniqueId", uniqueId);
+                        loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
+                                "permission", "mainActivityView", null, loans);
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                    } catch (Exception e) {
+                        displayLog("event.submit okanalytics error " + e.toString());
+                    }
+                    ActivityCompat.requestPermissions(activity, new String[]{
+                                    Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                            MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+                }
+            } else {
+                checkLocationSettings();
+            }
+        } else {
+            // App doesn't have access to the device's location at all. Make full request
+            // for permission.
+            try {
+                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
+                        "permission", "mainActivityView", null, loans);
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+            } catch (Exception e) {
+                displayLog("event.submit okanalytics error " + e.toString());
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                ActivityCompat.requestPermissions(activity, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        },
+                        MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+            } else {
+                ActivityCompat.requestPermissions(activity, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION},
+                        MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+            }
+
+        }
     }
 
     @Nullable
@@ -577,6 +756,43 @@ public final class OkHi extends ContentProvider {
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
+    }
+
+    private static void checkLocationSettings() {
+
+    }
+
+    private static void displayToast(String msg, boolean show) {
+        if (show) {
+            try {
+                Toast toast = Toast.makeText(mContext,
+                        msg, Toast.LENGTH_LONG);
+                toast.setGravity(Gravity.CENTER_HORIZONTAL, 0, 0);
+                toast.show();
+            } catch (Exception e) {
+                displayLog("Enable data toast error " + e.toString());
+            }
+        }
+    }
+
+    @Override
+    public boolean onCreate() {
+        // get the context (Application context)
+        mContext = getContext();
+        mFirestore = FirebaseFirestore.getInstance();
+        uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        query = mFirestore.collection("addresses").document(uniqueId)
+                .collection("addresses")
+                .orderBy("timestamp", Query.Direction.DESCENDING);
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        try {
+            remoteSmsTemplate = mFirebaseRemoteConfig.getString(REMOTE_SMS_TEMPLATE);
+            //displayLog("remotesmstemplate " + remoteSmsTemplate);
+        } catch (Exception e) {
+            displayLog("error getting frequency " + e.toString());
+        }
+        return true;
+
     }
 
     private void saveInfoToFirestore(JSONObject payload) {
