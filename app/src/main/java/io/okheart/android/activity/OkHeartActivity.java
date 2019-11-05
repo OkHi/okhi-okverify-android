@@ -264,14 +264,14 @@ public class OkHeartActivity extends AppCompatActivity {
         //displayLog("color " + color + " name " + name + " logo " + logo);
         //displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
 
-/*
+
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
 
 
         apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
-        */
+
         //apiKey = "r:ee30a6552f7e5dfab48f4234bd1ffc1b";
 
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
