@@ -15,7 +15,7 @@
           -->
     <application
         android:name="io.okheart.android.ApplicationClass"
-        android:label="OkHi"
+
         android:allowBackup="true"
         android:launchMode="singleInstance"
         android:supportsRtl="true">
