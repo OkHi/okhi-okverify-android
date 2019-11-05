@@ -71,6 +71,7 @@ public class ApplicationClass extends Application {
             displayLog("parse initialize error " + e.toString());
         }
         try {
+
             mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
             FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
                     .setFetchTimeoutInSeconds(10)
