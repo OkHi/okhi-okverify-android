@@ -7,7 +7,6 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.ComponentName;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -42,20 +41,12 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.SaveCallback;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -63,6 +54,7 @@ import java.util.Map;
 import io.okheart.android.BuildConfig;
 import io.okheart.android.R;
 import io.okheart.android.database.DataProvider;
+import io.okheart.android.datamodel.AddressItem;
 import io.okheart.android.datamodel.VerifyDataItem;
 import io.okheart.android.receivers.BootReceiver;
 import io.okheart.android.receivers.MyBroadcastReceiver;
@@ -70,26 +62,6 @@ import io.okheart.android.utilities.OkAnalytics;
 import io.okheart.android.utilities.geohash.GeoHash;
 
 import static android.app.NotificationManager.IMPORTANCE_LOW;
-import static io.okheart.android.utilities.Constants.COLUMN_BRANCH;
-import static io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID;
-import static io.okheart.android.utilities.Constants.COLUMN_CUSTOMERNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_DIRECTION;
-import static io.okheart.android.utilities.Constants.COLUMN_IMAGEURL;
-import static io.okheart.android.utilities.Constants.COLUMN_LAT;
-import static io.okheart.android.utilities.Constants.COLUMN_LNG;
-import static io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_LOCATIONNICKNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER;
-import static io.okheart.android.utilities.Constants.COLUMN_PROPERTYNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_STREETNAME;
-import static io.okheart.android.utilities.Constants.REMOTE_ADDRESS_FREQUENCY_THRESHOLD;
-import static io.okheart.android.utilities.Constants.REMOTE_AUTO_STOP;
-import static io.okheart.android.utilities.Constants.REMOTE_BACKGROUND_LOCATION_FREQUENCY;
-import static io.okheart.android.utilities.Constants.REMOTE_GEOSEARCH_RADIUS;
-import static io.okheart.android.utilities.Constants.REMOTE_GPS_ACCURACY;
-import static io.okheart.android.utilities.Constants.REMOTE_KILL_SWITCH;
-import static io.okheart.android.utilities.Constants.REMOTE_PING_FREQUENCY;
-import static io.okheart.android.utilities.Constants.REMOTE_RESUME_PING_FREQUENCY;
 
 public class ForegroundService extends Service {
 
@@ -103,7 +75,7 @@ public class ForegroundService extends Service {
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 7;
     private SettingsClient mSettingsClient;
     private LocationSettingsRequest mLocationSettingsRequest;
-    private FirebaseFirestore mFirestore;
+    //private FirebaseFirestore mFirestore;
     private LocationCallback mLocationCallback;
     private FusedLocationProviderClient mFusedLocationClient;
     private LocationRequest mLocationRequest;
@@ -111,19 +83,24 @@ public class ForegroundService extends Service {
     private Double lat, lng;
     private Float acc;
     private DataProvider dataProvider;
-    private Query query, queryAlarm;
+    //private Query query, queryAlarm;
     private List<Map<String, Object>> addresses;
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
-    private Integer remotelocationfrequency, remoteaddressfrequency, remotePingFrequency, remoteresumepingfrequency;
+    //private FirebaseRemoteConfig mFirebaseRemoteConfig;
+
+    private NotificationManager notificationManager;
+    //private Boolean firestore;
+    private Boolean parsedb;
+    private AlarmManager alarmManager;
+    private String uniqueId;
+    private Integer remotelocationfrequency;
+    private Integer remoteaddressfrequency;
+    private Integer remotePingFrequency;
+    private Integer remoteresumepingfrequency;
     private Double remotegeosearchradius;
     private Double remotegpsaccuracy;
     private Boolean remotekillswitch;
     private Boolean remoteautostop;
-    private NotificationManager notificationManager;
-    private Boolean firestore;
-    private Boolean parsedb;
-    private AlarmManager alarmManager;
-    private String uniqueId;
+    private List<AddressItem> addressItemList;
 
 
     public ForegroundService() {
@@ -156,7 +133,7 @@ public class ForegroundService extends Service {
             parameters.put("type", "onDestroy");
             parameters.put("onObject", "app");
             parameters.put("view", "foregroundService");
-            parameters.put("firestore", "" + firestore);
+            //parameters.put("firestore", "" + firestore);
             parameters.put("parse", "" + parsedb);
             sendEvent(parameters, loans);
         } catch (Exception e1) {
@@ -178,11 +155,14 @@ public class ForegroundService extends Service {
 
         }
 
-
-        if (remoteautostop) {
-            startAlert(remoteresumepingfrequency);
+        if (addressItemList.size() > 0) {
+            if (remoteautostop) {
+                startAlert(remoteresumepingfrequency);
+            } else {
+                startAlert(remotePingFrequency);
+            }
         } else {
-            startAlert(remotePingFrequency);
+            //maybe an event
         }
 
 
@@ -245,12 +225,9 @@ public class ForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         displayLog("My foreground service onCreate().");
-        firestore = false;
+        //firestore = false;
         parsedb = false;
         //Constants.scheduleJob(ForegroundService.this, "Foreground service");
-
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
-        uniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
         try {
             ComponentName receiver = new ComponentName(this, BootReceiver.class);
@@ -262,6 +239,20 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
 
         }
+
+        remotelocationfrequency = 30000;
+        remoteaddressfrequency = 1;
+        remotePingFrequency = 3600000;
+        remoteresumepingfrequency = 3600000;
+        remotegeosearchradius = 0.1;
+        remotegpsaccuracy = 50.0;
+        remotekillswitch = false;
+        remoteautostop = false;
+
+        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        uniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
+
+
 
         try {
             HashMap<String, String> loans = new HashMap<>();
@@ -283,7 +274,8 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
             displayLog("mainactivity is null");
         }
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        //mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        /*
         try {
             Double tempFrequency = mFirebaseRemoteConfig.getDouble(REMOTE_BACKGROUND_LOCATION_FREQUENCY);
             remotelocationfrequency = tempFrequency.intValue();
@@ -328,13 +320,19 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
             displayLog("error getting frequency " + e.toString());
         }
+        */
+
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
 
         dataProvider = new DataProvider(ForegroundService.this);
+        addressItemList = dataProvider.getAllAddressList();
+
+        /*
         mFirestore = FirebaseFirestore.getInstance();
         query = mFirestore.collection("addresses").document(uniqueId)
                 .collection("addresses")
                 .orderBy("timestamp", Query.Direction.DESCENDING);
+        */
 
         try {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(ForegroundService.this);
@@ -607,7 +605,7 @@ public class ForegroundService extends Service {
         startForeground(1, notification);
 
         if (remoteautostop) {
-            stopSelf(true, true);
+            stopSelf(true);
 
         } else {
             startLocationUpdates();
@@ -895,19 +893,9 @@ public class ForegroundService extends Service {
 
     private void firebase(String who) {
 
-        final Long timemilliseconds = System.currentTimeMillis();
-        final Map<String, Object> user = new HashMap<>();
-        user.put("state", who);
-        user.put("timestamp", new Timestamp(new Date()));
-        user.put("geoPointSource", "clientBackgroundGPS");
-        user.put("timemilliseconds", timemilliseconds);
-        user.put("device", getDeviceModelAndBrand());
-        user.put("model", Build.MODEL);
-        user.put("brand", Build.MANUFACTURER);
-        user.put("OSVersion", Build.VERSION.SDK_INT);
-        user.put("OSName", "Android");
-        user.put("appVersionCode", BuildConfig.VERSION_CODE);
-        user.put("appVersionName", BuildConfig.VERSION_NAME);
+        //final Long timemilliseconds = System.currentTimeMillis();
+
+        /*
         mFirestore.collection("verifydata").document("data")
                 .collection(uniqueId).document("" + timemilliseconds)
                 .set(user)
@@ -925,11 +913,13 @@ public class ForegroundService extends Service {
 
                     }
                 });
+        */
 
     }
 
 
     private void updateDatabase(final Double lat, final Double lng, final Float acc) {
+        addresses = new ArrayList<>();
 
         try {
             stopLocationUpdates();
@@ -943,22 +933,6 @@ public class ForegroundService extends Service {
         HashMap<String, String> parameters = new HashMap<>();
 
         final Long timemilliseconds = System.currentTimeMillis();
-        final Map<String, Object> user = new HashMap<>();
-        user.put("latitude", lat);
-        user.put("longitude", lng);
-        user.put("gpsAccuracy", acc);
-        user.put("timestamp", new Timestamp(new Date()));
-        GeoPoint geoPoint = new GeoPoint(lat, lng);
-        user.put("geoPoint", geoPoint);
-        user.put("geoPointSource", "clientBackgroundGPS");
-        user.put("timemilliseconds", timemilliseconds);
-        user.put("device", getDeviceModelAndBrand());
-        user.put("model", Build.MODEL);
-        user.put("brand", Build.MANUFACTURER);
-        user.put("OSVersion", Build.VERSION.SDK_INT);
-        user.put("OSName", "Android");
-        user.put("appVersionCode", BuildConfig.VERSION_CODE);
-        user.put("appVersionName", BuildConfig.VERSION_NAME);
 
         final ParseObject parseObject = new ParseObject("UserVerificationData");
 
@@ -988,7 +962,6 @@ public class ForegroundService extends Service {
                 if (ssid.length() > 0) {
                     displayLog("ssid " + ssid.substring(1, ssid.length() - 1));
                     parameters.put("ssid", ssid);
-                    user.put("ssid", ssid);
                     parseObject.put("ssid", ssid);
                 } else {
 
@@ -1012,7 +985,6 @@ public class ForegroundService extends Service {
                         parameters.put("configuredSSIDs", configuredSSIDList.toString());
                     }
                 }
-                user.put("configuredSSIDs", configuredSSIDList);
                 parseObject.put("configuredSSIDs", configuredSSIDList);
                 /*
                 for(ScanResult config : scanResultList) {
@@ -1035,7 +1007,6 @@ public class ForegroundService extends Service {
             BatteryManager bm = (BatteryManager) getSystemService(BATTERY_SERVICE);
             int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
             parameters.put("batteryLevel", "" + batLevel);
-            user.put("batteryLevel", batLevel);
             parseObject.put("batteryLevel", batLevel);
 
             Intent intent = ForegroundService.this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
@@ -1045,7 +1016,6 @@ public class ForegroundService extends Service {
                 isPlugged = isPlugged || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
             }
             parameters.put("isPlugged", "" + isPlugged);
-            user.put("isPlugged", isPlugged);
             parseObject.put("isPlugged", isPlugged);
 
             // Are we charging / charged?
@@ -1053,26 +1023,21 @@ public class ForegroundService extends Service {
             boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                     status == BatteryManager.BATTERY_STATUS_FULL;
             parameters.put("isCharging", "" + isCharging);
-            user.put("isCharging", isCharging);
             parseObject.put("isCharging", isCharging);
 
             // How are we charging?
             int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
             boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
             parameters.put("usbCharge", "" + usbCharge);
-            user.put("usbCharge", usbCharge);
             parseObject.put("usbCharge", usbCharge);
             boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
             parameters.put("acCharge", "" + acCharge);
-            user.put("acCharge", acCharge);
             parseObject.put("acCharge", acCharge);
 
         } catch (Exception e) {
             displayLog(" error getting battery status " + e.toString());
         }
 
-        //String uniqueId = OkVerifyApplication.getUniqueId();
-        user.put("uniqueId", uniqueId);
         parseObject.put("uniqueId", uniqueId);
         parameters.put("uniqueId", uniqueId);
 
@@ -1117,76 +1082,91 @@ public class ForegroundService extends Service {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
-
-        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    dataProvider.deleteAllAddresseses();
-                    displayLog("gotten results ");
-                    List<DocumentSnapshot> documentSnapshotList = task.getResult().getDocuments();
-                    if (documentSnapshotList.size() > 0) {
-                        displayLog("result size " + documentSnapshotList.size());
-                        addresses = new ArrayList<>();
-                        for (DocumentSnapshot address : documentSnapshotList) {
-                            VerifyDataItem verifyDataItem = address.toObject(VerifyDataItem.class);
-                            displayLog("unique id " + uniqueId + " ualid " + verifyDataItem.getUalId() + "lat " + verifyDataItem.getLatitude() + " lng " + verifyDataItem.getLongitude());
-                            Float distance = getDistance(lat, lng, verifyDataItem.getLatitude(), verifyDataItem.getLongitude());
-                            Map<String, Object> nestedData = new HashMap<>();
-                            nestedData.put("ualId", verifyDataItem.getUalId());
-                            nestedData.put("latitude", verifyDataItem.getLatitude());
-                            nestedData.put("longitude", verifyDataItem.getLongitude());
-                            if (distance < 100.0) {
-                                nestedData.put("verified", true);
-                            } else {
-                                nestedData.put("verified", false);
-                            }
-
-                            nestedData.put("distance", distance);
-                            HashMap<String, String> parameters = getTitleText(verifyDataItem);
-                            nestedData.put("title", parameters.get("header"));
-                            nestedData.put("text", parameters.get("text"));
-
-                            ContentValues contentValues = new ContentValues();
-                            contentValues.put(COLUMN_CUSTOMERNAME, verifyDataItem.getFirstName());
-                            contentValues.put(COLUMN_PHONECUSTOMER, verifyDataItem.getPhone());
-                            contentValues.put(COLUMN_STREETNAME, verifyDataItem.getStreetName());
-                            contentValues.put(COLUMN_PROPERTYNAME, verifyDataItem.getPropertyName());
-                            contentValues.put(COLUMN_DIRECTION, verifyDataItem.getDirections());
-                            contentValues.put(COLUMN_LOCATIONNICKNAME, verifyDataItem.getPlaceId());
-                            contentValues.put(COLUMN_CLAIMUALID, verifyDataItem.getUalId());
-                            contentValues.put(COLUMN_IMAGEURL, verifyDataItem.getUrl());
-                            contentValues.put(COLUMN_LOCATIONNAME, verifyDataItem.getTitle());
-                            contentValues.put(COLUMN_BRANCH, "okhi");
-                            contentValues.put(COLUMN_LAT, verifyDataItem.getLatitude());
-                            contentValues.put(COLUMN_LNG, verifyDataItem.getLongitude());
-
-                            Long i = dataProvider.insertAddressList(contentValues);
-                            user.put("phone", verifyDataItem.getPhone());
-                            parseObject.put("phone", verifyDataItem.getPhone());
-                            addresses.add(nestedData);
-                        }
-                        user.put("addresses", addresses);
-                        parseObject.put("addresses", addresses);
-                        saveData(parseObject, user, timemilliseconds);
+        if (addressItemList.size() > 0) {
+            for (int i = 0; i < addressItemList.size(); i++) {
+                try {
+                    AddressItem addressItem = addressItemList.get(i);
+                    Float distance = getDistance(lat, lng, addressItem.getLat(), addressItem.getLng());
+                    Map<String, Object> nestedData = new HashMap<>();
+                    nestedData.put("ualId", addressItem.getUalid());
+                    nestedData.put("latitude", addressItem.getLat());
+                    nestedData.put("longitude", addressItem.getLng());
+                    if (distance < 100.0) {
+                        nestedData.put("verified", true);
                     } else {
-                        saveData(parseObject, user, timemilliseconds);
+                        nestedData.put("verified", false);
                     }
-                } else {
-                    displayLog("couldn't get addresses list ");
-                    saveData(parseObject, user, timemilliseconds);
+
+                    nestedData.put("distance", distance);
+                    HashMap<String, String> paramText = getTitleText(addressItem);
+                    nestedData.put("title", paramText.get("header"));
+                    nestedData.put("text", paramText.get("text"));
+                    addresses.add(nestedData);
+                } catch (Exception e) {
+
                 }
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                displayLog("address query failed " + e.toString());
-                saveData(parseObject, user, timemilliseconds);
-            }
-        });
+            parseObject.put("addresses", addresses);
+            saveData(parseObject);
+        } else {
+            //add an event here saying we don't have addresses
+            //saveData(parseObject,  timemilliseconds);
+            stopSelf();
+        }
 
     }
 
+
+    private void saveData(ParseObject parseObject) {
+
+        displayLog("parse object save");
+        parseObject.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    displayLog("save parseobject success ");
+                    try {
+                        HashMap<String, String> loans = new HashMap<>();
+                        loans.put("uniqueId", uniqueId);
+                        HashMap<String, String> parameters = new HashMap<>();
+                        parameters.put("eventName", "Data Collection Service");
+                        parameters.put("subtype", "saveData");
+                        parameters.put("type", "parse");
+                        parameters.put("onObject", "success");
+                        parameters.put("view", "foregroundService");
+                        sendEvent(parameters, loans);
+                    } catch (Exception e1) {
+                        displayLog("error attaching afl to ual " + e1.toString());
+                    }
+                    parsedb = true;
+                    stopSelf(parsedb);
+
+                } else {
+                    try {
+                        HashMap<String, String> loans = new HashMap<>();
+                        loans.put("uniqueId", uniqueId);
+                        HashMap<String, String> parameters = new HashMap<>();
+                        parameters.put("eventName", "Data Collection Service");
+                        parameters.put("subtype", "saveData");
+                        parameters.put("type", "parse");
+                        parameters.put("onObject", "failure");
+                        parameters.put("view", "foregroundService");
+                        parameters.put("error", e.toString());
+                        sendEvent(parameters, loans);
+                    } catch (Exception e1) {
+                        displayLog("error attaching afl to ual " + e1.toString());
+                    }
+                    displayLog("save parseobject error " + e.toString());
+                    parsedb = true;
+                    stopSelf(parsedb);
+                }
+            }
+        });
+
+
+    }
+
+    /*
     private void saveData(ParseObject parseObject, Map<String, Object> user, Long timemilliseconds) {
         displayLog("about to saveData");
 
@@ -1211,11 +1191,7 @@ public class ForegroundService extends Service {
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
-                        /*
-                        if (notificationManager != null) {
-                            notificationManager.cancelAll();
-                        }
-                        */
+
                         firestore = true;
                         stopSelf(firestore, parsedb);
                     }
@@ -1237,12 +1213,8 @@ public class ForegroundService extends Service {
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
-                        /*
-                        if (notificationManager != null) {
-                            notificationManager.cancelAll();
-                        }
-                        */
-                        firestore = true;
+
+                        //firestore = true;
                         stopSelf(firestore, parsedb);
                     }
                 });
@@ -1267,11 +1239,7 @@ public class ForegroundService extends Service {
                     } catch (Exception e1) {
                         displayLog("error attaching afl to ual " + e1.toString());
                     }
-                    /*
-                    if (notificationManager != null) {
-                        notificationManager.cancelAll();
-                    }
-                    */
+
                     parsedb = true;
                     stopSelf(firestore, parsedb);
 
@@ -1291,19 +1259,14 @@ public class ForegroundService extends Service {
                         displayLog("error attaching afl to ual " + e1.toString());
                     }
                     displayLog("save parseobject error " + e.toString());
-                    /*
-                    if (notificationManager != null) {
-                        notificationManager.cancelAll();
-                    }
-                    */
+
                     parsedb = true;
                     stopSelf(firestore, parsedb);
                 }
             }
         });
-
-
     }
+    */
 
     /*
     private Boolean addressVerified(VerifyDataItem verifyDataItem) {
@@ -1337,6 +1300,47 @@ public class ForegroundService extends Service {
     }
     */
 
+    private void stopSelf(Boolean parsedb) {
+        displayLog("stopself parse " + parsedb);
+
+        if (parsedb) {
+            displayLog("if stop self");
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Data Collection Service");
+                parameters.put("subtype", "stop");
+                parameters.put("type", "stopSelf");
+                parameters.put("onObject", "stopped");
+                parameters.put("view", "foregroundService");
+                parameters.put("parse", "" + parsedb);
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+            stopSelf();
+        } else {
+            displayLog("else stop self");
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Data Collection Service");
+                parameters.put("subtype", "stop");
+                parameters.put("type", "stopSelf");
+                parameters.put("onObject", "notStopped");
+                parameters.put("view", "foregroundService");
+                parameters.put("parse", "" + parsedb);
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+        }
+
+    }
+
+    /*
     private void stopSelf(Boolean firestore, Boolean parsedb) {
         displayLog("stopself firestore " + firestore + " parse " + parsedb);
 
@@ -1378,6 +1382,7 @@ public class ForegroundService extends Service {
         }
 
     }
+    */
 
     private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {
 
@@ -1407,6 +1412,90 @@ public class ForegroundService extends Service {
             return manufacturer + " " + model;
         }
 
+    }
+
+    private HashMap<String, String> getTitleText(AddressItem model) {
+
+        String streetName = model.getStreetName();
+        String propertyName = model.getPropname();
+        String directions = model.getDirection();
+        String title = model.getLocationName();
+
+        displayLog(streetName + " " + propertyName + " " + directions + " " + title);
+
+        HashMap<String, String> titleText = new HashMap<>();
+
+        String header = "";
+        String text = "";
+        if (streetName != null) {
+            if (streetName.length() > 0) {
+                if (!(streetName.equalsIgnoreCase("null"))) {
+                    text = streetName;
+                } else {
+
+                    if (directions != null) {
+                        if (directions.length() > 0) {
+                            if (!(directions.equalsIgnoreCase("null"))) {
+                                text = directions;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (directions != null) {
+                    if (directions.length() > 0) {
+                        if (!(directions.equalsIgnoreCase("null"))) {
+                            text = directions;
+                        }
+                    }
+                }
+            }
+        } else {
+            if (directions != null) {
+                if (directions.length() > 0) {
+                    if (!(directions.equalsIgnoreCase("null"))) {
+                        text = directions;
+                    }
+                }
+            }
+        }
+
+        if (title != null) {
+            if (title.length() > 0) {
+                if (!(title.equalsIgnoreCase("null"))) {
+                    header = title;
+                } else {
+
+                    if (propertyName != null) {
+                        if (propertyName.length() > 0) {
+                            if (!(propertyName.equalsIgnoreCase("null"))) {
+                                header = propertyName;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (propertyName != null) {
+                    if (propertyName.length() > 0) {
+                        if (!(propertyName.equalsIgnoreCase("null"))) {
+                            header = propertyName;
+                        }
+                    }
+                }
+            }
+        } else {
+            if (propertyName != null) {
+                if (propertyName.length() > 0) {
+                    if (!(propertyName.equalsIgnoreCase("null"))) {
+                        header = propertyName;
+                    }
+                }
+            }
+        }
+        titleText.put("header", header);
+        titleText.put("text", text);
+        displayLog("titletext " + titleText.get("header") + " " + titleText.get("text"));
+        return titleText;
     }
 
     private HashMap<String, String> getTitleText(VerifyDataItem model) {

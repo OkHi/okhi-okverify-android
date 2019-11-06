@@ -62,6 +62,7 @@ public class Constants {
     public static final String COLUMN_ADDRESSFREQUENCY = "addressfrequency";
     public static final String COLUMN_CREATEDON = "createdon";
     public static final String COLUMN_LASTUSED = "lastused";
+    public static final String COLUMN_UNIQUEID = "uniqueId";
 
     public static final String TABLE_NAME_RUNLIST = "artcafferunlist";
     public static final String TABLE_NAME_STUFF = "artcaffestuff";

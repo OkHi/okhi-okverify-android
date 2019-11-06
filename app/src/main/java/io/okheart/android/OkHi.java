@@ -16,45 +16,25 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.SetOptions;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import io.okheart.android.activity.OkHeartActivity;
 import io.okheart.android.asynctask.HeartBeatTask;
 import io.okheart.android.asynctask.SegmentIdentifyTask;
 import io.okheart.android.asynctask.SegmentTrackTask;
-import io.okheart.android.asynctask.SendCustomLinkSmsTask;
 import io.okheart.android.callback.HeartBeatCallBack;
 import io.okheart.android.callback.OkHiCallback;
 import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
-import io.okheart.android.callback.SendCustomLinkSmsCallBack;
-import io.okheart.android.datamodel.VerifyDataItem;
 import io.okheart.android.utilities.OkAnalytics;
-
-import static io.okheart.android.utilities.Constants.REMOTE_SMS_TEMPLATE;
 
 public final class OkHi extends ContentProvider {
 
@@ -64,10 +44,7 @@ public final class OkHi extends ContentProvider {
     private static OkHiCallback callback;
     private static String appkey;
     private static String uniqueId;
-    private static FirebaseFirestore mFirestore;
-    private static Query query;
     private static String remoteSmsTemplate;
-    private static FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     public OkHi() {
     }
@@ -75,6 +52,7 @@ public final class OkHi extends ContentProvider {
     public static void initialize(final String applicationKey) {
 
 
+        /*
         Map<String, Object> users = new HashMap<>();
         users.put("appKey", applicationKey);
 
@@ -90,6 +68,7 @@ public final class OkHi extends ContentProvider {
                 displayLog("Document write failure " + e.getMessage());
             }
         });
+        */
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -445,80 +424,81 @@ public final class OkHi extends ContentProvider {
         }
     }
 
+    /*
 
-    public static void manualPing(OkHiCallback okHiCallback, JSONObject jsonObject) {
+      public static void manualPing(OkHiCallback okHiCallback, JSONObject jsonObject) {
 
-        //displayLog("display client " + jsonObject.toString());
+          //displayLog("display client " + jsonObject.toString());
 
 
-        callback = okHiCallback;
-        firstname = jsonObject.optString("firstName");
-        lastname = jsonObject.optString("lastName");
-        phonenumber = jsonObject.optString("phone");
+          callback = okHiCallback;
+          firstname = jsonObject.optString("firstName");
+          lastname = jsonObject.optString("lastName");
+          phonenumber = jsonObject.optString("phone");
 
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("phonenumber", phonenumber);
-            loans.put("firstname", firstname);
-            loans.put("lastname", lastname);
-            loans.put("uniqueId", uniqueId);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Android SDK");
-            parameters.put("type", "initialize");
-            parameters.put("subtype", "manualPing");
-            parameters.put("onObject", "okHeartAndroidSDK");
-            parameters.put("view", "app");
-            parameters.put("appKey", "" + appkey);
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
+          try {
+              HashMap<String, String> loans = new HashMap<>();
+              loans.put("phonenumber", phonenumber);
+              loans.put("firstname", firstname);
+              loans.put("lastname", lastname);
+              loans.put("uniqueId", uniqueId);
+              HashMap<String, String> parameters = new HashMap<>();
+              parameters.put("eventName", "Android SDK");
+              parameters.put("type", "initialize");
+              parameters.put("subtype", "manualPing");
+              parameters.put("onObject", "okHeartAndroidSDK");
+              parameters.put("view", "app");
+              parameters.put("appKey", "" + appkey);
+              sendEvent(parameters, loans);
+          } catch (Exception e1) {
+              displayLog("error attaching afl to ual " + e1.toString());
+          }
 
-        query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    if (task.getResult().size() > 0) {
-                        VerifyDataItem verifyDataItem = task.getResult().getDocuments().get(0).toObject(VerifyDataItem.class);
+          query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+              @Override
+              public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                  if (task.isSuccessful()) {
+                      if (task.getResult().size() > 0) {
+                          VerifyDataItem verifyDataItem = task.getResult().getDocuments().get(0).toObject(VerifyDataItem.class);
 
-                        try {
-                            String message = remoteSmsTemplate + uniqueId;
-                            final HashMap<String, String> jsonObject = new HashMap<>();
-                            jsonObject.put("userId", "GrlaR3LHUP");
-                            jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
-                            jsonObject.put("customName", "test");
-                            jsonObject.put("ualId", verifyDataItem.getUalId());
-                            jsonObject.put("phoneNumber", verifyDataItem.getPhone());
-                            jsonObject.put("phone", verifyDataItem.getPhone());
-                            jsonObject.put("message", message);
-                            jsonObject.put("uniqueId", uniqueId);
-                            SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new SendCustomLinkSmsCallBack() {
-                                @Override
-                                public void querycomplete(String response, boolean status) {
-                                    if (status) {
-                                        displayLog("send sms success " + response);
-                                        displayToast("SMS sent", true);
-                                    } else {
-                                        displayToast("Error! " + response, true);
-                                    }
-                                }
-                            };
-                            SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject);
-                            sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        } catch (Exception jse) {
-                            displayLog("jsonexception " + jse.toString());
-                        }
-                    } else {
-                        displayToast("Create an address first", true);
-                    }
-                } else {
-                    displayToast("Create an address first", true);
-                }
-            }
-        });
+                          try {
+                              String message = remoteSmsTemplate + uniqueId;
+                              final HashMap<String, String> jsonObject = new HashMap<>();
+                              jsonObject.put("userId", "GrlaR3LHUP");
+                              jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
+                              jsonObject.put("customName", "test");
+                              jsonObject.put("ualId", verifyDataItem.getUalId());
+                              jsonObject.put("phoneNumber", verifyDataItem.getPhone());
+                              jsonObject.put("phone", verifyDataItem.getPhone());
+                              jsonObject.put("message", message);
+                              jsonObject.put("uniqueId", uniqueId);
+                              SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new SendCustomLinkSmsCallBack() {
+                                  @Override
+                                  public void querycomplete(String response, boolean status) {
+                                      if (status) {
+                                          displayLog("send sms success " + response);
+                                          displayToast("SMS sent", true);
+                                      } else {
+                                          displayToast("Error! " + response, true);
+                                      }
+                                  }
+                              };
+                              SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject);
+                              sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                          } catch (Exception jse) {
+                              displayLog("jsonexception " + jse.toString());
+                          }
+                      } else {
+                          displayToast("Create an address first", true);
+                      }
+                  } else {
+                      displayToast("Create an address first", true);
+                  }
+              }
+          });
 
-    }
-
+      }
+  */
     public static void checkInternet() {
         try {
             HeartBeatCallBack heartBeatCallBack = new HeartBeatCallBack() {
@@ -779,8 +759,10 @@ public final class OkHi extends ContentProvider {
     public boolean onCreate() {
         // get the context (Application context)
         mContext = getContext();
-        mFirestore = FirebaseFirestore.getInstance();
+
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        /*
+        mFirestore = FirebaseFirestore.getInstance();
         query = mFirestore.collection("addresses").document(uniqueId)
                 .collection("addresses")
                 .orderBy("timestamp", Query.Direction.DESCENDING);
@@ -791,10 +773,12 @@ public final class OkHi extends ContentProvider {
         } catch (Exception e) {
             displayLog("error getting frequency " + e.toString());
         }
+        */
         return true;
 
     }
 
+    /*
     private void saveInfoToFirestore(JSONObject payload) {
 
         displayLog("saveAddressToFirestore");
@@ -872,4 +856,6 @@ public final class OkHi extends ContentProvider {
         });
 
     }
+    */
+
 }

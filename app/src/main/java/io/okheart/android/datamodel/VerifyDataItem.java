@@ -1,14 +1,9 @@
 package io.okheart.android.datamodel;
 
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.IgnoreExtraProperties;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Map;
 
-@IgnoreExtraProperties
 public class VerifyDataItem implements Serializable {
 
     private Boolean acCharge;
@@ -21,7 +16,6 @@ public class VerifyDataItem implements Serializable {
     private String model;
     private String ssid;
     private Long timemilliseconds;
-    private Timestamp timestamp;
     private Boolean usbCharge;
 
     private String OSName;
@@ -31,7 +25,6 @@ public class VerifyDataItem implements Serializable {
     private String appVersionName;
     private String brand;
     private String device;
-    private GeoPoint geoPoint;
     private String geoPointSource;
     private Float gpsAccuracy;
     private String uniqueId;
@@ -140,14 +133,6 @@ public class VerifyDataItem implements Serializable {
         this.timemilliseconds = timemilliseconds;
     }
 
-    public Timestamp getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(Timestamp timestamp) {
-        this.timestamp = timestamp;
-    }
-
     public Boolean getUsbCharge() {
         return usbCharge;
     }
@@ -210,14 +195,6 @@ public class VerifyDataItem implements Serializable {
 
     public void setDevice(String device) {
         this.device = device;
-    }
-
-    public GeoPoint getGeoPoint() {
-        return geoPoint;
-    }
-
-    public void setGeoPoint(GeoPoint geoPoint) {
-        this.geoPoint = geoPoint;
     }
 
     public String getGeoPointSource() {

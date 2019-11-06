@@ -91,6 +91,7 @@ public class AddressItem {
     private String createdon;
     private String lastused;
     private String locationName;
+    private String uniqueId;
 
     public AddressItem() {
 
@@ -406,5 +407,13 @@ public class AddressItem {
 
     public void setLocationName(String locationName) {
         this.locationName = locationName;
+    }
+
+    public String getUniqueId() {
+        return uniqueId;
+    }
+
+    public void setUniqueId(String uniqueId) {
+        this.uniqueId = uniqueId;
     }
 }

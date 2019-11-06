@@ -1,39 +1,48 @@
 package io.okheart.android.activity;
 
+import android.content.ContentValues;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.Timestamp;
-import com.google.firebase.firestore.FirebaseFirestore;
-import com.google.firebase.firestore.GeoPoint;
-import com.google.firebase.firestore.SetOptions;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.HashMap;
-import java.util.Map;
 
 import io.okheart.android.BuildConfig;
 import io.okheart.android.OkHi;
 import io.okheart.android.asynctask.SegmentTrackTask;
 import io.okheart.android.callback.SegmentTrackCallBack;
+import io.okheart.android.database.DataProvider;
+import io.okheart.android.services.ForegroundService;
 import io.okheart.android.utilities.Constants;
 import io.okheart.android.utilities.OkAnalytics;
+
+import static io.okheart.android.utilities.Constants.COLUMN_BRANCH;
+import static io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID;
+import static io.okheart.android.utilities.Constants.COLUMN_CUSTOMERNAME;
+import static io.okheart.android.utilities.Constants.COLUMN_DIRECTION;
+import static io.okheart.android.utilities.Constants.COLUMN_IMAGEURL;
+import static io.okheart.android.utilities.Constants.COLUMN_LAT;
+import static io.okheart.android.utilities.Constants.COLUMN_LNG;
+import static io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME;
+import static io.okheart.android.utilities.Constants.COLUMN_LOCATIONNICKNAME;
+import static io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER;
+import static io.okheart.android.utilities.Constants.COLUMN_PROPERTYNAME;
+import static io.okheart.android.utilities.Constants.COLUMN_STREETNAME;
+import static io.okheart.android.utilities.Constants.COLUMN_UNIQUEID;
 
 public class WebAppInterface {
     private static final String TAG = "WebAppInterface";
     private static String appkey;
     OkHeartActivity mContext;
-    private FirebaseFirestore mFirestore;
+    //private FirebaseFirestore mFirestore;
     private String uniqueId;
+    private DataProvider dataProvider;
 
     /**
      * Instantiate the interface and set the context
@@ -41,8 +50,9 @@ public class WebAppInterface {
     WebAppInterface(OkHeartActivity c, String applicationKey) {
         mContext = c;
         appkey = applicationKey;
-        mFirestore = FirebaseFirestore.getInstance();
+        //mFirestore = FirebaseFirestore.getInstance();
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+        dataProvider = new DataProvider(mContext);
     }
 
     /**
@@ -161,7 +171,22 @@ public class WebAppInterface {
                     case "location_created":
                         displayLog("location_created");
                         try {
-                            saveAddressToFirestore(payload);
+                            Long i = saveAddressToFirestore(payload);
+                            if (i > 0) {
+                                //
+                                try {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        mContext.startForegroundService(new Intent(mContext, ForegroundService.class));
+                                    } else {
+                                        mContext.startService(new Intent(mContext, ForegroundService.class));
+                                    }
+
+                                } catch (Exception jse) {
+                                    displayLog("jsonexception jse " + jse.toString());
+                                }
+                            } else {
+                                //put an event to capture this issue perhaps
+                            }
                         } catch (Exception e) {
                             displayLog("error saveAddressToFirestore " + e.toString());
                         }
@@ -199,7 +224,22 @@ public class WebAppInterface {
                     case "location_updated":
                         displayLog("location_updated");
                         try {
-                            saveAddressToFirestore(payload);
+                            Long i = saveAddressToFirestore(payload);
+                            if (i > 0) {
+                                //
+                                try {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        mContext.startForegroundService(new Intent(mContext, ForegroundService.class));
+                                    } else {
+                                        mContext.startService(new Intent(mContext, ForegroundService.class));
+                                    }
+
+                                } catch (Exception jse) {
+                                    displayLog("jsonexception jse " + jse.toString());
+                                }
+                            } else {
+                                //put an event to capture this issue perhaps
+                            }
                         } catch (Exception e) {
                             displayLog("error saveAddressToFirestore " + e.toString());
                         }
@@ -359,7 +399,7 @@ public class WebAppInterface {
     }
 
 
-    private void saveAddressToFirestore(JSONObject payload) {
+    private Long saveAddressToFirestore(JSONObject payload) {
 
         displayLog("saveAddressToFirestore");
 
@@ -380,6 +420,25 @@ public class WebAppInterface {
         Double lat = location.optDouble("lat");
         Double lng = location.optDouble("lng");
 
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_CUSTOMERNAME, firstName);
+        contentValues.put(COLUMN_PHONECUSTOMER, phone);
+        contentValues.put(COLUMN_STREETNAME, streetName);
+        contentValues.put(COLUMN_PROPERTYNAME, propertyName);
+        contentValues.put(COLUMN_DIRECTION, directions);
+        contentValues.put(COLUMN_LOCATIONNICKNAME, placeId);
+        contentValues.put(COLUMN_CLAIMUALID, ualId);
+        contentValues.put(COLUMN_IMAGEURL, url);
+        contentValues.put(COLUMN_LOCATIONNAME, title);
+        contentValues.put(COLUMN_BRANCH, "okhi");
+        contentValues.put(COLUMN_LAT, lat);
+        contentValues.put(COLUMN_LNG, lng);
+        contentValues.put(COLUMN_UNIQUEID, uniqueId);
+
+        Long i = dataProvider.insertAddressList(contentValues);
+        return i;
+
+        /*
 
         Map<String, Object> data = new HashMap<>();
         data.put("latitude", lat);
@@ -434,6 +493,7 @@ public class WebAppInterface {
                 displayLog("Document write failure " + e.getMessage());
             }
         });
+        */
 
     }
 

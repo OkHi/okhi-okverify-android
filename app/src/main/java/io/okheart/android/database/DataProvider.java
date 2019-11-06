@@ -116,6 +116,7 @@ public class DataProvider {
         addressItem.setCreatedon(cursor.getString(34));
         addressItem.setLastused(cursor.getString(35));
         addressItem.setLocationName(cursor.getString(35));
+        addressItem.setUniqueId(cursor.getString(36));
 
         //displayLog("floor "+addressItem.getFloor());
         //displayLog("unit "+addressItem.getUnit());

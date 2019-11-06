@@ -42,6 +42,7 @@ import static io.okheart.android.utilities.Constants.COLUMN_TRADITIONALBUILDINGN
 import static io.okheart.android.utilities.Constants.COLUMN_TRADITIONALBUILDINGNUMBER;
 import static io.okheart.android.utilities.Constants.COLUMN_TRADITIONALSTREETNAME;
 import static io.okheart.android.utilities.Constants.COLUMN_TRADITIONALSTREETNUMBER;
+import static io.okheart.android.utilities.Constants.COLUMN_UNIQUEID;
 import static io.okheart.android.utilities.Constants.COLUMN_UNIT;
 import static io.okheart.android.utilities.Constants.COLUMN_VALUE;
 import static io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST;
@@ -53,7 +54,7 @@ import static io.okheart.android.utilities.Constants.TABLE_NAME_STUFF;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "okverify.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 3;
 
     private static final String DATABASE_CREATE_RUNLIST =
             "create table " + TABLE_NAME_RUNLIST + " (" +
@@ -62,6 +63,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_CUSTOMERNAME + " VARCHAR, " +
                     COLUMN_AFFILIATION + " VARCHAR, " +
                     COLUMN_PHONECUSTOMER + " VARCHAR, " +
+
 
                     COLUMN_CLAIMAFLID + " VARCHAR, " +
                     COLUMN_CLAIMUALID + " VARCHAR, " +
@@ -101,6 +103,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     COLUMN_CREATEDON + " VARCHAR, " +
                     COLUMN_LASTUSED + " VARCHAR, " +
                     COLUMN_LOCATIONNAME + " VARCHAR, " +
+                    COLUMN_UNIQUEID + " VARCHAR, " +
                     " UNIQUE(" + COLUMN_CLAIMUALID + ") ON CONFLICT REPLACE);";
 
     private static final String DATABASE_CREATE_STUFF =

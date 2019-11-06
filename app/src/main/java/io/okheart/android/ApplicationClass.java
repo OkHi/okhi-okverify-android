@@ -5,13 +5,6 @@ import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
-import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 import com.parse.Parse;
 import com.segment.analytics.Analytics;
 
@@ -26,7 +19,7 @@ public class ApplicationClass extends Application {
     //public static Context context;
     //private static String uniqueId;
     private static Analytics analytics;
-    private FirebaseRemoteConfig mFirebaseRemoteConfig;
+    //private FirebaseRemoteConfig mFirebaseRemoteConfig;
 
     public static String getTAG() {
         return TAG;
@@ -70,6 +63,7 @@ public class ApplicationClass extends Application {
         } catch (Exception e) {
             displayLog("parse initialize error " + e.toString());
         }
+        /*
         try {
 
             mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
@@ -116,6 +110,7 @@ public class ApplicationClass extends Application {
         } catch (Exception e) {
             displayLog("firebase remote config initialize error " + e.toString());
         }
+        */
 
         try {
             //context = getApplicationContext();
@@ -144,7 +139,7 @@ public class ApplicationClass extends Application {
         }
 
     }
-
+/*
     public FirebaseRemoteConfig getmFirebaseRemoteConfig() {
         return mFirebaseRemoteConfig;
     }
@@ -152,6 +147,7 @@ public class ApplicationClass extends Application {
     public void setmFirebaseRemoteConfig(FirebaseRemoteConfig mFirebaseRemoteConfig) {
         this.mFirebaseRemoteConfig = mFirebaseRemoteConfig;
     }
+    */
 
     private void displayLog(String me) {
         Log.i(TAG, me);
