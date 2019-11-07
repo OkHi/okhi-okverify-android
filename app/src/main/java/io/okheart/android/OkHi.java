@@ -1,7 +1,6 @@
 package io.okheart.android;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -22,8 +21,13 @@ import androidx.core.app.ActivityCompat;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.HashMap;
 
 import io.okheart.android.activity.OkHeartActivity;
@@ -49,26 +53,26 @@ public final class OkHi extends ContentProvider {
     public OkHi() {
     }
 
-    public static void initialize(final String applicationKey) {
+    public static void initialize(final String applicationKey, final Boolean verify) throws RuntimeException {
 
+        if (applicationKey != null) {
+            if (applicationKey.length() > 0) {
+                if (applicationKey.startsWith("r:")) {
+                    startInitialization(applicationKey, verify);
+                } else {
+                    throw new RuntimeException("Initialization error", new Throwable("Confirm your application key is correct"));
 
-        /*
-        Map<String, Object> users = new HashMap<>();
-        users.put("appKey", applicationKey);
-
-        mFirestore.collection("affiliations").document(applicationKey).set(users, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        displayLog("Document written successfully");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                displayLog("Document write failure " + e.getMessage());
+                }
+            } else {
+                throw new RuntimeException("Initialization error", new Throwable("Confirm your application key is correct"));
             }
-        });
-        */
+        } else {
+            throw new RuntimeException("Initialization error", new Throwable("Confirm your application key is not null"));
+        }
+
+    }
+
+    private static void startInitialization(final String applicationKey, final Boolean verify) {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -79,18 +83,43 @@ public final class OkHi extends ContentProvider {
             parameters.put("onObject", "okHeartAndroidSDK");
             parameters.put("view", "app");
             parameters.put("appKey", "" + applicationKey);
+            parameters.put("verify", "" + verify);
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
         try {
-            displayLog("okhi initialized");
             writeToFile(applicationKey);
         } catch (Exception io) {
 
         } finally {
 
         }
+
+        try {
+            if (verify != null) {
+                String tempVerify = "" + verify;
+                if (tempVerify.length() > 0) {
+                    if ((tempVerify.equalsIgnoreCase("false")) || ((tempVerify.equalsIgnoreCase("true")))) {
+                        writeToFileVerify(tempVerify);
+                    } else {
+                        writeToFileVerify("false");
+                    }
+
+                } else {
+                    writeToFileVerify("false");
+                }
+
+            } else {
+                writeToFileVerify("false");
+            }
+        } catch (Exception io) {
+            writeToFileVerify("false");
+        } finally {
+            writeToFileVerify("false");
+        }
+
+
         appkey = applicationKey;
 
 
@@ -223,7 +252,6 @@ public final class OkHi extends ContentProvider {
             displayLog("jsonexception jse " + jse.toString());
         }
 
-
     }
 
     public static void customize(String color, String name, String logo, String appbarcolor, Boolean appbarvisibility, Boolean streetview) {
@@ -302,18 +330,6 @@ public final class OkHi extends ContentProvider {
             }
 
             final Boolean productionVersion = production;
-//
-            /*
-            JSONObject identifyjson = new JSONObject();
-            //identifyjson.put("userId", userId);
-            try {
-                SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
-                    @Override
-                    public void querycomplete(String response, boolean status) {
-                        if(status){
-                            */
-
-            ////
             displayLog("things went ok with send to omtm identify");
 
             try {
@@ -358,23 +374,6 @@ public final class OkHi extends ContentProvider {
             } catch (JSONException e) {
                 displayLog("track error omtm error " + e.toString());
             }
-            /////
-                            /*
-                        }
-                        else{
-                            displayLog("something went wrong with send to omtm identify");
-                        }
-
-                    }
-                };
-                SegmentIdentifyTask segmentIdentifyTask = new SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
-                segmentIdentifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-
-            } catch (Exception e) {
-                displayLog("Error initializing analytics_omtm " + e.toString());
-            }
-            */
-            ///
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
@@ -382,10 +381,112 @@ public final class OkHi extends ContentProvider {
 
     }
 
+    /*
     public static void displayClient(OkHiCallback okHiCallback, JSONObject jsonObject) {
 
         displayLog("display client " + jsonObject.toString());
 
+        if(checkPermission()) {
+            startActivity(okHiCallback, jsonObject);
+        }
+        else{
+            String cause = checkPermissionCause();
+            if((cause.equalsIgnoreCase("Manifest.permission.ACCESS_FINE_LOCATION granted")) ||
+                    (cause.equalsIgnoreCase("Manifest.permission.ACCESS_BACKGROUND_LOCATION granted"))){
+                startActivity(okHiCallback, jsonObject);
+            }
+            else{
+                if(verify != null){
+                    if(verify){
+                        try {
+                            JSONObject responseJson = new JSONObject();
+                            responseJson.put("message", "fatal_exit");
+                            JSONObject payloadJson = new JSONObject();
+                            payloadJson.put("Error","Location permission not granted");
+                            payloadJson.put("message", cause);
+                            responseJson.put("payload", payloadJson);
+                            displayLog(responseJson.toString());
+                            okHiCallback.querycomplete(responseJson);
+                        }
+                        catch (JSONException jse){
+
+                        }
+                    }
+                    else{
+                        startActivity(okHiCallback, jsonObject);
+                    }
+                }
+                else{
+                    startActivity(okHiCallback, jsonObject);
+                }
+            }
+        }
+    }
+*/
+
+    public static void displayClient(OkHiCallback okHiCallback, JSONObject jsonObject) throws RuntimeException {
+
+        displayLog("display client " + jsonObject.toString());
+
+        if (jsonObject != null) {
+            if (jsonObject.length() > 0) {
+                if (okHiCallback != null) {
+
+                    if (checkPermission()) {
+                        startActivity(okHiCallback, jsonObject);
+                    } else {
+                        String cause = checkPermissionCause();
+                        if ((cause.equalsIgnoreCase("Manifest.permission.ACCESS_FINE_LOCATION granted")) ||
+                                (cause.equalsIgnoreCase("Manifest.permission.ACCESS_BACKGROUND_LOCATION granted"))) {
+                            startActivity(okHiCallback, jsonObject);
+                        } else {
+                            String verify = "false";
+                            File filesDir = new File(mContext.getFilesDir() + "/verify.txt");
+                            if (filesDir.exists()) {
+                                displayLog("filesdir exists");
+                                try {
+                                    verify = getStringFromFile(filesDir.getAbsolutePath());
+                                    displayLog("verify " + verify);
+                                } catch (Exception e) {
+                                    // Hmm, the applicationId file was malformed or something. Assume it
+                                    // doesn't match.
+                                    displayLog("error " + e.toString());
+                                }
+                            } else {
+                                displayLog("filesdir does not exist");
+                            }
+                            if (verify.equalsIgnoreCase("true")) {
+                                try {
+                                    JSONObject responseJson = new JSONObject();
+                                    responseJson.put("message", "fatal_exit");
+                                    JSONObject payloadJson = new JSONObject();
+                                    payloadJson.put("Error", "Location permission not granted");
+                                    payloadJson.put("message", cause);
+                                    responseJson.put("payload", payloadJson);
+                                    displayLog(responseJson.toString());
+                                    okHiCallback.querycomplete(responseJson);
+                                } catch (JSONException jse) {
+
+                                }
+                            } else {
+                                startActivity(okHiCallback, jsonObject);
+                            }
+                        }
+                    }
+                } else {
+                    throw new RuntimeException("DisplayClient error", new Throwable("Confirm OkHiCallback is not null"));
+                }
+            } else {
+                throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
+            }
+        } else {
+            throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
+        }
+
+    }
+
+
+    private static void startActivity(OkHiCallback okHiCallback, JSONObject jsonObject) {
         callback = okHiCallback;
         firstname = jsonObject.optString("firstName");
         lastname = jsonObject.optString("lastName");
@@ -423,6 +524,192 @@ public final class OkHi extends ContentProvider {
             displayLog("error calling receiveActivity activity " + e.toString());
         }
     }
+
+
+    public static String checkPermissionCause() {
+
+        String permission;
+
+        boolean permissionAccessFineLocationApproved =
+                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        if (permissionAccessFineLocationApproved) {
+            try {
+                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                HashMap<String, String> loans = new HashMap<>();
+                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                //loans.put(PROP_ACTORNAME, loginname);
+                //loans.put("phonenumber", null);
+                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
+                        "permission", "mainActivityView", null, loans);
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+            } catch (Exception e) {
+                displayLog("event.submit okanalytics error " + e.toString());
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                boolean backgroundLocationPermissionApproved =
+                        ActivityCompat.checkSelfPermission(mContext,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED;
+
+                if (backgroundLocationPermissionApproved) {
+                    // App can access location both in the foreground and in the background.
+                    // Start your service that doesn't have a foreground service type
+                    // defined.
+                    try {
+                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        HashMap<String, String> loans = new HashMap<>();
+                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                        //loans.put(PROP_ACTORNAME, loginname);
+                        //loans.put("phonenumber", null);
+                        loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
+                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
+                                "permission", "mainActivityView", null, loans);
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                    } catch (Exception e) {
+                        displayLog("event.submit okanalytics error " + e.toString());
+                    }
+                    permission = "Manifest.permission.ACCESS_BACKGROUND_LOCATION granted";
+
+                } else {
+                    // App can only access location in the foreground. Display a dialog
+                    // warning the user that your app must have all-the-time access to
+                    // location in order to function properly. Then, request background
+                    // location.
+                    try {
+                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        HashMap<String, String> loans = new HashMap<>();
+                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                        //loans.put(PROP_ACTORNAME, loginname);
+                        //loans.put("phonenumber", null);
+                        loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
+                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
+                                "permission", "mainActivityView", null, loans);
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                    } catch (Exception e) {
+                        displayLog("event.submit okanalytics error " + e.toString());
+                    }
+                    permission = "Manifest.permission.ACCESS_BACKGROUND_LOCATION not granted";
+                }
+            } else {
+                permission = "Manifest.permission.ACCESS_FINE_LOCATION granted";
+            }
+        } else {
+            // App doesn't have access to the device's location at all. Make full request
+            // for permission.
+            try {
+                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                HashMap<String, String> loans = new HashMap<>();
+                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                //loans.put(PROP_ACTORNAME, loginname);
+                //loans.put("phonenumber", null);
+                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
+                        "permission", "mainActivityView", null, loans);
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+            } catch (Exception e) {
+                displayLog("event.submit okanalytics error " + e.toString());
+            }
+            permission = "Manifest.permission.ACCESS_FINE_LOCATION not granted";
+        }
+        return permission;
+    }
+
+
+    public static boolean checkPermission() {
+
+        Boolean permission;
+
+        boolean permissionAccessFineLocationApproved =
+                ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
+                        == PackageManager.PERMISSION_GRANTED;
+
+        if (permissionAccessFineLocationApproved) {
+            try {
+                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                HashMap<String, String> loans = new HashMap<>();
+                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                //loans.put(PROP_ACTORNAME, loginname);
+                //loans.put("phonenumber", null);
+                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
+                        "permission", "mainActivityView", null, loans);
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+            } catch (Exception e) {
+                displayLog("event.submit okanalytics error " + e.toString());
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                boolean backgroundLocationPermissionApproved =
+                        ActivityCompat.checkSelfPermission(mContext,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION)
+                                == PackageManager.PERMISSION_GRANTED;
+
+                if (backgroundLocationPermissionApproved) {
+                    // App can access location both in the foreground and in the background.
+                    // Start your service that doesn't have a foreground service type
+                    // defined.
+                    try {
+                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        HashMap<String, String> loans = new HashMap<>();
+                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                        //loans.put(PROP_ACTORNAME, loginname);
+                        //loans.put("phonenumber", null);
+                        loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
+                                "permission", "mainActivityView", null, loans);
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                    } catch (Exception e) {
+                        displayLog("event.submit okanalytics error " + e.toString());
+                    }
+                    permission = true;
+
+                } else {
+                    // App can only access location in the foreground. Display a dialog
+                    // warning the user that your app must have all-the-time access to
+                    // location in order to function properly. Then, request background
+                    // location.
+                    try {
+                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        HashMap<String, String> loans = new HashMap<>();
+                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                        //loans.put(PROP_ACTORNAME, loginname);
+                        //loans.put("phonenumber", null);
+                        loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
+                                "permission", "mainActivityView", null, loans);
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                    } catch (Exception e) {
+                        displayLog("event.submit okanalytics error " + e.toString());
+                    }
+                    permission = false;
+                }
+            } else {
+                permission = true;
+            }
+        } else {
+            // App doesn't have access to the device's location at all. Make full request
+            // for permission.
+            try {
+                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                HashMap<String, String> loans = new HashMap<>();
+                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
+                //loans.put(PROP_ACTORNAME, loginname);
+                //loans.put("phonenumber", null);
+                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
+                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
+                        "permission", "mainActivityView", null, loans);
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+            } catch (Exception e) {
+                displayLog("event.submit okanalytics error " + e.toString());
+            }
+            permission = false;
+        }
+        return permission;
+    }
+
+
 
     /*
 
@@ -600,6 +887,40 @@ public final class OkHi extends ContentProvider {
 
     }
 
+    private static void writeToFileVerify(String apiKey) {
+        try {
+            File path = mContext.getFilesDir();
+            File file = new File(path, "verify.txt");
+            if (!file.exists()) {
+                FileOutputStream stream = new FileOutputStream(file);
+                try {
+
+                    stream.write(apiKey.getBytes());
+                } catch (Exception e) {
+                    displayLog("filestream error " + e.toString());
+                } finally {
+                    stream.close();
+                }
+            } else {
+                file.delete();
+                FileOutputStream stream = new FileOutputStream(file);
+                try {
+
+                    stream.write(apiKey.getBytes());
+                } catch (Exception e) {
+                    displayLog("filestream error " + e.toString());
+                } finally {
+                    stream.close();
+                }
+            }
+
+        } catch (Exception e) {
+            displayLog("write to file error " + e.toString());
+
+        }
+
+    }
+
     public static OkHiCallback getCallback() {
         return callback;
     }
@@ -608,6 +929,7 @@ public final class OkHi extends ContentProvider {
         OkHi.callback = callback;
     }
 
+    /*
     public static void checkLocationPermission(Activity activity, int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
 
         boolean permissionAccessFineLocationApproved =
@@ -670,7 +992,8 @@ public final class OkHi extends ContentProvider {
                             MY_PERMISSIONS_ACCESS_FINE_LOCATION);
                 }
             } else {
-                checkLocationSettings();
+                permission = true;
+
             }
         } else {
             // App doesn't have access to the device's location at all. Make full request
@@ -700,6 +1023,7 @@ public final class OkHi extends ContentProvider {
 
         }
     }
+    */
 
     @Nullable
     @Override
@@ -736,10 +1060,6 @@ public final class OkHi extends ContentProvider {
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
-    }
-
-    private static void checkLocationSettings() {
-
     }
 
     private static void displayToast(String msg, boolean show) {
@@ -857,5 +1177,36 @@ public final class OkHi extends ContentProvider {
 
     }
     */
+
+
+    private static String convertStreamToString(InputStream is) throws IOException {
+        displayLog("convertStreamToString1");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        Boolean firstLine = true;
+        while ((line = reader.readLine()) != null) {
+            if (firstLine) {
+                sb.append(line);
+                firstLine = false;
+            } else {
+                sb.append("\n").append(line);
+            }
+        }
+        reader.close();
+        displayLog("convertStreamToString2");
+        return sb.toString();
+    }
+
+    private static String getStringFromFile(String filePath) throws IOException {
+        displayLog("getStringFromFile1");
+        File fl = new File(filePath);
+        FileInputStream fin = new FileInputStream(fl);
+        String ret = convertStreamToString(fin);
+        //Make sure you close all streams.
+        fin.close();
+        displayLog("getStringFromFile2");
+        return ret;
+    }
 
 }

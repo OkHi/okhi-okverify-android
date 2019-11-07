@@ -50,7 +50,7 @@ public class OkHeartActivity extends AppCompatActivity {
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
 
-    public static String convertStreamToString(InputStream is) throws IOException {
+    private static String convertStreamToString(InputStream is) throws IOException {
         displayLog("convertStreamToString1");
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
@@ -69,7 +69,7 @@ public class OkHeartActivity extends AppCompatActivity {
         return sb.toString();
     }
 
-    public static String getStringFromFile(String filePath) throws IOException {
+    private static String getStringFromFile(String filePath) throws IOException {
         displayLog("getStringFromFile1");
         File fl = new File(filePath);
         FileInputStream fin = new FileInputStream(fl);
@@ -80,51 +80,51 @@ public class OkHeartActivity extends AppCompatActivity {
         return ret;
     }
 
-    public static String getFirstname() {
+    private static String getFirstname() {
         return firstname;
     }
 
-    public static void setFirstname(String firstname) {
+    private static void setFirstname(String firstname) {
         OkHeartActivity.firstname = firstname;
     }
 
-    public static String getLastname() {
+    private static String getLastname() {
         return lastname;
     }
 
-    public static void setLastname(String lastname) {
+    private static void setLastname(String lastname) {
         OkHeartActivity.lastname = lastname;
     }
 
-    public static String getPhonenumber() {
+    private static String getPhonenumber() {
         return phonenumber;
     }
 
-    public static void setPhonenumber(String phonenumber) {
+    private static void setPhonenumber(String phonenumber) {
         OkHeartActivity.phonenumber = phonenumber;
     }
 
-    public static Double getLat() {
+    private static Double getLat() {
         return lat;
     }
 
-    public static void setLat(Double lat) {
+    private static void setLat(Double lat) {
         OkHeartActivity.lat = lat;
     }
 
-    public static Double getLng() {
+    private static Double getLng() {
         return lng;
     }
 
-    public static void setLng(Double lng) {
+    private static void setLng(Double lng) {
         OkHeartActivity.lng = lng;
     }
 
-    public static Float getAcc() {
+    private static Float getAcc() {
         return acc;
     }
 
-    public static void setAcc(Float acc) {
+    private static void setAcc(Float acc) {
         OkHeartActivity.acc = acc;
     }
 
@@ -132,7 +132,7 @@ public class OkHeartActivity extends AppCompatActivity {
         Log.i(TAG, log);
     }
 
-    public static boolean isCompletedWell() {
+    private static boolean isCompletedWell() {
         return completedWell;
     }
 
@@ -140,7 +140,7 @@ public class OkHeartActivity extends AppCompatActivity {
         OkHeartActivity.completedWell = completedWell;
     }
 
-    public static boolean isIsWebInterface() {
+    private static boolean isIsWebInterface() {
         return isWebInterface;
     }
 
@@ -264,15 +264,15 @@ public class OkHeartActivity extends AppCompatActivity {
         //displayLog("color " + color + " name " + name + " logo " + logo);
         //displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
 
+/*
 
-        /*
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
 
 
         apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
-        */
+*/
 
         //apiKey = "r:ee30a6552f7e5dfab48f4234bd1ffc1b";
 
@@ -508,7 +508,7 @@ public class OkHeartActivity extends AppCompatActivity {
         }
     }
 
-    public void sendGPSLocation(JSONObject jsonObject) {
+    private void sendGPSLocation(JSONObject jsonObject) {
 
         myWebView.evaluateJavascript("javascript:receiveAndroidData(" + jsonObject.toString() + ")", null);
 
