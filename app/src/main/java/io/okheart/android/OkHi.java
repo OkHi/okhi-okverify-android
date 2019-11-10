@@ -32,6 +32,7 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 
+import io.okheart.android.activity.OkHeartActivity;
 import io.okheart.android.asynctask.SegmentIdentifyTask;
 import io.okheart.android.asynctask.SegmentTrackTask;
 import io.okheart.android.callback.OkHiCallback;
@@ -517,8 +518,6 @@ public final class OkHi extends ContentProvider {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
-
-        /*
         try {
             Intent intent = new Intent(mContext, OkHeartActivity.class);
             intent.putExtra("firstname", firstname);
@@ -530,7 +529,7 @@ public final class OkHi extends ContentProvider {
         } catch (Exception e) {
             displayLog("error calling receiveActivity activity " + e.toString());
         }
-        */
+
     }
 
 
