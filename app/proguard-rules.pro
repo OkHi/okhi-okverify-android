@@ -44,6 +44,9 @@
 -keep class com.squareup.okhttp3.** {
 *;
 }
+
+-keep class com.parse.Parse.** { *; }
+
 -keepattributes Signature
 -keepattributes Annotation
 

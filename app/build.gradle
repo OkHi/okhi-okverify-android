@@ -24,8 +24,8 @@ android {
         //applicationId "io.okheart.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 30
-        versionName "1.5.14"
+        versionCode 31
+        versionName "1.5.15"
         signingConfig signingConfigs.config
         //buildConfigField("String", "FIREBASE_APP_KEY", "\"${firebaseAppKey}\"")
     }

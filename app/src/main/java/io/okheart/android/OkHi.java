@@ -53,7 +53,7 @@ public final class OkHi extends ContentProvider {
     public OkHi() {
     }
 
-    public static void initialize(final String applicationKey, final Boolean verify) throws RuntimeException {
+    public static void initialize(final String applicationKey, final Boolean verify, final Boolean poison) throws RuntimeException {
 
         if (applicationKey != null) {
             if (applicationKey.length() > 0) {
@@ -254,7 +254,8 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    public static void customize(String color, String name, String logo, String appbarcolor, Boolean appbarvisibility, Boolean streetview) {
+    public static void customize(String appColorTheme, String appName, String appLogo, String appBarColor,
+                                 Boolean appBarVisibility, Boolean enableStreetView) {
 
 
         try {
@@ -291,17 +292,17 @@ public final class OkHi extends ContentProvider {
                     jsonObject.put("logo", logo);
                 }
             }
-            if (appbarcolor != null) {
-                if (appbarcolor.length() > 0) {
-                    jsonObject.put("appbarcolor", appbarcolor);
+            if (appBarColor != null) {
+                if (appBarColor.length() > 0) {
+                    jsonObject.put("appbarcolor", appBarColor);
                 }
             }
-            if (appbarvisibility != null) {
-                jsonObject.put("appbarvisibility", appbarvisibility);
+            if (appBarVisibility != null) {
+                jsonObject.put("appbarvisibility", appBarVisibility);
             }
 
-            if (streetview != null) {
-                jsonObject.put("enablestreetview", streetview);
+            if (enableStreetView != null) {
+                jsonObject.put("enablestreetview", enableStreetView);
             }
             String customString = jsonObject.toString();
             //displayLog("logo "+jsonObject.get("logo"));

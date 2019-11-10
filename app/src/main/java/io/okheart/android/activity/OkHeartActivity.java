@@ -49,9 +49,10 @@ public class OkHeartActivity extends AppCompatActivity {
     private static OkHiCallback okHiCallback;
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
+    private static String verify;
 
     private static String convertStreamToString(InputStream is) throws IOException {
-        displayLog("convertStreamToString1");
+        //displayLog("convertStreamToString1");
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
         String line = null;
@@ -65,18 +66,18 @@ public class OkHeartActivity extends AppCompatActivity {
             }
         }
         reader.close();
-        displayLog("convertStreamToString2");
+        //displayLog("convertStreamToString2");
         return sb.toString();
     }
 
     private static String getStringFromFile(String filePath) throws IOException {
-        displayLog("getStringFromFile1");
+        //displayLog("getStringFromFile1");
         File fl = new File(filePath);
         FileInputStream fin = new FileInputStream(fl);
         String ret = convertStreamToString(fin);
         //Make sure you close all streams.
         fin.close();
-        displayLog("getStringFromFile2");
+        //displayLog("getStringFromFile2");
         return ret;
     }
 
@@ -161,8 +162,9 @@ public class OkHeartActivity extends AppCompatActivity {
         color = null;
         name = null;
         logo = null;
+        verify = "false";
 
-        //OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a");
+        // OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true, false);
         //OkHi.customize("rgb(0,179,255)", "Mula", "https://cdn.okhi.co/okhi-logo-white.svg");
 
         try {
@@ -187,6 +189,21 @@ public class OkHeartActivity extends AppCompatActivity {
                 uniqueId = bundle.getString("uniqueId");
             } catch (Exception e) {
                 displayLog("uniqueId error " + e.toString());
+            }
+
+            File filesDirVerify = new File(getFilesDir() + "/verify.txt");
+            if (filesDirVerify.exists()) {
+                displayLog("filesDirVerify exists");
+                try {
+                    verify = getStringFromFile(filesDirVerify.getAbsolutePath());
+                    displayLog("verify " + verify);
+                } catch (Exception e) {
+                    // Hmm, the applicationId file was malformed or something. Assume it
+                    // doesn't match.
+                    displayLog("filesDirVerify error " + e.toString());
+                }
+            } else {
+                displayLog("filesDirVerify does not exist");
             }
 
             File filesDir = new File(getFilesDir() + "/okheart.txt");
@@ -261,18 +278,34 @@ public class OkHeartActivity extends AppCompatActivity {
         } catch (Exception e) {
 
         }
-        //displayLog("color " + color + " name " + name + " logo " + logo);
-        //displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
 
-/*
-
+        /*
         firstname = "Ramogi";
         lastname = "Ochola";
         phonenumber = "+254713567907";
 
+        try {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("firstName", firstname);
+            jsonObject.put("lastName", lastname);
+            jsonObject.put("phone", phonenumber);
+            OkHi.displayClient(okHiCallback, jsonObject);
+        } catch (JSONException e) {
+            displayLog("json exception error " + e.toString());
+        }
+        */
+        //displayLog("color " + color + " name " + name + " logo " + logo);
+        //displayLog("appbarcolor " + appbarcolor + " appbarvisible " + appbarvisible + " enablestreetview " + enablestreetview);
 
-        apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
-*/
+/*
+        firstname = "Ramogi";
+        lastname = "Ochola";
+        phonenumber = "+254713567907";
+        */
+
+        //apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
+
+
 
         //apiKey = "r:ee30a6552f7e5dfab48f4234bd1ffc1b";
 
@@ -280,10 +313,59 @@ public class OkHeartActivity extends AppCompatActivity {
 
         myWebView = OkHeartActivity.this.findViewById(R.id.webview);
         myWebView.setWebViewClient(new MyWebViewClient());
+
+        /*
+        if(verify != null){
+            if(verify.length() > 0){
+                if(verify.equalsIgnoreCase("true")){
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        ActivityCompat.requestPermissions(this, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.ACCESS_BACKGROUND_LOCATION
+                        }, 0);
+                    }
+                    else{
+                        ActivityCompat.requestPermissions(this, new String[]{
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION
+                        }, 0);
+                    }
+                }
+                else if(verify.equalsIgnoreCase("false")){
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    }, 0);
+                }
+                else{
+                    ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    }, 0);
+                }
+            }
+            else{
+                ActivityCompat.requestPermissions(this, new String[]{
+                        Manifest.permission.ACCESS_FINE_LOCATION,
+                        Manifest.permission.ACCESS_COARSE_LOCATION
+                }, 0);
+            }
+        }
+        else{
+            ActivityCompat.requestPermissions(this, new String[]{
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                    Manifest.permission.ACCESS_COARSE_LOCATION
+            }, 0);
+        }
+        */
+
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION
         }, 0);
+
+
         WebSettings webSettings = myWebView.getSettings();
         webSettings.setLoadsImagesAutomatically(true);
         webSettings.setJavaScriptEnabled(true);
