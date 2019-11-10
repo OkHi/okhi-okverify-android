@@ -1,14 +1,10 @@
 package io.okheart.android;
 
 import android.app.Application;
-import android.content.Intent;
-import android.os.Build;
 import android.util.Log;
 
 import com.parse.Parse;
 import com.segment.analytics.Analytics;
-
-import io.okheart.android.services.ForegroundService;
 
 import static io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY;
 import static io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID;
@@ -127,16 +123,7 @@ public class ApplicationClass extends Application {
 
         //uniqueId = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
         //setUniqueId(uniqueId);
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                startForegroundService(new Intent(this.getApplicationContext(), ForegroundService.class));
-            } else {
-                startService(new Intent(this.getApplicationContext(), ForegroundService.class));
-            }
 
-        } catch (Exception jse) {
-            displayLog("jsonexception jse " + jse.toString());
-        }
 
     }
 /*

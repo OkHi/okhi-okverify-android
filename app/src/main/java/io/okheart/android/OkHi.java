@@ -1,6 +1,7 @@
 package io.okheart.android;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
@@ -29,15 +30,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
+import java.util.List;
 
-import io.okheart.android.activity.OkHeartActivity;
-import io.okheart.android.asynctask.HeartBeatTask;
 import io.okheart.android.asynctask.SegmentIdentifyTask;
 import io.okheart.android.asynctask.SegmentTrackTask;
-import io.okheart.android.callback.HeartBeatCallBack;
 import io.okheart.android.callback.OkHiCallback;
 import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
+import io.okheart.android.database.DataProvider;
+import io.okheart.android.datamodel.AddressItem;
+import io.okheart.android.services.ForegroundService;
 import io.okheart.android.utilities.OkAnalytics;
 
 public final class OkHi extends ContentProvider {
@@ -53,7 +55,9 @@ public final class OkHi extends ContentProvider {
     public OkHi() {
     }
 
-    public static void initialize(final String applicationKey, final Boolean verify, final Boolean poison) throws RuntimeException {
+    public static void initialize(final String applicationKey, final Boolean verify) throws RuntimeException {
+
+        displayLog("initialize");
 
         if (applicationKey != null) {
             if (applicationKey.length() > 0) {
@@ -101,22 +105,22 @@ public final class OkHi extends ContentProvider {
                 String tempVerify = "" + verify;
                 if (tempVerify.length() > 0) {
                     if ((tempVerify.equalsIgnoreCase("false")) || ((tempVerify.equalsIgnoreCase("true")))) {
-                        writeToFileVerify(tempVerify);
+                        writeToFileVerify(tempVerify, "six");
                     } else {
-                        writeToFileVerify("false");
+                        writeToFileVerify("false", "five");
                     }
 
                 } else {
-                    writeToFileVerify("false");
+                    writeToFileVerify("false", "four");
                 }
 
             } else {
-                writeToFileVerify("false");
+                writeToFileVerify("false", "three");
             }
         } catch (Exception io) {
-            writeToFileVerify("false");
+            writeToFileVerify("false", "two");
         } finally {
-            writeToFileVerify("false");
+            // writeToFileVerify("false", "one");
         }
 
 
@@ -461,7 +465,8 @@ public final class OkHi extends ContentProvider {
                                     JSONObject responseJson = new JSONObject();
                                     responseJson.put("message", "fatal_exit");
                                     JSONObject payloadJson = new JSONObject();
-                                    payloadJson.put("Error", "Location permission not granted");
+                                    payloadJson.put("errorCode", -1);
+                                    payloadJson.put("error", "Location permission not granted");
                                     payloadJson.put("message", cause);
                                     responseJson.put("payload", payloadJson);
                                     displayLog(responseJson.toString());
@@ -513,6 +518,7 @@ public final class OkHi extends ContentProvider {
         }
 
 
+        /*
         try {
             Intent intent = new Intent(mContext, OkHeartActivity.class);
             intent.putExtra("firstname", firstname);
@@ -524,6 +530,7 @@ public final class OkHi extends ContentProvider {
         } catch (Exception e) {
             displayLog("error calling receiveActivity activity " + e.toString());
         }
+        */
     }
 
 
@@ -539,9 +546,7 @@ public final class OkHi extends ContentProvider {
             try {
                 OkAnalytics okAnalytics = new OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
-                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                //loans.put(PROP_ACTORNAME, loginname);
-                //loans.put("phonenumber", null);
+                loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "permission", "mainActivityView", null, loans);
@@ -562,9 +567,7 @@ public final class OkHi extends ContentProvider {
                     try {
                         OkAnalytics okAnalytics = new OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                        //loans.put(PROP_ACTORNAME, loginname);
-                        //loans.put("phonenumber", null);
+                        loans.put("uniqueId", uniqueId);
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "permission", "mainActivityView", null, loans);
@@ -582,9 +585,7 @@ public final class OkHi extends ContentProvider {
                     try {
                         OkAnalytics okAnalytics = new OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                        //loans.put(PROP_ACTORNAME, loginname);
-                        //loans.put("phonenumber", null);
+                        loans.put("uniqueId", uniqueId);
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
@@ -603,9 +604,7 @@ public final class OkHi extends ContentProvider {
             try {
                 OkAnalytics okAnalytics = new OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
-                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                //loans.put(PROP_ACTORNAME, loginname);
-                //loans.put("phonenumber", null);
+                loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "permission", "mainActivityView", null, loans);
@@ -631,9 +630,7 @@ public final class OkHi extends ContentProvider {
             try {
                 OkAnalytics okAnalytics = new OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
-                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                //loans.put(PROP_ACTORNAME, loginname);
-                //loans.put("phonenumber", null);
+                loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "permission", "mainActivityView", null, loans);
@@ -654,9 +651,7 @@ public final class OkHi extends ContentProvider {
                     try {
                         OkAnalytics okAnalytics = new OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                        //loans.put(PROP_ACTORNAME, loginname);
-                        //loans.put("phonenumber", null);
+                        loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "permission", "mainActivityView", null, loans);
@@ -674,9 +669,7 @@ public final class OkHi extends ContentProvider {
                     try {
                         OkAnalytics okAnalytics = new OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
-                        //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                        //loans.put(PROP_ACTORNAME, loginname);
-                        //loans.put("phonenumber", null);
+                        loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
@@ -695,9 +688,7 @@ public final class OkHi extends ContentProvider {
             try {
                 OkAnalytics okAnalytics = new OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
-                //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
-                //loans.put(PROP_ACTORNAME, loginname);
-                //loans.put("phonenumber", null);
+                loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "permission", "mainActivityView", null, loans);
@@ -710,11 +701,8 @@ public final class OkHi extends ContentProvider {
         return permission;
     }
 
-
-
     /*
-
-      public static void manualPing(OkHiCallback okHiCallback, JSONObject jsonObject) {
+    public static void manualPing(OkHiCallback okHiCallback, JSONObject jsonObject) {
 
           //displayLog("display client " + jsonObject.toString());
 
@@ -787,6 +775,8 @@ public final class OkHi extends ContentProvider {
 
       }
   */
+
+    /*
     public static void checkInternet() {
         try {
             HeartBeatCallBack heartBeatCallBack = new HeartBeatCallBack() {
@@ -815,7 +805,7 @@ public final class OkHi extends ContentProvider {
             displayLog("check internet error " + e.toString());
         }
     }
-
+*/
     private static void displayLog(String log) {
         Log.i(TAG, log);
     }
@@ -888,7 +878,7 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    private static void writeToFileVerify(String apiKey) {
+    private static void writeToFileVerify(String apiKey, String who) {
         try {
             File path = mContext.getFilesDir();
             File file = new File(path, "verify.txt");
@@ -915,6 +905,7 @@ public final class OkHi extends ContentProvider {
                 }
             }
 
+            displayLog(who + " done writing verify " + apiKey);
         } catch (Exception e) {
             displayLog("write to file error " + e.toString());
 
@@ -930,8 +921,9 @@ public final class OkHi extends ContentProvider {
         OkHi.callback = callback;
     }
 
-    /*
-    public static void checkLocationPermission(Activity activity, int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
+    public static void requestPermission(Activity activity, int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
+
+        Boolean permission = false;
 
         boolean permissionAccessFineLocationApproved =
                 ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION)
@@ -944,7 +936,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
-                        "permission", "mainActivityView", null, loans);
+                        "requestPermission", activity.getLocalClassName(), null, loans);
                 okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
@@ -965,13 +957,13 @@ public final class OkHi extends ContentProvider {
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
-                                "permission", "mainActivityView", null, loans);
+                                "requestPermission", activity.getLocalClassName(), null, loans);
                         okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
                     //Constants.scheduleJob(MainActivity.this);
-                    checkLocationSettings();
+                    //checkLocationSettings();
                 } else {
                     // App can only access location in the foreground. Display a dialog
                     // warning the user that your app must have all-the-time access to
@@ -1005,7 +997,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
-                        "permission", "mainActivityView", null, loans);
+                        "requestPermission", activity.getLocalClassName(), null, loans);
                 okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
@@ -1023,35 +1015,6 @@ public final class OkHi extends ContentProvider {
             }
 
         }
-    }
-    */
-
-    @Nullable
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public String getType(Uri uri) {
-        return null;
-    }
-
-    @Nullable
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        return null;
-    }
-
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
-    }
-
-    @Override
-    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
     }
 
     private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
@@ -1076,27 +1039,57 @@ public final class OkHi extends ContentProvider {
         }
     }
 
-    @Override
-    public boolean onCreate() {
-        // get the context (Application context)
-        mContext = getContext();
-
-        uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-        /*
-        mFirestore = FirebaseFirestore.getInstance();
-        query = mFirestore.collection("addresses").document(uniqueId)
-                .collection("addresses")
-                .orderBy("timestamp", Query.Direction.DESCENDING);
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        try {
-            remoteSmsTemplate = mFirebaseRemoteConfig.getString(REMOTE_SMS_TEMPLATE);
-            //displayLog("remotesmstemplate " + remoteSmsTemplate);
-        } catch (Exception e) {
-            displayLog("error getting frequency " + e.toString());
+    private static String convertStreamToString(InputStream is) throws IOException {
+        displayLog("convertStreamToString1");
+        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+        StringBuilder sb = new StringBuilder();
+        String line = null;
+        Boolean firstLine = true;
+        while ((line = reader.readLine()) != null) {
+            if (firstLine) {
+                sb.append(line);
+                firstLine = false;
+            } else {
+                sb.append("\n").append(line);
+            }
         }
-        */
-        return true;
+        reader.close();
+        displayLog("convertStreamToString2");
+        return sb.toString();
+    }
 
+    private static String getStringFromFile(String filePath) throws IOException {
+        displayLog("getStringFromFile1");
+        File fl = new File(filePath);
+        FileInputStream fin = new FileInputStream(fl);
+        String ret = convertStreamToString(fin);
+        //Make sure you close all streams.
+        fin.close();
+        displayLog("getStringFromFile2");
+        return ret;
+    }
+
+    @Nullable
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public String getType(Uri uri) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        return null;
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        return 0;
     }
 
     /*
@@ -1179,35 +1172,51 @@ public final class OkHi extends ContentProvider {
     }
     */
 
-
-    private static String convertStreamToString(InputStream is) throws IOException {
-        displayLog("convertStreamToString1");
-        BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-        String line = null;
-        Boolean firstLine = true;
-        while ((line = reader.readLine()) != null) {
-            if (firstLine) {
-                sb.append(line);
-                firstLine = false;
-            } else {
-                sb.append("\n").append(line);
-            }
-        }
-        reader.close();
-        displayLog("convertStreamToString2");
-        return sb.toString();
+    @Override
+    public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
+        return 0;
     }
 
-    private static String getStringFromFile(String filePath) throws IOException {
-        displayLog("getStringFromFile1");
-        File fl = new File(filePath);
-        FileInputStream fin = new FileInputStream(fl);
-        String ret = convertStreamToString(fin);
-        //Make sure you close all streams.
-        fin.close();
-        displayLog("getStringFromFile2");
-        return ret;
+    @Override
+    public boolean onCreate() {
+        // get the context (Application context)
+        mContext = getContext();
+
+        uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        DataProvider dataProvider = new DataProvider(mContext);
+        List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        displayLog("foreground addressItemList " + addressItemList.size());
+        if (addressItemList.size() > 0) {
+            try {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    mContext.startForegroundService(new Intent(mContext, ForegroundService.class));
+                } else {
+                    mContext.startService(new Intent(mContext, ForegroundService.class));
+                }
+
+            } catch (Exception jse) {
+                displayLog("jsonexception jse " + jse.toString());
+            }
+        } else {
+            //we have no addresses to start foreground
+            displayLog("we have no addresses to start foreground");
+        }
+        /*
+        mFirestore = FirebaseFirestore.getInstance();
+        query = mFirestore.collection("addresses").document(uniqueId)
+                .collection("addresses")
+                .orderBy("timestamp", Query.Direction.DESCENDING);
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        try {
+            remoteSmsTemplate = mFirebaseRemoteConfig.getString(REMOTE_SMS_TEMPLATE);
+            //displayLog("remotesmstemplate " + remoteSmsTemplate);
+        } catch (Exception e) {
+            displayLog("error getting frequency " + e.toString());
+        }
+        */
+        return true;
+
     }
 
 }

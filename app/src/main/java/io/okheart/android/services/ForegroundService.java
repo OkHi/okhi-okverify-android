@@ -253,7 +253,6 @@ public class ForegroundService extends Service {
         uniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
 
-
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -610,7 +609,6 @@ public class ForegroundService extends Service {
         } else {
             startLocationUpdates();
         }
-
 
 
     }

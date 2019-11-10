@@ -35,7 +35,6 @@ import io.okheart.android.callback.OkHiCallback;
 import io.okheart.android.callback.SegmentIdentifyCallBack;
 import io.okheart.android.callback.SegmentTrackCallBack;
 
-import static io.okheart.android.OkHi.checkInternet;
 
 public class OkHeartActivity extends AppCompatActivity {
 
@@ -155,7 +154,7 @@ public class OkHeartActivity extends AppCompatActivity {
         setContentView(io.okheart.android.R.layout.activity_okheart);
         completedWell = false;
         isWebInterface = false;
-        checkInternet();
+        //checkInternet();
         lat = null;
         lng = null;
         acc = null;
@@ -164,7 +163,7 @@ public class OkHeartActivity extends AppCompatActivity {
         logo = null;
         verify = "false";
 
-        // OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true, false);
+        //OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true, false);
         //OkHi.customize("rgb(0,179,255)", "Mula", "https://cdn.okhi.co/okhi-logo-white.svg");
 
         try {
@@ -304,7 +303,6 @@ public class OkHeartActivity extends AppCompatActivity {
         */
 
         //apiKey = "r:b59a93ba7d80a95d89dff8e4c52e259a";
-
 
 
         //apiKey = "r:ee30a6552f7e5dfab48f4234bd1ffc1b";
@@ -495,7 +493,7 @@ public class OkHeartActivity extends AppCompatActivity {
     }
 
     public void startApp() {
-        checkInternet();
+        //checkInternet();
 
         try {
             if (color != null) {
