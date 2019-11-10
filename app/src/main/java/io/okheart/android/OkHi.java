@@ -533,7 +533,7 @@ public final class OkHi extends ContentProvider {
     }
 
 
-    public static String checkPermissionCause() {
+    private static String checkPermissionCause() {
 
         String permission;
 
@@ -1201,19 +1201,6 @@ public final class OkHi extends ContentProvider {
             //we have no addresses to start foreground
             displayLog("we have no addresses to start foreground");
         }
-        /*
-        mFirestore = FirebaseFirestore.getInstance();
-        query = mFirestore.collection("addresses").document(uniqueId)
-                .collection("addresses")
-                .orderBy("timestamp", Query.Direction.DESCENDING);
-        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
-        try {
-            remoteSmsTemplate = mFirebaseRemoteConfig.getString(REMOTE_SMS_TEMPLATE);
-            //displayLog("remotesmstemplate " + remoteSmsTemplate);
-        } catch (Exception e) {
-            displayLog("error getting frequency " + e.toString());
-        }
-        */
         return true;
 
     }
