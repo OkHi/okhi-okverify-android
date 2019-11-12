@@ -1,40 +1,28 @@
 package io.okheart.android.activity;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
+
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import io.okheart.android.BuildConfig;
-import io.okheart.android.OkHi;
-import io.okheart.android.asynctask.SegmentTrackTask;
-import io.okheart.android.callback.SegmentTrackCallBack;
-import io.okheart.android.database.DataProvider;
-import io.okheart.android.services.ForegroundService;
-import io.okheart.android.utilities.Constants;
-import io.okheart.android.utilities.OkAnalytics;
-
-import static io.okheart.android.utilities.Constants.COLUMN_BRANCH;
-import static io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID;
-import static io.okheart.android.utilities.Constants.COLUMN_CUSTOMERNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_DIRECTION;
-import static io.okheart.android.utilities.Constants.COLUMN_IMAGEURL;
-import static io.okheart.android.utilities.Constants.COLUMN_LAT;
-import static io.okheart.android.utilities.Constants.COLUMN_LNG;
-import static io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_LOCATIONNICKNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER;
-import static io.okheart.android.utilities.Constants.COLUMN_PROPERTYNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_STREETNAME;
-import static io.okheart.android.utilities.Constants.COLUMN_UNIQUEID;
+import io.okheart.android.datamodel.AddressItem;
+import io.okheart.android.utilities.MyWorker;
 
 public class WebAppInterface {
     private static final String TAG = "WebAppInterface";
@@ -42,7 +30,7 @@ public class WebAppInterface {
     OkHeartActivity mContext;
     //private FirebaseFirestore mFirestore;
     private String uniqueId;
-    private DataProvider dataProvider;
+    private io.okheart.android.database.DataProvider dataProvider;
 
     /**
      * Instantiate the interface and set the context
@@ -52,7 +40,11 @@ public class WebAppInterface {
         appkey = applicationKey;
         //mFirestore = FirebaseFirestore.getInstance();
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-        dataProvider = new DataProvider(mContext);
+        dataProvider = new io.okheart.android.database.DataProvider(mContext);
+    }
+
+    private static void stopPeriodicPing() {
+        WorkManager.getInstance().cancelUniqueWork("ramogi");
     }
 
     /**
@@ -172,13 +164,28 @@ public class WebAppInterface {
                         displayLog("location_created");
                         try {
                             Long i = saveAddressToFirestore(payload);
+                            String tempVerify = dataProvider.getPropertyValue("verify");
+                            if (tempVerify != null) {
+                                if (tempVerify.length() > 0) {
+                                    if (tempVerify.equalsIgnoreCase("true")) {
+                                        decideWhatToStart();
+                                    } else {
+                                        stopPeriodicPing();
+                                    }
+                                } else {
+                                    stopPeriodicPing();
+                                }
+                            } else {
+                                stopPeriodicPing();
+                            }
+                            /*
                             if (i > 0) {
                                 //
                                 try {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        mContext.startForegroundService(new Intent(mContext, ForegroundService.class));
+                                        mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
                                     } else {
-                                        mContext.startService(new Intent(mContext, ForegroundService.class));
+                                        mContext.startService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
                                     }
 
                                 } catch (Exception jse) {
@@ -187,6 +194,7 @@ public class WebAppInterface {
                             } else {
                                 //put an event to capture this issue perhaps
                             }
+                            */
                         } catch (Exception e) {
                             displayLog("error saveAddressToFirestore " + e.toString());
                         }
@@ -206,7 +214,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -225,13 +233,29 @@ public class WebAppInterface {
                         displayLog("location_updated");
                         try {
                             Long i = saveAddressToFirestore(payload);
+                            String tempVerify = dataProvider.getPropertyValue("verify");
+                            if (tempVerify != null) {
+                                if (tempVerify.length() > 0) {
+                                    if (tempVerify.equalsIgnoreCase("true")) {
+                                        decideWhatToStart();
+                                    } else {
+                                        stopPeriodicPing();
+                                    }
+                                } else {
+                                    stopPeriodicPing();
+                                }
+                            } else {
+                                stopPeriodicPing();
+                            }
+
+                            /*
                             if (i > 0) {
                                 //
                                 try {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                        mContext.startForegroundService(new Intent(mContext, ForegroundService.class));
+                                        mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
                                     } else {
-                                        mContext.startService(new Intent(mContext, ForegroundService.class));
+                                        mContext.startService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
                                     }
 
                                 } catch (Exception jse) {
@@ -240,6 +264,7 @@ public class WebAppInterface {
                             } else {
                                 //put an event to capture this issue perhaps
                             }
+                            */
                         } catch (Exception e) {
                             displayLog("error saveAddressToFirestore " + e.toString());
                         }
@@ -259,7 +284,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -291,7 +316,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -323,7 +348,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
 
@@ -398,7 +423,6 @@ public class WebAppInterface {
         }
     }
 
-
     private Long saveAddressToFirestore(JSONObject payload) {
 
         displayLog("saveAddressToFirestore");
@@ -421,19 +445,19 @@ public class WebAppInterface {
         Double lng = location.optDouble("lng");
 
         ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_CUSTOMERNAME, firstName);
-        contentValues.put(COLUMN_PHONECUSTOMER, phone);
-        contentValues.put(COLUMN_STREETNAME, streetName);
-        contentValues.put(COLUMN_PROPERTYNAME, propertyName);
-        contentValues.put(COLUMN_DIRECTION, directions);
-        contentValues.put(COLUMN_LOCATIONNICKNAME, placeId);
-        contentValues.put(COLUMN_CLAIMUALID, ualId);
-        contentValues.put(COLUMN_IMAGEURL, url);
-        contentValues.put(COLUMN_LOCATIONNAME, title);
-        contentValues.put(COLUMN_BRANCH, "okhi");
-        contentValues.put(COLUMN_LAT, lat);
-        contentValues.put(COLUMN_LNG, lng);
-        contentValues.put(COLUMN_UNIQUEID, uniqueId);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_CUSTOMERNAME, firstName);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER, phone);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_STREETNAME, streetName);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_PROPERTYNAME, propertyName);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_DIRECTION, directions);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LOCATIONNICKNAME, placeId);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID, ualId);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_IMAGEURL, url);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME, title);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "okhi");
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LAT, lat);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LNG, lng);
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, uniqueId);
 
         Long i = dataProvider.insertAddressList(contentValues);
         return i;
@@ -497,7 +521,6 @@ public class WebAppInterface {
 
     }
 
-
     private void sendEvent(final String appkey, final String action) {
         try {
             Boolean production = false;
@@ -526,7 +549,7 @@ public class WebAppInterface {
             displayLog("things went ok with send to omtm identify");
 
             try {
-                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                io.okheart.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okheart.android.callback.SegmentTrackCallBack() {
                     @Override
                     public void querycomplete(String response, boolean status) {
                         if (status) {
@@ -553,7 +576,7 @@ public class WebAppInterface {
                 trackjson.put("action", action);
                 trackjson.put("actionSubtype", action);
                 trackjson.put("clientProduct", "okHeartAndroidSDK");
-                trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+                trackjson.put("clientProductVersion", io.okheart.android.BuildConfig.VERSION_NAME);
                 trackjson.put("clientKey", appkey);
                 trackjson.put("appLayer", "client");
                 trackjson.put("onObject", "sdk");
@@ -562,14 +585,14 @@ public class WebAppInterface {
                 trackjson.put("subtype", action);
 
                 try {
-                    trackjson.put("timestamp", Constants.getUTCtimestamp());
+                    trackjson.put("timestamp", io.okheart.android.utilities.Constants.getUTCtimestamp());
                 } catch (Exception e) {
                     displayLog(" Constants.getUTCtimestamp() error " + e.toString());
                 }
 
 
                 eventjson.put("properties", trackjson);
-                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (JSONException e) {
                 displayLog("track error omtm error " + e.toString());
@@ -595,9 +618,122 @@ public class WebAppInterface {
 
     }
 
+    private void decideWhatToStart() {
+        List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        if (addressItemList.size() > 0) {
+            String tempKill = dataProvider.getPropertyValue("kill_switch");
+            if (tempKill != null) {
+                if (tempKill.length() > 0) {
+                    if (tempKill.equalsIgnoreCase("true")) {
+                        String tempResume_ping_frequency = dataProvider.getPropertyValue("resume_ping_frequency");
+                        if (tempResume_ping_frequency != null) {
+                            if (tempResume_ping_frequency.length() > 0) {
+                                Integer pingTime = Integer.parseInt(tempResume_ping_frequency);
+                                startReplacePeriodicPing(pingTime, uniqueId);
+                            } else {
+                                startReplacePeriodicPing(360000000, uniqueId);
+                            }
+                        } else {
+                            startReplacePeriodicPing(360000000, uniqueId);
+                        }
+                    } else {
+                        String tempPing_frequency = dataProvider.getPropertyValue("ping_frequency");
+                        if (tempPing_frequency != null) {
+                            if (tempPing_frequency.length() > 0) {
+                                Integer pingTime = Integer.parseInt(tempPing_frequency);
+                                startKeepPeriodicPing(pingTime, uniqueId);
+                            } else {
+                                startKeepPeriodicPing(3600000, uniqueId);
+                            }
+                        } else {
+                            startKeepPeriodicPing(3600000, uniqueId);
+                        }
+                    }
+                } else {
+                    String tempPing_frequency = dataProvider.getPropertyValue("ping_frequency");
+                    if (tempPing_frequency != null) {
+                        if (tempPing_frequency.length() > 0) {
+                            Integer pingTime = Integer.parseInt(tempPing_frequency);
+                            startKeepPeriodicPing(pingTime, uniqueId);
+                        } else {
+                            startKeepPeriodicPing(3600000, uniqueId);
+                        }
+                    } else {
+                        startKeepPeriodicPing(3600000, uniqueId);
+                    }
+                }
+            } else {
+                String tempPing_frequency = dataProvider.getPropertyValue("ping_frequency");
+                if (tempPing_frequency != null) {
+                    if (tempPing_frequency.length() > 0) {
+                        Integer pingTime = Integer.parseInt(tempPing_frequency);
+                        startKeepPeriodicPing(pingTime, uniqueId);
+                    } else {
+                        startKeepPeriodicPing(3600000, uniqueId);
+                    }
+                } else {
+                    startKeepPeriodicPing(3600000, uniqueId);
+                }
+            }
+        } else {
+            stopPeriodicPing();
+        }
+    }
+
+    private void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
+
+        try {
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            Data inputData = new Data.Builder()
+                    .putString("uniqueId", uniqueId)
+                    .build();
+
+            PeriodicWorkRequest request =
+                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                            .setInputData(inputData)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
+                            .build();
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
+
+        } catch (Exception e) {
+            displayLog("my worker error " + e.toString());
+        }
+    }
+
+    private void startReplacePeriodicPing(Integer pingTime, String uniqueId) {
+
+        try {
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            Data inputData = new Data.Builder()
+                    .putString("uniqueId", uniqueId)
+                    .build();
+
+            PeriodicWorkRequest request =
+                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                            .setInputData(inputData)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
+                            .build();
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.REPLACE, request);
+
+
+        } catch (Exception e) {
+            displayLog("my worker error " + e.toString());
+        }
+    }
+
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            OkAnalytics okAnalytics = new OkAnalytics(mContext);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
             okAnalytics.sendToAnalytics(parameters, loans);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());

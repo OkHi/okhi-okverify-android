@@ -1,69 +1,7 @@
 package io.okheart.android.services;
 
-import android.app.AlarmManager;
-import android.app.Notification;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
-import android.app.PendingIntent;
-import android.app.Service;
-import android.content.ComponentName;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
-import android.os.Build;
-import android.os.IBinder;
-import android.provider.Settings;
-import android.util.Log;
-import android.view.Gravity;
-import android.widget.Toast;
 
-import androidx.annotation.NonNull;
-import androidx.core.app.NotificationCompat;
-
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.location.SettingsClient;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
-import com.parse.ParseObject;
-import com.parse.SaveCallback;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import io.okheart.android.BuildConfig;
-import io.okheart.android.R;
-import io.okheart.android.database.DataProvider;
-import io.okheart.android.datamodel.AddressItem;
-import io.okheart.android.datamodel.VerifyDataItem;
-import io.okheart.android.receivers.BootReceiver;
-import io.okheart.android.receivers.MyBroadcastReceiver;
-import io.okheart.android.utilities.OkAnalytics;
-import io.okheart.android.utilities.geohash.GeoHash;
-
-import static android.app.NotificationManager.IMPORTANCE_LOW;
-
-public class ForegroundService extends Service {
+public class ForegroundService {/*extends Service {
 
     //private String status;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -82,7 +20,7 @@ public class ForegroundService extends Service {
     private Location mCurrentLocation;
     private Double lat, lng;
     private Float acc;
-    private DataProvider dataProvider;
+    private io.okheart.android.database.DataProvider dataProvider;
     //private Query query, queryAlarm;
     private List<Map<String, Object>> addresses;
     //private FirebaseRemoteConfig mFirebaseRemoteConfig;
@@ -90,7 +28,7 @@ public class ForegroundService extends Service {
     private NotificationManager notificationManager;
     //private Boolean firestore;
     private Boolean parsedb;
-    private AlarmManager alarmManager;
+    //private AlarmManager alarmManager;
     private String uniqueId;
     private Integer remotelocationfrequency;
     private Integer remoteaddressfrequency;
@@ -100,7 +38,7 @@ public class ForegroundService extends Service {
     private Double remotegpsaccuracy;
     private Boolean remotekillswitch;
     private Boolean remoteautostop;
-    private List<AddressItem> addressItemList;
+    //private List<io.okheart.android.datamodel.AddressItem> addressItemList;
 
 
     public ForegroundService() {
@@ -154,7 +92,7 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
 
         }
-
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         if (addressItemList.size() > 0) {
             if (remoteautostop) {
                 startAlert(remoteresumepingfrequency);
@@ -176,20 +114,24 @@ public class ForegroundService extends Service {
             displayLog("alarm status is true");
         }
         */
+
+    /*
     }
 
     public void startAlert(Integer pingTime) {
 
-        Intent intent = new Intent(this, MyBroadcastReceiver.class);
+        /*
+        Intent intent = new Intent(this, io.okheart.android.receivers.MyBroadcastReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this.getApplicationContext(), 987623224, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
+        AlarmManager alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         alarmManager.setExact(AlarmManager.RTC_WAKEUP,
                 System.currentTimeMillis() + (pingTime),
                 pendingIntent);
 
 
         try {
-            ComponentName receiver = new ComponentName(this, BootReceiver.class);
+            ComponentName receiver = new ComponentName(this, io.okheart.android.receivers.BootReceiver.class);
             PackageManager pm = this.getPackageManager();
 
             pm.setComponentEnabledSetting(receiver,
@@ -198,6 +140,7 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
 
         }
+        */
 
 
         /*
@@ -218,7 +161,11 @@ public class ForegroundService extends Service {
                     }
                 });
         */
+
+        /*
         displayLog("Alarm set in " + remotePingFrequency + " seconds");
+
+
     }
 
     @Override
@@ -229,8 +176,9 @@ public class ForegroundService extends Service {
         parsedb = false;
         //Constants.scheduleJob(ForegroundService.this, "Foreground service");
 
+        /*
         try {
-            ComponentName receiver = new ComponentName(this, BootReceiver.class);
+            ComponentName receiver = new ComponentName(this, io.okheart.android.receivers.BootReceiver.class);
             PackageManager pm = this.getPackageManager();
 
             pm.setComponentEnabledSetting(receiver,
@@ -239,17 +187,21 @@ public class ForegroundService extends Service {
         } catch (Exception e) {
 
         }
+        */
+/*
+        displayLog("resume_ping_frequency "+ OkHi.getResume_ping_frequency() +" ping_frequency "+ OkHi.getPing_frequency()+
+                " background_frequency "+OkHi.getBackground_frequency()+" sms_template "+OkHi.getSms_template()+"" +
+                " gps_accuracy "+OkHi.getGps_accuracy()+" kill_switch "+OkHi.getKill_switch());
 
         remotelocationfrequency = 30000;
         remoteaddressfrequency = 1;
-        remotePingFrequency = 3600000;
-        remoteresumepingfrequency = 3600000;
+        remotePingFrequency = 900000;
+        remoteresumepingfrequency = 900000;
         remotegeosearchradius = 0.1;
         remotegpsaccuracy = 50.0;
         remotekillswitch = false;
         remoteautostop = false;
 
-        alarmManager = (AlarmManager) getSystemService(ALARM_SERVICE);
         uniqueId = Settings.Secure.getString(getContentResolver(), Settings.Secure.ANDROID_ID);
 
 
@@ -321,10 +273,10 @@ public class ForegroundService extends Service {
         }
         */
 
+/*
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        dataProvider = new DataProvider(ForegroundService.this);
-        addressItemList = dataProvider.getAllAddressList();
+        dataProvider = new io.okheart.android.database.DataProvider(io.okheart.android.services.ForegroundService.this);
+        //addressItemList = dataProvider.getAllAddressList();
 
         /*
         mFirestore = FirebaseFirestore.getInstance();
@@ -333,9 +285,12 @@ public class ForegroundService extends Service {
                 .orderBy("timestamp", Query.Direction.DESCENDING);
         */
 
+
+
+/*
         try {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(ForegroundService.this);
-            mSettingsClient = LocationServices.getSettingsClient(ForegroundService.this);
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(io.okheart.android.services.ForegroundService.this);
+            mSettingsClient = LocationServices.getSettingsClient(io.okheart.android.services.ForegroundService.this);
         } catch (Exception e) {
             displayLog("mfusedlocationclient error " + e.toString());
         }
@@ -473,8 +428,11 @@ public class ForegroundService extends Service {
         }
         */
 
-        // Kick off the process of building the LocationCallback, LocationRequest, and
-        // LocationSettingsRequest objects.
+    // Kick off the process of building the LocationCallback, LocationRequest, and
+    // LocationSettingsRequest objects.
+
+
+    /*
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -482,6 +440,14 @@ public class ForegroundService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        try {
+
+            startForegroundService();
+        }
+        catch (Exception e){
+            displayLog("onstart command error "+e.toString());
+        }
 
         /*
         if (remotekillswitch) {
@@ -524,7 +490,7 @@ public class ForegroundService extends Service {
             startForegroundService();
         }
         */
-
+/*
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -540,12 +506,14 @@ public class ForegroundService extends Service {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-        startForegroundService();
+
 
         return super.onStartCommand(intent, flags, startId);
     }
 
     /* Used to build and start foreground service. */
+
+/*
     private void startForegroundService() {
 
         if (notificationManager != null) {
@@ -556,23 +524,25 @@ public class ForegroundService extends Service {
         }
 
         displayLog("Start foreground service.");
-        Bitmap largeIconBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher_foreground);
+        Bitmap largeIconBitmap = BitmapFactory.decodeResource(getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
         /*
         NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
         bigTextStyle.setBigContentTitle("Address verification service.");
         bigTextStyle.bigText("Proof of address powered by OkHi");
         */
 
+/*
+
         Intent playIntent = new Intent(this, ForegroundService.class);
         playIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
         PendingIntent pendingIntent = PendingIntent.getService(this, 0, playIntent, PendingIntent.FLAG_ONE_SHOT);
         //NotificationCompat.Action playAction = new NotificationCompat.Action(android.R.drawable.ic_media_play, "Play", pendingIntent);
 
-        String channelId = getString(R.string.default_notification_channel_id);
+        String channelId = getString(io.okheart.android.R.string.default_notification_channel_id);
         Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.ic_stat_ic_notification)
+                        .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
                         .setContentTitle("OkVerify")
                         .setContentText("Location verification in progress")
                         .setAutoCancel(true)
@@ -887,6 +857,9 @@ public class ForegroundService extends Service {
             displayLog("jsonexception " + jse.toString());
         }
         */
+
+
+/*
     }
 
     private void firebase(String who) {
@@ -913,6 +886,8 @@ public class ForegroundService extends Service {
                 });
         */
 
+
+/*
     }
 
 
@@ -946,8 +921,8 @@ public class ForegroundService extends Service {
         parseObject.put("brand", Build.MANUFACTURER);
         parseObject.put("OSVersion", Build.VERSION.SDK_INT);
         parseObject.put("OSName", "Android");
-        parseObject.put("appVersionCode", BuildConfig.VERSION_CODE);
-        parseObject.put("appVersionName", BuildConfig.VERSION_NAME);
+        parseObject.put("appVersionCode", io.okheart.android.BuildConfig.VERSION_CODE);
+        parseObject.put("appVersionName", io.okheart.android.BuildConfig.VERSION_NAME);
 
         try {
             WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
@@ -990,6 +965,9 @@ public class ForegroundService extends Service {
                     scannedSSIDList.add(config.SSID);
                 }
                 */
+
+
+/*
             } catch (Exception e) {
                 displayLog("error gettign scanned list " + e.toString());
             }
@@ -1061,7 +1039,7 @@ public class ForegroundService extends Service {
                 location2.setLatitude(lat);
                 location2.setLongitude(lng);
 
-                GeoHash hash = GeoHash.fromLocation(location2, 12);
+                io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
                 parameters.put("location", hash.toString());
             } catch (Exception e) {
                 displayLog("geomap error " + e.toString());
@@ -1073,17 +1051,19 @@ public class ForegroundService extends Service {
             parameters.put("brand", Build.MANUFACTURER);
             parameters.put("OSVersion", "" + Build.VERSION.SDK_INT);
             parameters.put("OSName", "Android");
-            parameters.put("appVersionCode", "" + BuildConfig.VERSION_CODE);
-            parameters.put("appVersionName", "" + BuildConfig.VERSION_NAME);
+            parameters.put("appVersionCode", "" + io.okheart.android.BuildConfig.VERSION_CODE);
+            parameters.put("appVersionName", "" + io.okheart.android.BuildConfig.VERSION_NAME);
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+
         if (addressItemList.size() > 0) {
             for (int i = 0; i < addressItemList.size(); i++) {
                 try {
-                    AddressItem addressItem = addressItemList.get(i);
+                    io.okheart.android.datamodel.AddressItem addressItem = addressItemList.get(i);
                     Float distance = getDistance(lat, lng, addressItem.getLat(), addressItem.getLng());
                     Map<String, Object> nestedData = new HashMap<>();
                     nestedData.put("ualId", addressItem.getUalid());
@@ -1298,6 +1278,8 @@ public class ForegroundService extends Service {
     }
     */
 
+
+    /*
     private void stopSelf(Boolean parsedb) {
         displayLog("stopself parse " + parsedb);
 
@@ -1381,7 +1363,7 @@ public class ForegroundService extends Service {
 
     }
     */
-
+/*
     private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {
 
         Location locationA = new Location("point A");
@@ -1412,7 +1394,7 @@ public class ForegroundService extends Service {
 
     }
 
-    private HashMap<String, String> getTitleText(AddressItem model) {
+    private HashMap<String, String> getTitleText(io.okheart.android.datamodel.AddressItem model) {
 
         String streetName = model.getStreetName();
         String propertyName = model.getPropname();
@@ -1496,7 +1478,7 @@ public class ForegroundService extends Service {
         return titleText;
     }
 
-    private HashMap<String, String> getTitleText(VerifyDataItem model) {
+    private HashMap<String, String> getTitleText(io.okheart.android.datamodel.VerifyDataItem model) {
 
         String streetName = model.getStreetName();
         String propertyName = model.getPropertyName();
@@ -1582,7 +1564,7 @@ public class ForegroundService extends Service {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            OkAnalytics okAnalytics = new OkAnalytics(ForegroundService.this);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(ForegroundService.this);
             okAnalytics.sendToAnalytics(parameters, loans);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
@@ -1601,4 +1583,5 @@ public class ForegroundService extends Service {
             }
         }
     }
+    */
 }

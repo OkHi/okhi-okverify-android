@@ -10,18 +10,11 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.okheart.android.datamodel.AddressItem;
-
-import static io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID;
-import static io.okheart.android.utilities.Constants.COLUMN_PROPERTY;
-import static io.okheart.android.utilities.Constants.COLUMN_VALUE;
-import static io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST;
-import static io.okheart.android.utilities.Constants.TABLE_NAME_STUFF;
-
 
 /**
  * Created by ramogiochola on 6/18/16.
  */
+
 public class DataProvider {
     private static final String TAG = "DataProvider";
 
@@ -57,7 +50,7 @@ public class DataProvider {
                 displayLog("insertAddressList openWrite error " + e.toString());
             }
             displayLog("after write before insert");
-            insertId = database.insert(TABLE_NAME_RUNLIST, null, values);
+            insertId = database.insert(io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST, null, values);
             displayLog("insertAddressList method executed " + insertId);
 
 
@@ -69,9 +62,9 @@ public class DataProvider {
         return insertId;
     }
 
-    private AddressItem cursorToAddressListItem(Cursor cursor) {
+    private io.okheart.android.datamodel.AddressItem cursorToAddressListItem(Cursor cursor) {
 
-        AddressItem addressItem = new AddressItem();
+        io.okheart.android.datamodel.AddressItem addressItem = new io.okheart.android.datamodel.AddressItem();
 
         addressItem.setCustomername(cursor.getString(1));
         addressItem.setAffiliation(cursor.getString(2));
@@ -223,7 +216,7 @@ public class DataProvider {
 
     public void deleteAddressListItemUAL(String ualid) {
         displayLog("deleteAddressListItemUAL() method called");
-        String selection = COLUMN_CLAIMUALID + " = ? ";
+        String selection = io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
         String[] selectionArgs = {ualid};
         try {
             try {
@@ -231,7 +224,7 @@ public class DataProvider {
             } catch (Exception e) {
                 displayLog("deleteAddressListItemUAL openWrite error " + e.toString());
             }
-            database.delete(TABLE_NAME_RUNLIST, selection, selectionArgs);
+            database.delete(io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST, selection, selectionArgs);
             displayLog("deleteAddressListItemUAL() method executed");
 
         } catch (SQLException sqle) {
@@ -251,7 +244,7 @@ public class DataProvider {
             } catch (Exception e) {
                 displayLog("deleteAllAddresseses openWrite error " + e.toString());
             }
-            database.delete(TABLE_NAME_RUNLIST, null, null);
+            database.delete(io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST, null, null);
             displayLog("deleteAllAddresseses() method executed");
 
         } catch (SQLException sqle) {
@@ -261,12 +254,12 @@ public class DataProvider {
         }
     }
 
-    public List<AddressItem> getAddressListItem(String deliveryId) {
+    public List<io.okheart.android.datamodel.AddressItem> getAddressListItem(String deliveryId) {
         displayLog("List<AddressItem> getAddressListItem(" + deliveryId + ") method called");
 
-        List<AddressItem> ArtcaffeRunList = new ArrayList<AddressItem>();
+        List<io.okheart.android.datamodel.AddressItem> ArtcaffeRunList = new ArrayList<io.okheart.android.datamodel.AddressItem>();
 
-        String selection = COLUMN_CLAIMUALID + " = ? ";
+        String selection = io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
         String[] selectionArgs = {"" + deliveryId};
 
         try {
@@ -277,11 +270,11 @@ public class DataProvider {
                 displayLog("getAllArtcaffeAddressesBackup openRead error " + e.toString());
             }
 
-            Cursor cursor = database.query(TABLE_NAME_RUNLIST, null, selection, selectionArgs, null, null, null);
+            Cursor cursor = database.query(io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST, null, selection, selectionArgs, null, null, null);
             displayLog("List<AddressItem> getAddressListItem method executed");
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                AddressItem AddressItem = cursorToAddressListItem(cursor);
+                io.okheart.android.datamodel.AddressItem AddressItem = cursorToAddressListItem(cursor);
                 ArtcaffeRunList.add(AddressItem);
                 cursor.moveToNext();
             }
@@ -296,11 +289,11 @@ public class DataProvider {
 
     }
 
-    public List<AddressItem> getAllAddressList() {
+    public List<io.okheart.android.datamodel.AddressItem> getAllAddressList() {
 
         displayLog("getAllAddressList method called ");
 
-        List<AddressItem> artcaffeRunList = new ArrayList<>();
+        List<io.okheart.android.datamodel.AddressItem> artcaffeRunList = new ArrayList<>();
         Cursor cursor;
         try {
             try {
@@ -308,11 +301,11 @@ public class DataProvider {
             } catch (Exception e) {
                 displayLog("getAllAddressList openRead error " + e.toString());
             }
-            cursor = database.query(TABLE_NAME_RUNLIST, null, null, null, null, null, null);
+            cursor = database.query(io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST, null, null, null, null, null, null);
             displayLog(" List<AddressItem> getAllAddressList() method executed");
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {
-                AddressItem addressItem = cursorToAddressListItem(cursor);
+                io.okheart.android.datamodel.AddressItem addressItem = cursorToAddressListItem(cursor);
                 artcaffeRunList.add(addressItem);
                 cursor.moveToNext();
             }
@@ -335,7 +328,7 @@ public class DataProvider {
             } catch (Exception e) {
                 displayLog("deleteAllStuff openWrite error " + e.toString());
             }
-            database.delete(TABLE_NAME_STUFF, null, null);
+            database.delete(io.okheart.android.utilities.Constants.TABLE_NAME_STUFF, null, null);
             displayLog("deleteAllStuff() method executed");
 
         } catch (SQLException sqle) {
@@ -357,10 +350,10 @@ public class DataProvider {
             }
 
             ContentValues values = new ContentValues();
-            values.put(COLUMN_PROPERTY, propname);
-            values.put(COLUMN_VALUE, affiliation);
+            values.put(io.okheart.android.utilities.Constants.COLUMN_PROPERTY, propname);
+            values.put(io.okheart.android.utilities.Constants.COLUMN_VALUE, affiliation);
 
-            insertId = database.insert(TABLE_NAME_STUFF, null, values);
+            insertId = database.insert(io.okheart.android.utilities.Constants.TABLE_NAME_STUFF, null, values);
 
             displayLog("insertStuff method executed " + insertId);
         } catch (SQLException sqle) {
@@ -376,8 +369,8 @@ public class DataProvider {
         String carupgradedelivered = "";
         Cursor cursor;
 
-        String[] columns = {COLUMN_VALUE};
-        String selection = COLUMN_PROPERTY + " = ? ";
+        String[] columns = {io.okheart.android.utilities.Constants.COLUMN_VALUE};
+        String selection = io.okheart.android.utilities.Constants.COLUMN_PROPERTY + " = ? ";
         String[] selectionArgs = {"" + propertyname};
 
         try {
@@ -387,7 +380,7 @@ public class DataProvider {
                 displayLog("getPropertyValue openRead error " + e.toString());
             }
 
-            cursor = database.query(TABLE_NAME_STUFF, columns, selection, selectionArgs, null, null, null);
+            cursor = database.query(io.okheart.android.utilities.Constants.TABLE_NAME_STUFF, columns, selection, selectionArgs, null, null, null);
 
             cursor.moveToFirst();
             while (!cursor.isAfterLast()) {

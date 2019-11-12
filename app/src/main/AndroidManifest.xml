@@ -12,48 +12,49 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-        android:name=".ApplicationClass"
+
         android:allowBackup="true"
         android:launchMode="singleInstance"
         android:supportsRtl="true">
         <activity
-            android:name=".activity.TestActivity"
+            android:name="io.okheart.android.activity.TestActivity"
             android:theme="@style/AppTheme">
-            <!--
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-            -->
+
         </activity>
         <activity
-            android:name=".activity.OkHeartActivity"
+            android:name="io.okheart.android.activity.OkHeartActivity"
             android:exported="true"
             android:theme="@style/AppTheme"></activity>
 
         <provider
-            android:name=".OkHi"
+            android:name="io.okheart.android.OkHi"
             android:authorities="${applicationId}.OkHeart"
             android:enabled="true"
             android:exported="true" />
+        <!--
+                <receiver
+                    android:name="io.okheart.android.receivers.BootReceiver"
+                    android:enabled="false">
+                    <intent-filter>
+                        <action android:name="android.intent.action.BOOT_COMPLETED" />
+                    </intent-filter>
+                </receiver>
+                <receiver
+                    android:name="io.okheart.android.receivers.MyBroadcastReceiver"
+                    android:enabled="false"></receiver>
 
-        <receiver
-            android:name=".receivers.BootReceiver"
-            android:enabled="false">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
-        </receiver>
-        <receiver
-            android:name=".receivers.MyBroadcastReceiver"
-            android:enabled="false"></receiver>
-
-        <service
-            android:name=".services.ForegroundService"
-            android:enabled="true"
-            android:exported="true"
-            android:foregroundServiceType="location" />
+                <service
+                    android:name="io.okheart.android.services.ForegroundService"
+                    android:enabled="true"
+                    android:exported="true"
+                    android:foregroundServiceType="location" />
+                -->
     </application>
 
 </manifest>

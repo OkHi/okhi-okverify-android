@@ -9,15 +9,6 @@ import com.segment.analytics.Properties;
 
 import java.util.HashMap;
 
-import io.okheart.android.BuildConfig;
-
-import static io.okheart.android.utilities.Constants.appLayer;
-import static io.okheart.android.utilities.Constants.appType;
-import static io.okheart.android.utilities.Constants.formFactor;
-import static io.okheart.android.utilities.Constants.librarytrackerwaybill;
-import static io.okheart.android.utilities.Constants.product;
-import static io.okheart.android.utilities.Constants.versiontrackerwaybill;
-
 
 /**
  * Created by ramogiochola on 6/21/16.
@@ -178,7 +169,7 @@ public class OkAnalytics {
         }
         */
         try {
-            setProductVersion(BuildConfig.VERSION_NAME);
+            setProductVersion(io.okheart.android.BuildConfig.VERSION_NAME);
         } catch (Exception e) {
             displayLog(" getVersion error " + e.toString());
         }
@@ -278,12 +269,12 @@ public class OkAnalytics {
             displayLog(" width error " + e.toString());
         }
         try {
-            device.putValue("formFactor", formFactor);
+            device.putValue("formFactor", io.okheart.android.utilities.Constants.formFactor);
         } catch (Exception e) {
             displayLog(" formFactor error " + e.toString());
         }
         try {
-            device.putValue("appType", appType);
+            device.putValue("appType", io.okheart.android.utilities.Constants.appType);
         } catch (Exception e) {
             displayLog(" appType error " + e.toString());
         }
@@ -309,12 +300,12 @@ public class OkAnalytics {
             displayLog(" versiontrackerwaybill error " + e.toString());
         }
         try {
-            trackerWaybill.putValue("library", librarytrackerwaybill);
+            trackerWaybill.putValue("library", io.okheart.android.utilities.Constants.librarytrackerwaybill);
         } catch (Exception e) {
             displayLog(" versiontrackerwaybill error " + e.toString());
         }
         try {
-            trackerWaybill.putValue("version", versiontrackerwaybill);
+            trackerWaybill.putValue("version", io.okheart.android.utilities.Constants.versiontrackerwaybill);
         } catch (Exception e) {
             displayLog(" trackerWaybill error " + e.toString());
         }
@@ -376,8 +367,8 @@ public class OkAnalytics {
         //getEvent().putValue("submit", getSubmit());
         eventProperties.putValue("event", getEvent());
         //displayLog("event string " + getEvent().toString());
-        eventProperties.putValue("appLayer", appLayer);
-        eventProperties.putValue("product", product);
+        eventProperties.putValue("appLayer", io.okheart.android.utilities.Constants.appLayer);
+        eventProperties.putValue("product", io.okheart.android.utilities.Constants.product);
         eventProperties.putValue("productVersion", productVersion);
         eventProperties.putValue("context", contextdeviceandproduct);
         eventProperties.putValue("waybill", waybill);
@@ -426,10 +417,10 @@ public class OkAnalytics {
         //getEvent().putValue("submit", getSubmit());
         eventProperties.putValue("event", getEvent());
         //displayLog("event string " + getEvent().toString());
-        eventProperties.putValue("appLayer", appLayer);
-        eventProperties.putValue("product", product);
+        eventProperties.putValue("appLayer", io.okheart.android.utilities.Constants.appLayer);
+        eventProperties.putValue("product", io.okheart.android.utilities.Constants.product);
         eventProperties.putValue("productVersion", productVersion);
-        eventProperties.putValue("clientProduct", product);
+        eventProperties.putValue("clientProduct", io.okheart.android.utilities.Constants.product);
         eventProperties.putValue("clientProductVersion", productVersion);
         eventProperties.putValue("context", contextdeviceandproduct);
         eventProperties.putValue("waybill", waybill);
@@ -541,10 +532,10 @@ public class OkAnalytics {
         eventProperties.putValue("userRoles", userRoles);
         eventProperties.putValue("customerCode", customerCode);
         eventProperties.putValue("event", getEvent());
-        eventProperties.putValue("appLayer", appLayer);
-        eventProperties.putValue("product", product);
+        eventProperties.putValue("appLayer", io.okheart.android.utilities.Constants.appLayer);
+        eventProperties.putValue("product", io.okheart.android.utilities.Constants.product);
         eventProperties.putValue("productVersion", productVersion);
-        eventProperties.putValue("clientProduct", product);
+        eventProperties.putValue("clientProduct", io.okheart.android.utilities.Constants.product);
         eventProperties.putValue("clientProductVersion", productVersion);
         eventProperties.putValue("context", contextdeviceandproduct);
         eventProperties.putValue("waybill", waybill);

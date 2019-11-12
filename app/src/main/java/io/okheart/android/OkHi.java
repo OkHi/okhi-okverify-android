@@ -18,6 +18,16 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
+
+import com.parse.Parse;
+import com.segment.analytics.Analytics;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -31,27 +41,28 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
-import io.okheart.android.activity.OkHeartActivity;
-import io.okheart.android.asynctask.SegmentIdentifyTask;
-import io.okheart.android.asynctask.SegmentTrackTask;
-import io.okheart.android.callback.OkHiCallback;
-import io.okheart.android.callback.SegmentIdentifyCallBack;
-import io.okheart.android.callback.SegmentTrackCallBack;
-import io.okheart.android.database.DataProvider;
-import io.okheart.android.datamodel.AddressItem;
-import io.okheart.android.services.ForegroundService;
-import io.okheart.android.utilities.OkAnalytics;
+import io.okheart.android.utilities.MyWorker;
+
 
 public final class OkHi extends ContentProvider {
 
     private static final String TAG = "OkHi";
+    protected static Integer resume_ping_frequency = null;
+    protected static Integer ping_frequency = null;
+    protected static Integer background_frequency = null;
+    protected static String sms_template = null;
+    protected static Double gps_accuracy = null;
+    protected static Boolean kill_switch = null;
+    protected static io.okheart.android.database.DataProvider dataProvider;
     private static String firstname, lastname, phonenumber, color, name, logo, requestSource;
     private static Context mContext;
-    private static OkHiCallback callback;
+    private static io.okheart.android.callback.OkHiCallback callback;
     private static String appkey;
     private static String uniqueId;
     private static String remoteSmsTemplate;
+    private static Analytics analytics;
 
     public OkHi() {
     }
@@ -101,31 +112,43 @@ public final class OkHi extends ContentProvider {
 
         }
 
+        dataProvider.insertStuff("verify", "" + verify);
         try {
             if (verify != null) {
                 String tempVerify = "" + verify;
                 if (tempVerify.length() > 0) {
                     if ((tempVerify.equalsIgnoreCase("false")) || ((tempVerify.equalsIgnoreCase("true")))) {
                         writeToFileVerify(tempVerify, "six");
+                        if (verify) {
+                            decideWhatToStart();
+                        } else {
+                            stopPeriodicPing();
+                        }
+
+
                     } else {
                         writeToFileVerify("false", "five");
+                        stopPeriodicPing();
                     }
 
                 } else {
                     writeToFileVerify("false", "four");
+                    stopPeriodicPing();
                 }
 
             } else {
                 writeToFileVerify("false", "three");
+                stopPeriodicPing();
             }
         } catch (Exception io) {
             writeToFileVerify("false", "two");
+            stopPeriodicPing();
         } finally {
             // writeToFileVerify("false", "one");
         }
 
-
         appkey = applicationKey;
+        dataProvider.insertStuff("applicationKey", applicationKey);
 
 
         try {
@@ -145,14 +168,14 @@ public final class OkHi extends ContentProvider {
             JSONObject identifyjson = new JSONObject();
             //identifyjson.put("userId", userId);
             try {
-                SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
+                io.okheart.android.callback.SegmentIdentifyCallBack segmentIdentifyCallBack = new io.okheart.android.callback.SegmentIdentifyCallBack() {
                     @Override
                     public void querycomplete(String response, boolean status) {
                         if (status) {
                             displayLog("things went ok with send to omtm identify");
 
                             try {
-                                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                                io.okheart.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okheart.android.callback.SegmentTrackCallBack() {
                                     @Override
                                     public void querycomplete(String response, boolean status) {
                                         if (status) {
@@ -236,7 +259,7 @@ public final class OkHi extends ContentProvider {
 
 
                                 eventjson.put("properties", trackjson);
-                                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
                                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             } catch (JSONException e) {
                                 displayLog("track error omtm error " + e.toString());
@@ -247,7 +270,7 @@ public final class OkHi extends ContentProvider {
 
                     }
                 };
-                SegmentIdentifyTask segmentIdentifyTask = new SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
+                io.okheart.android.asynctask.SegmentIdentifyTask segmentIdentifyTask = new io.okheart.android.asynctask.SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
                 segmentIdentifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             } catch (Exception e) {
@@ -339,7 +362,7 @@ public final class OkHi extends ContentProvider {
             displayLog("things went ok with send to omtm identify");
 
             try {
-                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                io.okheart.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okheart.android.callback.SegmentTrackCallBack() {
                     @Override
                     public void querycomplete(String response, boolean status) {
                         if (status) {
@@ -375,7 +398,7 @@ public final class OkHi extends ContentProvider {
 
 
                 eventjson.put("properties", trackjson);
-                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (JSONException e) {
                 displayLog("track error omtm error " + e.toString());
@@ -430,7 +453,7 @@ public final class OkHi extends ContentProvider {
     }
 */
 
-    public static void displayClient(OkHiCallback okHiCallback, JSONObject jsonObject) throws RuntimeException {
+    public static void displayClient(io.okheart.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) throws RuntimeException {
 
         displayLog("display client " + jsonObject.toString());
 
@@ -493,7 +516,7 @@ public final class OkHi extends ContentProvider {
     }
 
 
-    private static void startActivity(OkHiCallback okHiCallback, JSONObject jsonObject) {
+    private static void startActivity(io.okheart.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) {
         callback = okHiCallback;
         firstname = jsonObject.optString("firstName");
         lastname = jsonObject.optString("lastName");
@@ -519,7 +542,7 @@ public final class OkHi extends ContentProvider {
         }
 
         try {
-            Intent intent = new Intent(mContext, OkHeartActivity.class);
+            Intent intent = new Intent(mContext, io.okheart.android.activity.OkHeartActivity.class);
             intent.putExtra("firstname", firstname);
             intent.putExtra("lastname", lastname);
             intent.putExtra("phone", phonenumber);
@@ -543,7 +566,7 @@ public final class OkHi extends ContentProvider {
 
         if (permissionAccessFineLocationApproved) {
             try {
-                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -564,7 +587,7 @@ public final class OkHi extends ContentProvider {
                     // Start your service that doesn't have a foreground service type
                     // defined.
                     try {
-                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
@@ -582,7 +605,7 @@ public final class OkHi extends ContentProvider {
                     // location in order to function properly. Then, request background
                     // location.
                     try {
-                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
@@ -601,7 +624,7 @@ public final class OkHi extends ContentProvider {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
             try {
-                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -627,7 +650,7 @@ public final class OkHi extends ContentProvider {
 
         if (permissionAccessFineLocationApproved) {
             try {
-                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -648,7 +671,7 @@ public final class OkHi extends ContentProvider {
                     // Start your service that doesn't have a foreground service type
                     // defined.
                     try {
-                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -666,7 +689,7 @@ public final class OkHi extends ContentProvider {
                     // location in order to function properly. Then, request background
                     // location.
                     try {
-                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -685,7 +708,7 @@ public final class OkHi extends ContentProvider {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
             try {
-                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -904,7 +927,9 @@ public final class OkHi extends ContentProvider {
                 }
             }
 
-            displayLog(who + " done writing verify " + apiKey);
+            dataProvider.insertStuff("verify", "" + apiKey);
+
+            displayLog(who + "okhi done writing verify " + apiKey);
         } catch (Exception e) {
             displayLog("write to file error " + e.toString());
 
@@ -912,11 +937,11 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    public static OkHiCallback getCallback() {
+    public static io.okheart.android.callback.OkHiCallback getCallback() {
         return callback;
     }
 
-    public static void setCallback(OkHiCallback callback) {
+    public static void setCallback(io.okheart.android.callback.OkHiCallback callback) {
         OkHi.callback = callback;
     }
 
@@ -930,7 +955,7 @@ public final class OkHi extends ContentProvider {
 
         if (permissionAccessFineLocationApproved) {
             try {
-                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -951,7 +976,7 @@ public final class OkHi extends ContentProvider {
                     // Start your service that doesn't have a foreground service type
                     // defined.
                     try {
-                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -969,7 +994,7 @@ public final class OkHi extends ContentProvider {
                     // location in order to function properly. Then, request background
                     // location.
                     try {
-                        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -991,7 +1016,7 @@ public final class OkHi extends ContentProvider {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
             try {
-                OkAnalytics okAnalytics = new OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
@@ -1016,9 +1041,72 @@ public final class OkHi extends ContentProvider {
         }
     }
 
+    private static void decideWhatToStart() {
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+        if (addressItemList.size() > 0) {
+
+            String tempKill = dataProvider.getPropertyValue("kill_switch");
+            if (tempKill != null) {
+                if (tempKill.length() > 0) {
+                    if (tempKill.equalsIgnoreCase("true")) {
+                        String tempResume_ping_frequency = dataProvider.getPropertyValue("resume_ping_frequency");
+                        if (tempResume_ping_frequency != null) {
+                            if (tempResume_ping_frequency.length() > 0) {
+                                Integer pingTime = Integer.parseInt(tempResume_ping_frequency);
+                                startReplacePeriodicPing(pingTime, uniqueId);
+                            } else {
+                                startReplacePeriodicPing(360000000, uniqueId);
+                            }
+                        } else {
+                            startReplacePeriodicPing(360000000, uniqueId);
+                        }
+                    } else {
+                        String tempPing_frequency = dataProvider.getPropertyValue("ping_frequency");
+                        if (tempPing_frequency != null) {
+                            if (tempPing_frequency.length() > 0) {
+                                Integer pingTime = Integer.parseInt(tempPing_frequency);
+                                startKeepPeriodicPing(pingTime, uniqueId);
+                            } else {
+                                startKeepPeriodicPing(3600000, uniqueId);
+                            }
+                        } else {
+                            startKeepPeriodicPing(3600000, uniqueId);
+                        }
+                    }
+                } else {
+                    String tempPing_frequency = dataProvider.getPropertyValue("ping_frequency");
+                    if (tempPing_frequency != null) {
+                        if (tempPing_frequency.length() > 0) {
+                            Integer pingTime = Integer.parseInt(tempPing_frequency);
+                            startKeepPeriodicPing(pingTime, uniqueId);
+                        } else {
+                            startKeepPeriodicPing(3600000, uniqueId);
+                        }
+                    } else {
+                        startKeepPeriodicPing(3600000, uniqueId);
+                    }
+                }
+            } else {
+                String tempPing_frequency = dataProvider.getPropertyValue("ping_frequency");
+                if (tempPing_frequency != null) {
+                    if (tempPing_frequency.length() > 0) {
+                        Integer pingTime = Integer.parseInt(tempPing_frequency);
+                        startKeepPeriodicPing(pingTime, uniqueId);
+                    } else {
+                        startKeepPeriodicPing(3600000, uniqueId);
+                    }
+                } else {
+                    startKeepPeriodicPing(3600000, uniqueId);
+                }
+            }
+        } else {
+            stopPeriodicPing();
+        }
+    }
+
     private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            OkAnalytics okAnalytics = new OkAnalytics(mContext);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
             okAnalytics.sendToAnalytics(parameters, loans);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
@@ -1068,27 +1156,63 @@ public final class OkHi extends ContentProvider {
         return ret;
     }
 
-    @Nullable
-    @Override
-    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-        return null;
+    private static void stopPeriodicPing() {
+        WorkManager.getInstance().cancelUniqueWork("ramogi");
     }
 
-    @Nullable
-    @Override
-    public String getType(Uri uri) {
-        return null;
+    private static void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
+
+        try {
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            Data inputData = new Data.Builder()
+                    .putString("uniqueId", uniqueId)
+                    .build();
+
+            PeriodicWorkRequest request =
+                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                            .setInputData(inputData)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
+                            .build();
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
+
+        } catch (Exception e) {
+            displayLog("my worker error " + e.toString());
+        }
     }
 
-    @Nullable
-    @Override
-    public Uri insert(Uri uri, ContentValues values) {
-        return null;
+    private static void startReplacePeriodicPing(Integer pingTime, String uniqueId) {
+
+        try {
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            Data inputData = new Data.Builder()
+                    .putString("uniqueId", uniqueId)
+                    .build();
+
+            PeriodicWorkRequest request =
+                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                            .setInputData(inputData)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
+                            .build();
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.REPLACE, request);
+
+
+        } catch (Exception e) {
+            displayLog("my worker error " + e.toString());
+        }
     }
 
-    @Override
-    public int delete(Uri uri, String selection, String[] selectionArgs) {
-        return 0;
+    public static Integer getResume_ping_frequency() {
+        return resume_ping_frequency;
     }
 
     /*
@@ -1171,6 +1295,73 @@ public final class OkHi extends ContentProvider {
     }
     */
 
+    public static void setResume_ping_frequency(Integer resume_ping_frequency) {
+        OkHi.resume_ping_frequency = resume_ping_frequency;
+    }
+
+    public static Integer getPing_frequency() {
+        return ping_frequency;
+    }
+
+    public static void setPing_frequency(Integer ping_frequency) {
+        OkHi.ping_frequency = ping_frequency;
+    }
+
+    public static Integer getBackground_frequency() {
+        return background_frequency;
+    }
+
+    public static void setBackground_frequency(Integer background_frequency) {
+        OkHi.background_frequency = background_frequency;
+    }
+
+    public static String getSms_template() {
+        return sms_template;
+    }
+
+    public static void setSms_template(String sms_template) {
+        OkHi.sms_template = sms_template;
+    }
+
+    public static Double getGps_accuracy() {
+        return gps_accuracy;
+    }
+
+    public static void setGps_accuracy(Double gps_accuracy) {
+        OkHi.gps_accuracy = gps_accuracy;
+    }
+
+    public static Boolean getKill_switch() {
+        return kill_switch;
+    }
+
+    public static void setKill_switch(Boolean kill_switch) {
+        OkHi.kill_switch = kill_switch;
+    }
+
+    @Nullable
+    @Override
+    public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public String getType(Uri uri) {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public Uri insert(Uri uri, ContentValues values) {
+        return null;
+    }
+
+    @Override
+    public int delete(Uri uri, String selection, String[] selectionArgs) {
+        return 0;
+    }
+
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
         return 0;
@@ -1180,18 +1371,36 @@ public final class OkHi extends ContentProvider {
     public boolean onCreate() {
         // get the context (Application context)
         mContext = getContext();
+        try {
+            Parse.initialize(new Parse.Configuration.Builder(mContext)
+                    .applicationId(io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID)
+                    .clientKey(io.okheart.android.utilities.Constants.DEVMASTER_CLIENT_ID)
+                    .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+        } catch (Exception e) {
+            displayLog("parse initialize error " + e.toString());
+        }
+
+        try {
+            analytics = new Analytics.Builder(mContext, io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY).build();
+            Analytics.setSingletonInstance(analytics);
+        } catch (Exception e) {
+            displayLog("Error initializing analytics " + e.toString());
+        }
 
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        DataProvider dataProvider = new DataProvider(mContext);
-        List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        dataProvider = new io.okheart.android.database.DataProvider(mContext);
+
+        io.okheart.android.utilities.ConfigurationFile configurationFile = new io.okheart.android.utilities.ConfigurationFile(mContext);
+        /*
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("foreground addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    mContext.startForegroundService(new Intent(mContext, ForegroundService.class));
+                    mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
                 } else {
-                    mContext.startService(new Intent(mContext, ForegroundService.class));
+                    mContext.startService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
                 }
 
             } catch (Exception jse) {
@@ -1201,8 +1410,11 @@ public final class OkHi extends ContentProvider {
             //we have no addresses to start foreground
             displayLog("we have no addresses to start foreground");
         }
+        */
+
+        displayLog("okhi create");
+
+
         return true;
-
     }
-
 }

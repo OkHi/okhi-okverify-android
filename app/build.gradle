@@ -1,6 +1,6 @@
-apply plugin: 'com.android.library'
+//apply plugin: 'com.android.library'
 apply plugin: 'com.github.dcendents.android-maven'
-//apply plugin: 'com.android.application'
+apply plugin: 'com.android.application'
 group = 'com.github.okhi-android-sdk'
 
 
@@ -21,11 +21,11 @@ android {
 
     compileSdkVersion 29
     defaultConfig {
-        //applicationId "io.okheart.android"
+        applicationId "io.okheart.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 34
-        versionName "1.5.18"
+        versionCode 36
+        versionName "1.5.20"
         signingConfig signingConfigs.config
         //buildConfigField("String", "FIREBASE_APP_KEY", "\"${firebaseAppKey}\"")
     }
@@ -53,6 +53,7 @@ dependencies {
     //implementation 'com.google.firebase:firebase-config:19.0.3'
     implementation 'com.segment.analytics.android:analytics:4.3.1'
     //implementation 'com.google.firebase:firebase-config:19.0.3'
+    implementation "android.arch.work:work-runtime:1.0.1"
 
     implementation 'androidx.constraintlayout:constraintlayout:1.1.3'
 }

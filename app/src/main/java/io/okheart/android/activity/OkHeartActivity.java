@@ -26,15 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import io.okheart.android.BuildConfig;
-import io.okheart.android.OkHi;
-import io.okheart.android.R;
-import io.okheart.android.asynctask.SegmentIdentifyTask;
-import io.okheart.android.asynctask.SegmentTrackTask;
-import io.okheart.android.callback.OkHiCallback;
-import io.okheart.android.callback.SegmentIdentifyCallBack;
-import io.okheart.android.callback.SegmentTrackCallBack;
-
 
 public class OkHeartActivity extends AppCompatActivity {
 
@@ -45,7 +36,7 @@ public class OkHeartActivity extends AppCompatActivity {
     private static Float acc;
     private static String firstname, lastname, phonenumber, apiKey, color, name, logo, appbarcolor;
     private static Boolean appbarvisible, enablestreetview;
-    private static OkHiCallback okHiCallback;
+    private static io.okheart.android.callback.OkHiCallback okHiCallback;
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
     private static String verify;
@@ -309,7 +300,7 @@ public class OkHeartActivity extends AppCompatActivity {
 
         //apiKey = "r:b4877fc0324225741db19553d67f147b";
 
-        myWebView = OkHeartActivity.this.findViewById(R.id.webview);
+        myWebView = OkHeartActivity.this.findViewById(io.okheart.android.R.id.webview);
         myWebView.setWebViewClient(new MyWebViewClient());
 
         /*
@@ -396,7 +387,7 @@ public class OkHeartActivity extends AppCompatActivity {
         });
 
         try {
-            okHiCallback = OkHi.getCallback();
+            okHiCallback = io.okheart.android.OkHi.getCallback();
             if (okHiCallback != null) {
                 displayLog("okheartcallback is not null");
             } else {
@@ -425,14 +416,14 @@ public class OkHeartActivity extends AppCompatActivity {
             JSONObject identifyjson = new JSONObject();
             identifyjson.put("userId", "8VXRqG8YhN");
             try {
-                SegmentIdentifyCallBack segmentIdentifyCallBack = new SegmentIdentifyCallBack() {
+                io.okheart.android.callback.SegmentIdentifyCallBack segmentIdentifyCallBack = new io.okheart.android.callback.SegmentIdentifyCallBack() {
                     @Override
                     public void querycomplete(String response, boolean status) {
                         if (status) {
                             displayLog("things went ok with send to omtm identify");
 
                             try {
-                                SegmentTrackCallBack segmentTrackCallBack = new SegmentTrackCallBack() {
+                                io.okheart.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okheart.android.callback.SegmentTrackCallBack() {
                                     @Override
                                     public void querycomplete(String response, boolean status) {
                                         if (status) {
@@ -459,7 +450,7 @@ public class OkHeartActivity extends AppCompatActivity {
                                 trackjson.put("action", "start");
                                 trackjson.put("actionSubtype", "start");
                                 trackjson.put("clientProduct", "okHeartAndroidSDK");
-                                trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+                                trackjson.put("clientProductVersion", io.okheart.android.BuildConfig.VERSION_NAME);
                                 trackjson.put("clientKey", apiKey);
                                 trackjson.put("appLayer", "client");
                                 trackjson.put("onObject", "sdk");
@@ -469,7 +460,7 @@ public class OkHeartActivity extends AppCompatActivity {
                                 trackjson.put("uniqueId", uniqueId);
 
                                 eventjson.put("properties", trackjson);
-                                SegmentTrackTask segmentTrackTask = new SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
                                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             } catch (JSONException e) {
                                 displayLog("track error omtm error " + e.toString());
@@ -480,7 +471,7 @@ public class OkHeartActivity extends AppCompatActivity {
 
                     }
                 };
-                SegmentIdentifyTask segmentIdentifyTask = new SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
+                io.okheart.android.asynctask.SegmentIdentifyTask segmentIdentifyTask = new io.okheart.android.asynctask.SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
                 segmentIdentifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             } catch (Exception e) {
@@ -575,8 +566,8 @@ public class OkHeartActivity extends AppCompatActivity {
                     "    },\n" +
                     "    \"parent\": {\n" +
                     "      \"name\": \"okHeartAndroidSDK\",\n" +
-                    "      \"version\": \"" + BuildConfig.VERSION_NAME + "\",\n" +
-                    "      \"build\": \"" + BuildConfig.VERSION_CODE + "\",\n" +
+                    "      \"version\": \"" + io.okheart.android.BuildConfig.VERSION_NAME + "\",\n" +
+                    "      \"build\": \"" + io.okheart.android.BuildConfig.VERSION_CODE + "\",\n" +
                     "      \"namespace\": \"com.develop.okheartandroidsdk.okhi\"\n" +
                     "    }\n" +
                     "  }\n" +

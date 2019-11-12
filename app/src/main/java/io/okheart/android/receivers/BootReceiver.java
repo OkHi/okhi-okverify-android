@@ -1,13 +1,6 @@
 package io.okheart.android.receivers;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.os.Build;
-
-import io.okheart.android.services.ForegroundService;
-
-public class BootReceiver extends BroadcastReceiver {
+public class BootReceiver {/* extends BroadcastReceiver {
     private static final String TAG = "BootReceiver";
 
     @Override
@@ -22,9 +15,9 @@ public class BootReceiver extends BroadcastReceiver {
 
             try {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    context.startForegroundService(new Intent(context, ForegroundService.class));
+                    context.startForegroundService(new Intent(context, io.okheart.android.services.ForegroundService.class));
                 } else {
-                    context.startService(new Intent(context, ForegroundService.class));
+                    context.startService(new Intent(context, io.okheart.android.services.ForegroundService.class));
                 }
 
             } catch (Exception jse) {
