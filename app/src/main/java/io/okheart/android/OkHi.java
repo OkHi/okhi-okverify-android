@@ -734,28 +734,28 @@ public final class OkHi extends ContentProvider {
         displayLog("display client " + jsonObject.toString());
 
 
-          callback = okHiCallback;
-          firstname = jsonObject.optString("firstName");
-          lastname = jsonObject.optString("lastName");
-          phonenumber = jsonObject.optString("phone");
+        callback = okHiCallback;
+        firstname = jsonObject.optString("firstName");
+        lastname = jsonObject.optString("lastName");
+        phonenumber = jsonObject.optString("phone");
 
-          try {
-              HashMap<String, String> loans = new HashMap<>();
-              loans.put("phonenumber", phonenumber);
-              loans.put("firstname", firstname);
-              loans.put("lastname", lastname);
-              loans.put("uniqueId", uniqueId);
-              HashMap<String, String> parameters = new HashMap<>();
-              parameters.put("eventName", "Android SDK");
-              parameters.put("type", "initialize");
-              parameters.put("subtype", "manualPing");
-              parameters.put("onObject", "okHeartAndroidSDK");
-              parameters.put("view", "worker");
-              parameters.put("appKey", "" + appkey);
-              sendEvent(parameters, loans);
-          } catch (Exception e1) {
-              displayLog("error attaching afl to ual " + e1.toString());
-          }
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("phonenumber", phonenumber);
+            loans.put("firstname", firstname);
+            loans.put("lastname", lastname);
+            loans.put("uniqueId", uniqueId);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "initialize");
+            parameters.put("subtype", "manualPing");
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "worker");
+            parameters.put("appKey", "" + appkey);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
 
         String tempPhonenumber = null;
         if (phonenumber != null) {
@@ -860,7 +860,7 @@ public final class OkHi extends ContentProvider {
               }
           });
 */
-      }
+    }
 
 
     /*
@@ -949,6 +949,7 @@ public final class OkHi extends ContentProvider {
             displayLog("jsonexception " + jse.toString());
         }
     }
+
     private static void displayLog(String log) {
         Log.i(TAG, log);
     }
