@@ -89,6 +89,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void startInitialization(final String applicationKey, final Boolean verify) {
+        displayLog("workmanager startInitialization " + verify);
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -120,8 +121,10 @@ public final class OkHi extends ContentProvider {
                     if ((tempVerify.equalsIgnoreCase("false")) || ((tempVerify.equalsIgnoreCase("true")))) {
                         writeToFileVerify(tempVerify, "six");
                         if (verify) {
+                            displayLog("decideWhatToStart");
                             decideWhatToStart();
                         } else {
+                            displayLog("stopPeriodicPing");
                             stopPeriodicPing();
                         }
 
@@ -1043,6 +1046,7 @@ public final class OkHi extends ContentProvider {
 
     private static void decideWhatToStart() {
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+        displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
 
             String tempKill = dataProvider.getPropertyValue("kill_switch");
@@ -1161,7 +1165,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
-
+        displayLog("workmanager startKeepPeriodicPing");
         try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -1186,7 +1190,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void startReplacePeriodicPing(Integer pingTime, String uniqueId) {
-
+        displayLog("workmanager startReplacePeriodicPing");
         try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)

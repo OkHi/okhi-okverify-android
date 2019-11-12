@@ -164,19 +164,23 @@ public class WebAppInterface {
                         displayLog("location_created");
                         try {
                             Long i = saveAddressToFirestore(payload);
-                            String tempVerify = dataProvider.getPropertyValue("verify");
-                            if (tempVerify != null) {
-                                if (tempVerify.length() > 0) {
-                                    if (tempVerify.equalsIgnoreCase("true")) {
-                                        decideWhatToStart();
+                            if (i > 0) {
+                                displayLog("saveAddressToFirestore " + i);
+                                String tempVerify = dataProvider.getPropertyValue("verify");
+                                displayLog("verify " + tempVerify);
+                                if (tempVerify != null) {
+                                    if (tempVerify.length() > 0) {
+                                        if (tempVerify.equalsIgnoreCase("true")) {
+                                            decideWhatToStart();
+                                        } else {
+                                            stopPeriodicPing();
+                                        }
                                     } else {
                                         stopPeriodicPing();
                                     }
                                 } else {
                                     stopPeriodicPing();
                                 }
-                            } else {
-                                stopPeriodicPing();
                             }
                             /*
                             if (i > 0) {
@@ -233,19 +237,23 @@ public class WebAppInterface {
                         displayLog("location_updated");
                         try {
                             Long i = saveAddressToFirestore(payload);
-                            String tempVerify = dataProvider.getPropertyValue("verify");
-                            if (tempVerify != null) {
-                                if (tempVerify.length() > 0) {
-                                    if (tempVerify.equalsIgnoreCase("true")) {
-                                        decideWhatToStart();
+                            if (i > 0) {
+                                displayLog("saveAddressToFirestore " + i);
+                                String tempVerify = dataProvider.getPropertyValue("verify");
+                                displayLog("verify " + tempVerify);
+                                if (tempVerify != null) {
+                                    if (tempVerify.length() > 0) {
+                                        if (tempVerify.equalsIgnoreCase("true")) {
+                                            decideWhatToStart();
+                                        } else {
+                                            stopPeriodicPing();
+                                        }
                                     } else {
                                         stopPeriodicPing();
                                     }
                                 } else {
                                     stopPeriodicPing();
                                 }
-                            } else {
-                                stopPeriodicPing();
                             }
 
                             /*
@@ -300,6 +308,29 @@ public class WebAppInterface {
                         break;
                     case "location_selected":
                         displayLog("location_selected");
+                        try {
+                            Long i = saveAddressToFirestore(payload);
+                            if (i > 0) {
+                                displayLog("saveAddressToFirestore " + i);
+                                String tempVerify = dataProvider.getPropertyValue("verify");
+                                displayLog("verify " + tempVerify);
+                                if (tempVerify != null) {
+                                    if (tempVerify.length() > 0) {
+                                        if (tempVerify.equalsIgnoreCase("true")) {
+                                            decideWhatToStart();
+                                        } else {
+                                            stopPeriodicPing();
+                                        }
+                                    } else {
+                                        stopPeriodicPing();
+                                    }
+                                } else {
+                                    stopPeriodicPing();
+                                }
+                            }
+                        } catch (Exception e) {
+                            displayLog("error saveAddressToFirestore " + e.toString());
+                        }
                         try {
                             HashMap<String, String> loans = new HashMap<>();
                             //loans.put("phonenumber",postDataParams.get("phone"));
@@ -620,6 +651,7 @@ public class WebAppInterface {
 
     private void decideWhatToStart() {
         List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
             String tempKill = dataProvider.getPropertyValue("kill_switch");
             if (tempKill != null) {
@@ -682,6 +714,7 @@ public class WebAppInterface {
 
     private void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
 
+        displayLog("workmanager startKeepPeriodicPing");
         try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -706,7 +739,7 @@ public class WebAppInterface {
     }
 
     private void startReplacePeriodicPing(Integer pingTime, String uniqueId) {
-
+        displayLog("workmanager startReplacePeriodicPing");
         try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
