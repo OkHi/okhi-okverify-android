@@ -41,13 +41,14 @@
 #-renamesourcefileattribute SourceFile
 
 -keep class retrofit2.** { *; }
--keep class com.squareup.okhttp3.** {
-*;
-}
+
 
 -keep class com.parse.Parse.** { *; }
 
--keepattributes Signature
--keepattributes Annotation
+-keep interface okhttp3.** { *; }
+
+-dontwarn okhttp3.**
+
+-keep class io.okheart.android.datamodel.** { *; }
 
 
