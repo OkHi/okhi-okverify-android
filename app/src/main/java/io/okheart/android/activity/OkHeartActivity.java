@@ -26,6 +26,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import io.okheart.android.OkHi;
+
 
 public class OkHeartActivity extends AppCompatActivity {
 
@@ -40,6 +42,7 @@ public class OkHeartActivity extends AppCompatActivity {
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
     private static String verify;
+
 
     private static String convertStreamToString(InputStream is) throws IOException {
         //displayLog("convertStreamToString1");
@@ -387,7 +390,7 @@ public class OkHeartActivity extends AppCompatActivity {
         });
 
         try {
-            okHiCallback = io.okheart.android.OkHi.getCallback();
+            okHiCallback = OkHi.getCallback();
             if (okHiCallback != null) {
                 displayLog("okheartcallback is not null");
             } else {

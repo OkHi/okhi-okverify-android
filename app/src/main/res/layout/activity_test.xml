@@ -50,4 +50,16 @@
         android:text="submit"
         android:textSize="20dip" />
 
+
+    <Button
+        android:id="@+id/ping"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/submit"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="40dip"
+        android:padding="20dip"
+        android:text="Manual ping"
+        android:textSize="20dip" />
+
 </RelativeLayout>

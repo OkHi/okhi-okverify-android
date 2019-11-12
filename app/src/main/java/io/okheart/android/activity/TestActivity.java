@@ -21,7 +21,7 @@ public class TestActivity extends AppCompatActivity {
 
     private static final int MY_PERMISSIONS_ACCESS_FINE_LOCATION = 83;
     private EditText firstnameedt, lastnameedt, phoneedt;
-    private Button submitbtn;
+    private Button submitbtn, pingbtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,7 +34,7 @@ public class TestActivity extends AppCompatActivity {
         lastnameedt = findViewById(R.id.lastname);
         phoneedt = findViewById(R.id.phone);
         submitbtn = findViewById(R.id.submit);
-
+        pingbtn = findViewById(R.id.ping);
         //displayLog(""+OkHi.checkPermission());
 
         submitbtn.setOnClickListener(new View.OnClickListener() {
@@ -74,6 +74,43 @@ public class TestActivity extends AppCompatActivity {
 
             }
         });
+
+        pingbtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                OkHiCallback okHiCallback = new OkHiCallback() {
+                    @Override
+                    public void querycomplete(JSONObject result) {
+                        displayLog(result.toString());
+                        try {
+
+                            String message = result.optString("message");
+                            if (message != null) {
+                                if (message.equalsIgnoreCase("fatal_exit")) {
+                                    Toast.makeText(TestActivity.this, "Please input phonenumber", Toast.LENGTH_LONG).show();
+                                } else {
+                                    JSONObject payloadJson = result.optJSONObject("payload");
+                                    String errormessage = payloadJson.optString("message");
+                                    Toast.makeText(TestActivity.this, errormessage, Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        } catch (Exception jse) {
+                            displayLog(jse.toString());
+                        }
+                    }
+                };
+                String tempPhonenumber = phoneedt.getText().toString();
+                try {
+                    JSONObject jsonObject = new JSONObject();
+                    jsonObject.put("phone", tempPhonenumber);
+                    OkHi.manualPing(okHiCallback, jsonObject);
+                } catch (JSONException e) {
+                    displayLog("json exception error " + e.toString());
+                }
+
+            }
+        });
+
     }
 
 

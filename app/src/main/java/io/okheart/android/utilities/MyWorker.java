@@ -7,7 +7,6 @@ import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
@@ -58,7 +57,6 @@ public class MyWorker extends Worker {
     public MyWorker(@NonNull Context appContext, @NonNull WorkerParameters workerParams) {
         super(appContext, workerParams);
         context = appContext;
-
     }
 
     @NonNull
@@ -67,6 +65,21 @@ public class MyWorker extends Worker {
 
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(context);
+
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Data Collection Service");
+            parameters.put("subtype", "create");
+            parameters.put("type", "doWork");
+            parameters.put("onObject", "app");
+            parameters.put("view", "worker");
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
+
         try {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
         } catch (Exception e) {
@@ -102,7 +115,7 @@ public class MyWorker extends Worker {
         startLocationUpdates();
 
         Data outputData = new Data.Builder().putString("work_result", "Foreground service started").build();
-        sendSMS("dowork");
+        //sendSMS("dowork");
 
         return Result.success(outputData);
     }
@@ -119,7 +132,7 @@ public class MyWorker extends Worker {
             parameters.put("subtype", "create");
             parameters.put("type", "createLocationRequest");
             parameters.put("onObject", "app");
-            parameters.put("view", "foregroundService");
+            parameters.put("view", "worker");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -142,7 +155,7 @@ public class MyWorker extends Worker {
             parameters.put("subtype", "create");
             parameters.put("type", "createLocationCallback");
             parameters.put("onObject", "app");
-            parameters.put("view", "foregroundService");
+            parameters.put("view", "worker");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -155,7 +168,7 @@ public class MyWorker extends Worker {
 
                 if (locationResult == null) {
                     displayLog("lat cannot get location");
-                    sendSMS("with null location");
+                    //sendSMS("with null location");
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
@@ -164,7 +177,7 @@ public class MyWorker extends Worker {
                         parameters.put("subtype", "result");
                         parameters.put("type", "onLocationResult");
                         parameters.put("onObject", "null");
-                        parameters.put("view", "foregroundService");
+                        parameters.put("view", "worker");
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
                         displayLog("error attaching afl to ual " + e1.toString());
@@ -187,7 +200,7 @@ public class MyWorker extends Worker {
                         parameters.put("subtype", "result");
                         parameters.put("type", "onLocationResult");
                         parameters.put("onObject", "app");
-                        parameters.put("view", "foregroundService");
+                        parameters.put("view", "worker");
                         parameters.put("latitude", "" + lat);
                         parameters.put("longitude", "" + lng);
                         parameters.put("gpsAccuracy", "" + acc);
@@ -224,7 +237,7 @@ public class MyWorker extends Worker {
             parameters.put("subtype", "create");
             parameters.put("type", "buildLocationSettingsRequest");
             parameters.put("onObject", "app");
-            parameters.put("view", "foregroundService");
+            parameters.put("view", "worker");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -372,7 +385,7 @@ public class MyWorker extends Worker {
                 parameters.put("subtype", "saveBackgroundData");
                 parameters.put("type", "saveData");
                 parameters.put("onObject", "backgroundService");
-                parameters.put("view", "foregroundService");
+                parameters.put("view", "worker");
                 parameters.put("branch", "hq_okhi");
                 //parameters.put("deliveryId", null);
                 //parameters.put("ualId", addressParseObject.getClaimUalId());
@@ -456,7 +469,7 @@ public class MyWorker extends Worker {
                         parameters.put("subtype", "saveData");
                         parameters.put("type", "parse");
                         parameters.put("onObject", "success");
-                        parameters.put("view", "foregroundService");
+                        parameters.put("view", "worker");
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
                         displayLog("error attaching afl to ual " + e1.toString());
@@ -471,7 +484,7 @@ public class MyWorker extends Worker {
                         parameters.put("subtype", "saveData");
                         parameters.put("type", "parse");
                         parameters.put("onObject", "failure");
-                        parameters.put("view", "foregroundService");
+                        parameters.put("view", "worker");
                         parameters.put("error", e.toString());
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
@@ -495,7 +508,7 @@ public class MyWorker extends Worker {
             parameters.put("subtype", "stop");
             parameters.put("type", "stopLocationUpdates");
             parameters.put("onObject", "app");
-            parameters.put("view", "foregroundService");
+            parameters.put("view", "worker");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -517,7 +530,7 @@ public class MyWorker extends Worker {
             parameters.put("subtype", "start");
             parameters.put("type", "startLocationUpdates");
             parameters.put("onObject", "app");
-            parameters.put("view", "foregroundService");
+            parameters.put("view", "worker");
             //parameters.put("killswitch", "" + remotekillswitch);
             //parameters.put("ualId", model.getUalId());
             sendEvent(parameters, loans);
@@ -539,7 +552,7 @@ public class MyWorker extends Worker {
                                 parameters.put("subtype", "complete");
                                 parameters.put("type", "startLocationUpdates");
                                 parameters.put("onObject", "app");
-                                parameters.put("view", "foregroundService");
+                                parameters.put("view", "worker");
                                 //parameters.put("killswitch", "" + remotekillswitch);
                                 //parameters.put("ualId", model.getUalId());
                                 sendEvent(parameters, loans);
@@ -560,7 +573,7 @@ public class MyWorker extends Worker {
                         parameters.put("subtype", "success");
                         parameters.put("type", "startLocationUpdates");
                         parameters.put("onObject", "app");
-                        parameters.put("view", "foregroundService");
+                        parameters.put("view", "worker");
                         //parameters.put("killswitch", "" + remotekillswitch);
                         //parameters.put("ualId", model.getUalId());
                         sendEvent(parameters, loans);
@@ -581,14 +594,14 @@ public class MyWorker extends Worker {
                         parameters.put("subtype", "failure");
                         parameters.put("type", "startLocationUpdates");
                         parameters.put("onObject", "app");
-                        parameters.put("view", "foregroundService");
+                        parameters.put("view", "worker");
                         //parameters.put("killswitch", "" + remotekillswitch);
                         parameters.put("error", e.getMessage());
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
                         displayLog("error attaching afl to ual " + e1.toString());
                     }
-                    sendSMS("location callback failure");
+                    //sendSMS("location callback failure");
                     //startAlert(remotePingFrequency);
 
                 }
@@ -596,13 +609,14 @@ public class MyWorker extends Worker {
         } catch (SecurityException e) {
             displayLog("startLocationUpdates requestLocationUpdates error " + e.toString());
             //displayToast("Please enable GPS location", true);
-            sendSMS("location callback security exception");
+            //sendSMS("location callback security exception");
         }
 
 
     }
 
 
+    /*
     private void sendSMS(String who) {
 
         try {
@@ -636,6 +650,7 @@ public class MyWorker extends Worker {
         }
 
     }
+    */
 
 
     private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {

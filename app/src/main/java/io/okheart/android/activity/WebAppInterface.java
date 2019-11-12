@@ -21,10 +21,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.okheart.android.OkHi;
 import io.okheart.android.datamodel.AddressItem;
 import io.okheart.android.utilities.MyWorker;
 
-public class WebAppInterface {
+class WebAppInterface {
     private static final String TAG = "WebAppInterface";
     private static String appkey;
     OkHeartActivity mContext;
@@ -218,7 +219,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -292,7 +293,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -347,7 +348,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -379,7 +380,7 @@ public class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
 

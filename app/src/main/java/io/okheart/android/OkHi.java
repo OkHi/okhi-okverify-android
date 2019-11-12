@@ -43,6 +43,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.okheart.android.asynctask.SendCustomLinkSmsTask;
+import io.okheart.android.callback.SendCustomLinkSmsCallBack;
 import io.okheart.android.utilities.MyWorker;
 
 
@@ -61,7 +63,7 @@ public final class OkHi extends ContentProvider {
     private static io.okheart.android.callback.OkHiCallback callback;
     private static String appkey;
     private static String uniqueId;
-    private static String remoteSmsTemplate;
+    //private static String remoteSmsTemplate;
     private static Analytics analytics;
 
     public OkHi() {
@@ -726,10 +728,10 @@ public final class OkHi extends ContentProvider {
         return permission;
     }
 
-    /*
-    public static void manualPing(OkHiCallback okHiCallback, JSONObject jsonObject) {
 
-          //displayLog("display client " + jsonObject.toString());
+    public static void manualPing(io.okheart.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) {
+
+        displayLog("display client " + jsonObject.toString());
 
 
           callback = okHiCallback;
@@ -748,13 +750,73 @@ public final class OkHi extends ContentProvider {
               parameters.put("type", "initialize");
               parameters.put("subtype", "manualPing");
               parameters.put("onObject", "okHeartAndroidSDK");
-              parameters.put("view", "app");
+              parameters.put("view", "worker");
               parameters.put("appKey", "" + appkey);
               sendEvent(parameters, loans);
           } catch (Exception e1) {
               displayLog("error attaching afl to ual " + e1.toString());
           }
 
+        String tempPhonenumber = null;
+        if (phonenumber != null) {
+            if (phonenumber.length() > 0) {
+                if (phonenumber.startsWith("0")) {
+                    tempPhonenumber = "+254" + phonenumber.substring(1);
+                } else {
+                    tempPhonenumber = phonenumber;
+                }
+                List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+                if (addressItemList.size() > 0) {
+                    sendPingSMS(okHiCallback, tempPhonenumber);
+                } else {
+                    try {
+                        JSONObject responseJson = new JSONObject();
+                        responseJson.put("message", "sms_failure");
+                        JSONObject payloadJson = new JSONObject();
+                        payloadJson.put("errorCode", -1);
+                        payloadJson.put("error", "Missing addresses");
+                        payloadJson.put("message", "Please create at least one address");
+                        responseJson.put("payload", payloadJson);
+                        displayLog(responseJson.toString());
+                        okHiCallback.querycomplete(responseJson);
+                    } catch (JSONException jse) {
+
+                    }
+                }
+            } else {
+                try {
+                    JSONObject responseJson = new JSONObject();
+                    responseJson.put("message", "fatal_exit");
+                    JSONObject payloadJson = new JSONObject();
+                    payloadJson.put("errorCode", -1);
+                    payloadJson.put("error", "Missing parameter");
+                    payloadJson.put("message", "Phone number cannot be an empty string");
+                    responseJson.put("payload", payloadJson);
+                    displayLog(responseJson.toString());
+                    okHiCallback.querycomplete(responseJson);
+                } catch (JSONException jse) {
+
+                }
+            }
+        } else {
+            try {
+                JSONObject responseJson = new JSONObject();
+                responseJson.put("message", "fatal_exit");
+                JSONObject payloadJson = new JSONObject();
+                payloadJson.put("errorCode", -1);
+                payloadJson.put("error", "Missing parameter");
+                payloadJson.put("message", "Phone number cannot be null");
+                responseJson.put("payload", payloadJson);
+                displayLog(responseJson.toString());
+                okHiCallback.querycomplete(responseJson);
+            } catch (JSONException jse) {
+
+            }
+        }
+
+
+
+                  /*
           query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
               @Override
               public void onComplete(@NonNull Task<QuerySnapshot> task) {
@@ -797,9 +859,9 @@ public final class OkHi extends ContentProvider {
                   }
               }
           });
-
+*/
       }
-  */
+
 
     /*
     public static void checkInternet() {
@@ -831,6 +893,62 @@ public final class OkHi extends ContentProvider {
         }
     }
 */
+
+    private static void sendPingSMS(final io.okheart.android.callback.OkHiCallback okHiCallback, String phonenumber) {
+        try {
+            String remoteSmsTemplate = dataProvider.getPropertyValue("sms_template");
+            String message = remoteSmsTemplate + uniqueId;
+            final HashMap<String, String> jsonObject = new HashMap<>();
+            jsonObject.put("userId", "GrlaR3LHUP");
+            jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
+            jsonObject.put("customName", "test");
+            //jsonObject.put("ualId", verifyDataItem.getUalId());
+            jsonObject.put("phoneNumber", phonenumber);
+            jsonObject.put("phone", phonenumber);
+            jsonObject.put("message", message);
+            jsonObject.put("uniqueId", uniqueId);
+            SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new SendCustomLinkSmsCallBack() {
+                @Override
+                public void querycomplete(String response, boolean status) {
+                    if (status) {
+                        //displayLog("send sms success " + response);
+                        try {
+                            JSONObject responseJson = new JSONObject();
+                            responseJson.put("message", "sendSMS");
+                            JSONObject payloadJson = new JSONObject();
+                            payloadJson.put("errorCode", 0);
+                            payloadJson.put("error", "SMS sent");
+                            payloadJson.put("message", "SMS sent");
+                            responseJson.put("payload", payloadJson);
+                            displayLog(responseJson.toString());
+                            okHiCallback.querycomplete(responseJson);
+                        } catch (JSONException jse) {
+
+                        }
+                    } else {
+                        displayLog("Error! " + response);
+                        try {
+                            JSONObject responseJson = new JSONObject();
+                            responseJson.put("message", "sendSMS");
+                            JSONObject payloadJson = new JSONObject();
+                            payloadJson.put("errorCode", 0);
+                            payloadJson.put("error", "SMS not sent");
+                            payloadJson.put("message", response);
+                            responseJson.put("payload", payloadJson);
+                            displayLog(responseJson.toString());
+                            okHiCallback.querycomplete(responseJson);
+                        } catch (JSONException jse) {
+
+                        }
+                    }
+                }
+            };
+            SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject);
+            sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } catch (Exception jse) {
+            displayLog("jsonexception " + jse.toString());
+        }
+    }
     private static void displayLog(String log) {
         Log.i(TAG, log);
     }
