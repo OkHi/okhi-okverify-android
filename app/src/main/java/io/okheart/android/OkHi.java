@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.location.Location;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -27,6 +28,9 @@ import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
 import com.parse.Parse;
+import com.parse.ParseException;
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
 import com.segment.analytics.Analytics;
 
 import org.json.JSONException;
@@ -546,6 +550,10 @@ public final class OkHi extends ContentProvider {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
+        dataProvider.insertStuff("phonenumber", phonenumber);
+        dataProvider.insertStuff("requestSource", requestSource);
+
+
         try {
             Intent intent = new Intent(mContext, io.okheart.android.activity.OkHeartActivity.class);
             intent.putExtra("firstname", firstname);
@@ -813,86 +821,7 @@ public final class OkHi extends ContentProvider {
 
             }
         }
-
-
-
-                  /*
-          query.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-              @Override
-              public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                  if (task.isSuccessful()) {
-                      if (task.getResult().size() > 0) {
-                          VerifyDataItem verifyDataItem = task.getResult().getDocuments().get(0).toObject(VerifyDataItem.class);
-
-                          try {
-                              String message = remoteSmsTemplate + uniqueId;
-                              final HashMap<String, String> jsonObject = new HashMap<>();
-                              jsonObject.put("userId", "GrlaR3LHUP");
-                              jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
-                              jsonObject.put("customName", "test");
-                              jsonObject.put("ualId", verifyDataItem.getUalId());
-                              jsonObject.put("phoneNumber", verifyDataItem.getPhone());
-                              jsonObject.put("phone", verifyDataItem.getPhone());
-                              jsonObject.put("message", message);
-                              jsonObject.put("uniqueId", uniqueId);
-                              SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new SendCustomLinkSmsCallBack() {
-                                  @Override
-                                  public void querycomplete(String response, boolean status) {
-                                      if (status) {
-                                          displayLog("send sms success " + response);
-                                          displayToast("SMS sent", true);
-                                      } else {
-                                          displayToast("Error! " + response, true);
-                                      }
-                                  }
-                              };
-                              SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject);
-                              sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                          } catch (Exception jse) {
-                              displayLog("jsonexception " + jse.toString());
-                          }
-                      } else {
-                          displayToast("Create an address first", true);
-                      }
-                  } else {
-                      displayToast("Create an address first", true);
-                  }
-              }
-          });
-*/
     }
-
-
-    /*
-    public static void checkInternet() {
-        try {
-            HeartBeatCallBack heartBeatCallBack = new HeartBeatCallBack() {
-                @Override
-                public void querycomplete(Boolean response) {
-                    if (response) {
-
-                    } else {
-                        try {
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("message", "fatal_exit");
-                            JSONObject jsonObject1 = new JSONObject();
-                            jsonObject1.put("Error", "Network error");
-                            jsonObject.put("payload", jsonObject1);
-                            displayLog(jsonObject.toString());
-                            callback.querycomplete(jsonObject);
-                        } catch (JSONException jse) {
-                            displayLog("json error " + jse.toString());
-                        }
-                    }
-                }
-            };
-            HeartBeatTask heartBeatTask = new HeartBeatTask(heartBeatCallBack);
-            heartBeatTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } catch (Exception e) {
-            displayLog("check internet error " + e.toString());
-        }
-    }
-*/
 
     private static void sendPingSMS(final io.okheart.android.callback.OkHiCallback okHiCallback, String phonenumber) {
         try {
@@ -1280,12 +1209,40 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void stopPeriodicPing() {
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Data Collection Service");
+            parameters.put("subtype", "stopPeriodicPing");
+            parameters.put("type", "doWork");
+            parameters.put("onObject", "app");
+            parameters.put("view", "OkHi");
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
         WorkManager.getInstance().cancelUniqueWork("ramogi");
     }
 
     private static void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
         displayLog("workmanager startKeepPeriodicPing");
         try {
+
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Data Collection Service");
+                parameters.put("subtype", "startKeepPeriodicPing");
+                parameters.put("type", "doWork");
+                parameters.put("onObject", "app");
+                parameters.put("view", "OkHi");
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build();
@@ -1311,6 +1268,20 @@ public final class OkHi extends ContentProvider {
     private static void startReplacePeriodicPing(Integer pingTime, String uniqueId) {
         displayLog("workmanager startReplacePeriodicPing");
         try {
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Data Collection Service");
+                parameters.put("subtype", "startReplacePeriodicPing");
+                parameters.put("type", "doWork");
+                parameters.put("onObject", "app");
+                parameters.put("view", "OkHi");
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build();
@@ -1334,89 +1305,381 @@ public final class OkHi extends ContentProvider {
         }
     }
 
+
+/*
+    private void updateDatabase() {
+
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+
+        if (addressItemList.size() > 0) {
+            List<Map<String, Object>> addresses = new ArrayList<>();
+
+
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            HashMap<String, String> parameters = new HashMap<>();
+
+            final Long timemilliseconds = System.currentTimeMillis();
+
+            final ParseObject parseObject = new ParseObject("UserVerificationData");
+
+            /*
+            parseObject.put("latitude", lat);
+            parseObject.put("longitude", lng);
+            parseObject.put("gpsAccuracy", acc);
+            ParseGeoPoint parseGeoPoint = new ParseGeoPoint(lat, lng);
+            parseObject.put("geoPoint", parseGeoPoint);
+            */
+/*
+            parseObject.put("geoPointSource", "webClientBackgroundGPS");
+            parseObject.put("timemilliseconds", timemilliseconds);
+            parseObject.put("device", getDeviceModelAndBrand());
+            parseObject.put("model", Build.MODEL);
+            parseObject.put("brand", Build.MANUFACTURER);
+            parseObject.put("OSVersion", Build.VERSION.SDK_INT);
+            parseObject.put("OSName", "Android");
+            parseObject.put("appVersionCode", io.okheart.android.BuildConfig.VERSION_CODE);
+            parseObject.put("appVersionName", io.okheart.android.BuildConfig.VERSION_NAME);
+
+            try {
+                WifiManager wifiManager = (WifiManager) mContext.getSystemService(Context.WIFI_SERVICE);
+                WifiInfo info = wifiManager.getConnectionInfo();
+                String ssid = info.getSSID();
+                displayLog("ssid " + ssid);
+                if (ssid.contains("unknown")) {
+
+                } else {
+                    if (ssid.length() > 0) {
+                        displayLog("ssid " + ssid.substring(1, ssid.length() - 1));
+                        parameters.put("ssid", ssid);
+                        parseObject.put("ssid", ssid);
+                    } else {
+
+                    }
+                }
+
+
+                try {
+                    List<String> configuredSSIDList = new ArrayList<>();
+                    //List<String> scannedSSIDList = new ArrayList<>();
+                    List<WifiConfiguration> configuredList = wifiManager.getConfiguredNetworks();
+                    //List<ScanResult> scanResultList = wifiManager.getScanResults();
+                    //displayLog("configured list size "+configuredList.size());
+                    //displayLog("scanned list size "+scanResultList.size());
+                    for (WifiConfiguration config : configuredList) {
+                        //displayLog("configured list "+config.SSID);
+                        configuredSSIDList.add(config.SSID);
+                    }
+                    if (configuredSSIDList != null) {
+                        if (configuredSSIDList.size() > 0) {
+                            parameters.put("configuredSSIDs", configuredSSIDList.toString());
+                        }
+                    }
+                    parseObject.put("configuredSSIDs", configuredSSIDList);
+
+                } catch (Exception e) {
+                    displayLog("error gettign scanned list " + e.toString());
+                }
+
+
+            } catch (Exception e) {
+                displayLog(" error getting wifi info " + e.toString());
+            }
+
+            try{
+                String phonenumber = dataProvider.getPropertyValue("phonenumber");
+                if(phonenumber != null){
+                    if(phonenumber.length() > 0){
+                        parseObject.put("phonenumber", phonenumber);
+                    }
+                }
+            }
+            catch (Exception e){
+                displayLog("error getting phonenumber "+e.toString());
+            }
+
+
+            try {
+                boolean isPlugged = false;
+                BatteryManager bm = (BatteryManager) mContext.getSystemService(BATTERY_SERVICE);
+                int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                parameters.put("batteryLevel", "" + batLevel);
+                parseObject.put("batteryLevel", batLevel);
+
+                Intent intent = mContext.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+                    isPlugged = isPlugged || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                }
+                parameters.put("isPlugged", "" + isPlugged);
+                parseObject.put("isPlugged", isPlugged);
+
+                // Are we charging / charged?
+                int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                        status == BatteryManager.BATTERY_STATUS_FULL;
+                parameters.put("isCharging", "" + isCharging);
+                parseObject.put("isCharging", isCharging);
+
+                // How are we charging?
+                int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                parameters.put("usbCharge", "" + usbCharge);
+                parseObject.put("usbCharge", usbCharge);
+                boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                parameters.put("acCharge", "" + acCharge);
+                parseObject.put("acCharge", acCharge);
+
+            } catch (Exception e) {
+                displayLog(" error getting battery status " + e.toString());
+            }
+
+            parseObject.put("uniqueId", uniqueId);
+            parameters.put("uniqueId", uniqueId);
+
+            try {
+
+                parameters.put("uniqueId", uniqueId);
+                parameters.put("cookieToken", uniqueId);
+                parameters.put("eventName", "Data collection Service");
+                parameters.put("subtype", "saveBackgroundData");
+                parameters.put("type", "saveData");
+                parameters.put("onObject", "backgroundService");
+                parameters.put("view", "worker");
+                parameters.put("branch", "hq_okhi");
+                //parameters.put("deliveryId", null);
+                //parameters.put("ualId", addressParseObject.getClaimUalId());
+                parameters.put("userAffiliation", "okhi");
+
+                /*
+                parameters.put("latitude", "" + lat);
+                parameters.put("longitude", "" + lng);
+                parameters.put("gpsAccuracy", "" + acc);
+                try {
+                    Location location2 = new Location("geohash");
+                    location2.setLatitude(lat);
+                    location2.setLongitude(lng);
+
+                    io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                    parameters.put("location", hash.toString());
+                } catch (Exception e) {
+                    displayLog("geomap error " + e.toString());
+                }
+                */
+/*
+                parameters.put("geoPointSource", "clientBackgroundGPS");
+                parameters.put("timemilliseconds", "" + timemilliseconds);
+                parameters.put("device", getDeviceModelAndBrand());
+                parameters.put("model", Build.MODEL);
+                parameters.put("brand", Build.MANUFACTURER);
+                parameters.put("OSVersion", "" + Build.VERSION.SDK_INT);
+                parameters.put("OSName", "Android");
+                parameters.put("appVersionCode", "" + io.okheart.android.BuildConfig.VERSION_CODE);
+                parameters.put("appVersionName", "" + io.okheart.android.BuildConfig.VERSION_NAME);
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+
+
+            for (int i = 0; i < addressItemList.size(); i++) {
+                try {
+                    io.okheart.android.datamodel.AddressItem addressItem = addressItemList.get(i);
+                    //Float distance = getDistance(lat, lng, addressItem.getLat(), addressItem.getLng());
+                    Map<String, Object> nestedData = new HashMap<>();
+                    nestedData.put("ualId", addressItem.getUalid());
+                    nestedData.put("latitude", addressItem.getLat());
+                    nestedData.put("longitude", addressItem.getLng());
+                    if (distance < 100.0) {
+                        nestedData.put("verified", true);
+                    } else {
+                        nestedData.put("verified", false);
+                    }
+
+                    nestedData.put("distance", distance);
+                    HashMap<String, String> paramText = getTitleText(addressItem);
+                    nestedData.put("title", paramText.get("header"));
+                    nestedData.put("text", paramText.get("text"));
+                    addresses.add(nestedData);
+                } catch (Exception e) {
+
+                }
+            }
+            parseObject.put("addresses", addresses);
+            saveData(parseObject);
+        } else {
+            //add an event here saying we don't have addresses
+            //saveData(parseObject,  timemilliseconds);
+            //stopSelf();
+        }
+
+    }
+*/
+
+    private String getDeviceModelAndBrand() {
+
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.contains(manufacturer)) {
+            return model;
+        } else {
+            return manufacturer + " " + model;
+        }
+
+    }
+
+    private void saveData(ParseObject parseObject) {
+
+        displayLog("parse object save");
+        parseObject.saveEventually(new SaveCallback() {
+            @Override
+            public void done(ParseException e) {
+                if (e == null) {
+                    displayLog("save parseobject success ");
+                    try {
+                        HashMap<String, String> loans = new HashMap<>();
+                        loans.put("uniqueId", uniqueId);
+                        HashMap<String, String> parameters = new HashMap<>();
+                        parameters.put("eventName", "Data Collection Service");
+                        parameters.put("subtype", "saveData");
+                        parameters.put("type", "parse");
+                        parameters.put("onObject", "success");
+                        parameters.put("view", "worker");
+                        sendEvent(parameters, loans);
+                    } catch (Exception e1) {
+                        displayLog("error attaching afl to ual " + e1.toString());
+                    }
+
+                } else {
+                    try {
+                        HashMap<String, String> loans = new HashMap<>();
+                        loans.put("uniqueId", uniqueId);
+                        HashMap<String, String> parameters = new HashMap<>();
+                        parameters.put("eventName", "Data Collection Service");
+                        parameters.put("subtype", "saveData");
+                        parameters.put("type", "parse");
+                        parameters.put("onObject", "failure");
+                        parameters.put("view", "worker");
+                        parameters.put("error", e.toString());
+                        sendEvent(parameters, loans);
+                    } catch (Exception e1) {
+                        displayLog("error attaching afl to ual " + e1.toString());
+                    }
+                    displayLog("save parseobject error " + e.toString());
+                }
+            }
+        });
+    }
+
+
+    private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {
+
+        Location locationA = new Location("point A");
+
+        locationA.setLatitude(latA);
+        locationA.setLongitude(lngA);
+
+        Location locationB = new Location("point B");
+
+        locationB.setLatitude(latB);
+        locationB.setLongitude(lngB);
+
+        Float me = locationA.distanceTo(locationB);
+        displayLog("getDistance " + latA + " " + lngA + " " + latB + " " + lngB + " distance " + me);
+        return me;
+
+    }
+
+
+    private HashMap<String, String> getTitleText(io.okheart.android.datamodel.AddressItem model) {
+
+        String streetName = model.getStreetName();
+        String propertyName = model.getPropname();
+        String directions = model.getDirection();
+        String title = model.getLocationName();
+
+        displayLog(streetName + " " + propertyName + " " + directions + " " + title);
+
+        HashMap<String, String> titleText = new HashMap<>();
+
+        String header = "";
+        String text = "";
+        if (streetName != null) {
+            if (streetName.length() > 0) {
+                if (!(streetName.equalsIgnoreCase("null"))) {
+                    text = streetName;
+                } else {
+
+                    if (directions != null) {
+                        if (directions.length() > 0) {
+                            if (!(directions.equalsIgnoreCase("null"))) {
+                                text = directions;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (directions != null) {
+                    if (directions.length() > 0) {
+                        if (!(directions.equalsIgnoreCase("null"))) {
+                            text = directions;
+                        }
+                    }
+                }
+            }
+        } else {
+            if (directions != null) {
+                if (directions.length() > 0) {
+                    if (!(directions.equalsIgnoreCase("null"))) {
+                        text = directions;
+                    }
+                }
+            }
+        }
+
+        if (title != null) {
+            if (title.length() > 0) {
+                if (!(title.equalsIgnoreCase("null"))) {
+                    header = title;
+                } else {
+
+                    if (propertyName != null) {
+                        if (propertyName.length() > 0) {
+                            if (!(propertyName.equalsIgnoreCase("null"))) {
+                                header = propertyName;
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (propertyName != null) {
+                    if (propertyName.length() > 0) {
+                        if (!(propertyName.equalsIgnoreCase("null"))) {
+                            header = propertyName;
+                        }
+                    }
+                }
+            }
+        } else {
+            if (propertyName != null) {
+                if (propertyName.length() > 0) {
+                    if (!(propertyName.equalsIgnoreCase("null"))) {
+                        header = propertyName;
+                    }
+                }
+            }
+        }
+        titleText.put("header", header);
+        titleText.put("text", text);
+        displayLog("titletext " + titleText.get("header") + " " + titleText.get("text"));
+        return titleText;
+    }
+
     public static Integer getResume_ping_frequency() {
         return resume_ping_frequency;
     }
 
-    /*
-    private void saveInfoToFirestore(JSONObject payload) {
-
-        displayLog("saveAddressToFirestore");
-
-        JSONObject location = payload.optJSONObject("location");
-        JSONObject user = payload.optJSONObject("user");
-        String firstName = user.optString("firstName");
-        String lastName = user.optString("lastName");
-        String phone = user.optString("phone");
-        String streetName = location.optString("streetName");
-        String propertyName = location.optString("propertyName");
-        String directions = location.optString("directions");
-        String placeId = location.optString("placeId");
-        String ualId = location.optString("id");
-        String url = location.optString("url");
-        String title = location.optString("title");
-        String plusCode = location.optString("plusCode");
-        String branch = "okhi";
-        Double lat = location.optDouble("lat");
-        Double lng = location.optDouble("lng");
-
-
-        Map<String, Object> data = new HashMap<>();
-        data.put("latitude", lat);
-        data.put("longitude", lng);
-        data.put("timestamp", new Timestamp(new Date()));
-        GeoPoint geoPoint = new GeoPoint(lat, lng);
-        data.put("geoPoint", geoPoint);
-        data.put("firstName", firstName);
-        data.put("lastName", lastName);
-        data.put("phone", phone);
-        data.put("streetName", streetName);
-        data.put("propertyName", propertyName);
-
-        data.put("directions", directions);
-        data.put("placeId", placeId);
-        data.put("ualId", ualId);
-        data.put("url", url);
-        data.put("title", title);
-        data.put("plusCode", plusCode);
-        data.put("appKey", appkey);
-
-        Map<String, Object> users = new HashMap<>();
-        users.put("firstName", firstName);
-        users.put("lastName", lastName);
-        users.put("phone", phone);
-        users.put("uniqueId", uniqueId);
-        users.put("appKey", appkey);
-
-        mFirestore.collection("users").document(uniqueId).set(users, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        displayLog("Document written successfully");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                displayLog("Document write failure " + e.getMessage());
-            }
-        });
-
-        mFirestore.collection("addresses").document(uniqueId).collection("addresses")
-                .document(ualId).set(data, SetOptions.merge())
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        displayLog("Document written successfully");
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                displayLog("Document write failure " + e.getMessage());
-            }
-        });
-
-    }
-    */
 
     public static void setResume_ping_frequency(Integer resume_ping_frequency) {
         OkHi.resume_ping_frequency = resume_ping_frequency;

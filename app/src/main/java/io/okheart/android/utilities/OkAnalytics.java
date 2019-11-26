@@ -457,6 +457,38 @@ public class OkAnalytics {
         } catch (Exception e) {
             displayLog(" Constants.getUTCtimestamp() error " + e.toString());
         }
+
+        if (parameters.containsKey("latitude")) {
+            eventProperties.putValue("latitude", parameters.get("latitude"));
+        }
+        if (parameters.containsKey("longitude")) {
+            eventProperties.putValue("longitude", parameters.get("longitude"));
+        }
+        if (parameters.containsKey("gpsAccuracy")) {
+            eventProperties.putValue("gpsAccuracy", parameters.get("gpsAccuracy"));
+        }
+        if (parameters.containsKey("remoteGPSAccuracy")) {
+            eventProperties.putValue("remoteGPSAccuracy", parameters.get("remoteGPSAccuracy"));
+        }
+        if (parameters.containsKey("uniqueId")) {
+            eventProperties.putValue("uniqueId", parameters.get("uniqueId"));
+        }
+        if (parameters.containsKey("phone")) {
+            eventProperties.putValue("phone", parameters.get("phone"));
+            eventProperties.putValue("phonenumber", parameters.get("phonenumber"));
+        }
+        if (parameters.containsKey("phonenumber")) {
+            eventProperties.putValue("phone", parameters.get("phone"));
+            eventProperties.putValue("phonenumber", parameters.get("phonenumber"));
+        }
+        if (parameters.containsKey("appKey")) {
+            eventProperties.putValue("appKey", parameters.get("appKey"));
+        }
+        if (parameters.containsKey("verify")) {
+            eventProperties.putValue("verify", parameters.get("verify"));
+        }
+
+
         if (parameters.containsKey("error")) {
             eventProperties.putValue("error", parameters.get("error"));
         }
@@ -546,12 +578,12 @@ public class OkAnalytics {
         //Analytics analytics = new Analytics.Builder(context, ANALYTICS_WRITE_KEY).tag("devomtmindex").build();
         //Analytics.setSingletonInstance(null);
         //Analytics.setSingletonInstance(analytics);
-        displayLog("before sending");
+        //displayLog("before sending");
         Analytics.with(context).track(parameters.get("eventName"), eventProperties);
         //OkVerifyApplication.getAnalytics().with(context).track(parameters.get("eventName"), eventProperties);
         //getCommunication().clear();
         //getSubmit().clear();
-        displayLog("after sending");
+        //displayLog("after sending");
     }
 
 

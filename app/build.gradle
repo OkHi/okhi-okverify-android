@@ -24,10 +24,9 @@ android {
         //applicationId "io.okheart.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 40
-        versionName "1.5.24"
+        versionCode 42
+        versionName "1.5.25"
         signingConfig signingConfigs.config
-        //buildConfigField("String", "FIREBASE_APP_KEY", "\"${firebaseAppKey}\"")
     }
     buildTypes {
         debug {
@@ -47,7 +46,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
     implementation 'androidx.appcompat:appcompat:1.1.0'
     implementation 'com.squareup.retrofit2:retrofit:2.6.2'
-    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.20.0"
+    implementation "com.github.parse-community.Parse-SDK-Android:parse:1.22.1"
     implementation 'com.google.android.gms:play-services-location:17.0.0'
     //implementation 'com.google.firebase:firebase-firestore:21.2.1'
     //implementation 'com.google.firebase:firebase-config:19.0.3'

@@ -337,6 +337,17 @@ public class MyWorker extends Worker {
                 displayLog(" error getting wifi info " + e.toString());
             }
 
+            try {
+                String phonenumber = dataProvider.getPropertyValue("phonenumber");
+                if (phonenumber != null) {
+                    if (phonenumber.length() > 0) {
+                        parseObject.put("phonenumber", phonenumber);
+                    }
+                }
+            } catch (Exception e) {
+                displayLog("error getting phonenumber " + e.toString());
+            }
+
 
             try {
                 boolean isPlugged = false;
@@ -494,8 +505,6 @@ public class MyWorker extends Worker {
                 }
             }
         });
-
-
     }
 
 
