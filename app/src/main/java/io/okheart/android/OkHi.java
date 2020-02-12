@@ -1208,7 +1208,9 @@ public final class OkHi extends ContentProvider {
         return ret;
     }
 
+    ///Please enable this after testing
     private static void stopPeriodicPing() {
+        /*
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -1223,6 +1225,7 @@ public final class OkHi extends ContentProvider {
             displayLog("error attaching afl to ual " + e1.toString());
         }
         WorkManager.getInstance().cancelUniqueWork("ramogi");
+        */
     }
 
     private static void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
@@ -1797,6 +1800,28 @@ public final class OkHi extends ContentProvider {
             displayLog("we have no addresses to start foreground");
         }
         */
+
+        try {
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            Data inputData = new Data.Builder()
+                    .putString("uniqueId", uniqueId)
+                    .build();
+
+            PeriodicWorkRequest request =
+                    new PeriodicWorkRequest.Builder(MyWorker.class, 1800000, TimeUnit.MILLISECONDS)
+                            .setInputData(inputData)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
+                            .build();
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
+
+        } catch (Exception e) {
+            displayLog("my worker error " + e.toString());
+        }
 
         displayLog("okhi create");
 

@@ -1,7 +1,57 @@
 package io.okheart.android.services;
 
 
-public class ForegroundService {/*extends Service {
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.app.Service;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.net.wifi.WifiConfiguration;
+import android.net.wifi.WifiInfo;
+import android.net.wifi.WifiManager;
+import android.os.BatteryManager;
+import android.os.Build;
+import android.os.IBinder;
+import android.provider.Settings;
+import android.util.Log;
+import android.view.Gravity;
+import android.widget.Toast;
+
+import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationCallback;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationResult;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.location.LocationSettingsRequest;
+import com.google.android.gms.location.SettingsClient;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.parse.ParseException;
+import com.parse.ParseGeoPoint;
+import com.parse.ParseObject;
+import com.parse.SaveCallback;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static android.app.NotificationManager.IMPORTANCE_LOW;
+
+public class ForegroundService extends Service {
 
     //private String status;
     protected static final int REQUEST_CHECK_SETTINGS = 0x1;
@@ -41,12 +91,9 @@ public class ForegroundService {/*extends Service {
     //private List<io.okheart.android.datamodel.AddressItem> addressItemList;
 
 
+
     public ForegroundService() {
 
-    }
-
-    private static void displayLog(String me) {
-        Log.i(TAG, me);
     }
 
     @Override
@@ -115,7 +162,7 @@ public class ForegroundService {/*extends Service {
         }
         */
 
-    /*
+
     }
 
     public void startAlert(Integer pingTime) {
@@ -162,7 +209,7 @@ public class ForegroundService {/*extends Service {
                 });
         */
 
-        /*
+
         displayLog("Alarm set in " + remotePingFrequency + " seconds");
 
 
@@ -188,10 +235,12 @@ public class ForegroundService {/*extends Service {
 
         }
         */
-/*
+
+        /*
         displayLog("resume_ping_frequency "+ OkHi.getResume_ping_frequency() +" ping_frequency "+ OkHi.getPing_frequency()+
                 " background_frequency "+OkHi.getBackground_frequency()+" sms_template "+OkHi.getSms_template()+"" +
                 " gps_accuracy "+OkHi.getGps_accuracy()+" kill_switch "+OkHi.getKill_switch());
+        */
 
         remotelocationfrequency = 30000;
         remoteaddressfrequency = 1;
@@ -221,9 +270,9 @@ public class ForegroundService {/*extends Service {
             displayLog("error attaching afl to ual " + e1.toString());
         }
         try {
-            //mainActivity = OkVerifyApplication.getMainActivity();
+            //ForegroundService.this = OkHi.getForegroundService.this();
         } catch (Exception e) {
-            displayLog("mainactivity is null");
+            displayLog("ForegroundService.this is null");
         }
         //mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
         /*
@@ -273,7 +322,7 @@ public class ForegroundService {/*extends Service {
         }
         */
 
-/*
+
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         dataProvider = new io.okheart.android.database.DataProvider(io.okheart.android.services.ForegroundService.this);
         //addressItemList = dataProvider.getAllAddressList();
@@ -286,14 +335,13 @@ public class ForegroundService {/*extends Service {
         */
 
 
-
-/*
         try {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(io.okheart.android.services.ForegroundService.this);
             mSettingsClient = LocationServices.getSettingsClient(io.okheart.android.services.ForegroundService.this);
         } catch (Exception e) {
             displayLog("mfusedlocationclient error " + e.toString());
         }
+
         /*
         try {
             DocumentReference docRef = mFirestore.collection("alarms").document(OkVerifyApplication.getUniqueId());
@@ -320,7 +368,6 @@ public class ForegroundService {/*extends Service {
         }
         */
 
-
         /*
         try {
             boolean permissionAccessFineLocationApproved =
@@ -329,7 +376,7 @@ public class ForegroundService {/*extends Service {
 
             if (permissionAccessFineLocationApproved) {
                 try {
-                    OkAnalytics okAnalytics = new OkAnalytics();
+                    OkAnalytics okAnalytics = new OkAnalytics(this);
                     HashMap<String, String> loans = new HashMap<>();
                     //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
                     //loans.put(PROP_ACTORNAME, loginname);
@@ -352,7 +399,7 @@ public class ForegroundService {/*extends Service {
                         // Start your service that doesn't have a foreground service type
                         // defined.
                         try {
-                            OkAnalytics okAnalytics = new OkAnalytics();
+                            OkAnalytics okAnalytics = new OkAnalytics(this);
                             HashMap<String, String> loans = new HashMap<>();
                             //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
                             //loans.put(PROP_ACTORNAME, loginname);
@@ -371,7 +418,7 @@ public class ForegroundService {/*extends Service {
                         // location in order to function properly. Then, request background
                         // location.
                         try {
-                            OkAnalytics okAnalytics = new OkAnalytics();
+                            OkAnalytics okAnalytics = new OkAnalytics(this);
                             HashMap<String, String> loans = new HashMap<>();
                             //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
                             //loans.put(PROP_ACTORNAME, loginname);
@@ -394,7 +441,7 @@ public class ForegroundService {/*extends Service {
                 // App doesn't have access to the device's location at all. Make full request
                 // for permission.
                 try {
-                    OkAnalytics okAnalytics = new OkAnalytics();
+                    OkAnalytics okAnalytics = new OkAnalytics(this);
                     HashMap<String, String> loans = new HashMap<>();
                     //loans.put(PROP_ACTORPHONENUMBER, loginphonenumber);
                     //loans.put(PROP_ACTORNAME, loginname);
@@ -408,13 +455,13 @@ public class ForegroundService {/*extends Service {
                 }
                 try {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        ActivityCompat.requestPermissions(mainActivity, new String[]{
+                        ActivityCompat.requestPermissions(ForegroundService.this, new String[]{
                                         Manifest.permission.ACCESS_FINE_LOCATION,
                                         Manifest.permission.ACCESS_BACKGROUND_LOCATION
                                 },
                                 MY_PERMISSIONS_ACCESS_FINE_LOCATION);
                     } else {
-                        ActivityCompat.requestPermissions(mainActivity, new String[]{
+                        ActivityCompat.requestPermissions(ForegroundService.this, new String[]{
                                         Manifest.permission.ACCESS_FINE_LOCATION},
                                 MY_PERMISSIONS_ACCESS_FINE_LOCATION);
                     }
@@ -426,13 +473,13 @@ public class ForegroundService {/*extends Service {
         } catch (Exception e) {
             displayLog("error getting permission " + e.toString());
         }
-        */
+*/
 
     // Kick off the process of building the LocationCallback, LocationRequest, and
     // LocationSettingsRequest objects.
 
 
-    /*
+
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
@@ -449,7 +496,6 @@ public class ForegroundService {/*extends Service {
             displayLog("onstart command error "+e.toString());
         }
 
-        /*
         if (remotekillswitch) {
             displayLog("don't collect data");
             try {
@@ -489,8 +535,7 @@ public class ForegroundService {/*extends Service {
             }
             startForegroundService();
         }
-        */
-/*
+
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -513,7 +558,7 @@ public class ForegroundService {/*extends Service {
 
     /* Used to build and start foreground service. */
 
-/*
+
     private void startForegroundService() {
 
         if (notificationManager != null) {
@@ -531,7 +576,6 @@ public class ForegroundService {/*extends Service {
         bigTextStyle.bigText("Proof of address powered by OkHi");
         */
 
-/*
 
         Intent playIntent = new Intent(this, ForegroundService.class);
         playIntent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
@@ -825,6 +869,7 @@ public class ForegroundService {/*extends Service {
     }
 
     private void sendSMS(String who) {
+
         /*
         try {
             //String message = "https://hypertrack-996a0.firebaseapp.com/?id="+OkVerifyApplication.getUniqueId();
@@ -858,15 +903,14 @@ public class ForegroundService {/*extends Service {
         }
         */
 
-
-/*
     }
 
+    /*
     private void firebase(String who) {
 
         //final Long timemilliseconds = System.currentTimeMillis();
 
-        /*
+
         mFirestore.collection("verifydata").document("data")
                 .collection(uniqueId).document("" + timemilliseconds)
                 .set(user)
@@ -884,11 +928,9 @@ public class ForegroundService {/*extends Service {
 
                     }
                 });
-        */
 
-
-/*
     }
+    */
 
 
     private void updateDatabase(final Double lat, final Double lng, final Float acc) {
@@ -967,7 +1009,6 @@ public class ForegroundService {/*extends Service {
                 */
 
 
-/*
             } catch (Exception e) {
                 displayLog("error gettign scanned list " + e.toString());
             }
@@ -1144,11 +1185,11 @@ public class ForegroundService {/*extends Service {
 
     }
 
-    /*
+
     private void saveData(ParseObject parseObject, Map<String, Object> user, Long timemilliseconds) {
         displayLog("about to saveData");
 
-
+/*
         mFirestore.collection("verifydata").document("data")
                 .collection(uniqueId).document("" + timemilliseconds)
                 .set(user)
@@ -1196,7 +1237,7 @@ public class ForegroundService {/*extends Service {
                         stopSelf(firestore, parsedb);
                     }
                 });
-
+*/
 
         displayLog("parse object save");
         parseObject.saveEventually(new SaveCallback() {
@@ -1219,7 +1260,7 @@ public class ForegroundService {/*extends Service {
                     }
 
                     parsedb = true;
-                    stopSelf(firestore, parsedb);
+                    //stopSelf(firestore, parsedb);
 
                 } else {
                     try {
@@ -1239,12 +1280,11 @@ public class ForegroundService {/*extends Service {
                     displayLog("save parseobject error " + e.toString());
 
                     parsedb = true;
-                    stopSelf(firestore, parsedb);
+                    //stopSelf(firestore, parsedb);
                 }
             }
         });
     }
-    */
 
     /*
     private Boolean addressVerified(VerifyDataItem verifyDataItem) {
@@ -1276,10 +1316,7 @@ public class ForegroundService {/*extends Service {
         displayLog("returning " + results);
         return results;
     }
-    */
-
-
-    /*
+  */
     private void stopSelf(Boolean parsedb) {
         displayLog("stopself parse " + parsedb);
 
@@ -1320,7 +1357,7 @@ public class ForegroundService {/*extends Service {
 
     }
 
-    /*
+  /*
     private void stopSelf(Boolean firestore, Boolean parsedb) {
         displayLog("stopself firestore " + firestore + " parse " + parsedb);
 
@@ -1363,7 +1400,7 @@ public class ForegroundService {/*extends Service {
 
     }
     */
-/*
+
     private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {
 
         Location locationA = new Location("point A");
@@ -1583,5 +1620,13 @@ public class ForegroundService {/*extends Service {
             }
         }
     }
-    */
+
+    private void displayLog(String log) {
+        Log.i(TAG, log);
+    }
+
+
+
+
+
 }

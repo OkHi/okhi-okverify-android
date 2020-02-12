@@ -276,7 +276,6 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
 
         } catch (UnsupportedEncodingException e) {
             displayLog("unsupported encoding exception " + e.toString());
-
         } catch (IOException io) {
             displayLog("io exception " + io.toString());
         } catch (IllegalArgumentException iae) {

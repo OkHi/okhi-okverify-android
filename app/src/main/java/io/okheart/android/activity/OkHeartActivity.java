@@ -1,9 +1,11 @@
 package io.okheart.android.activity;
 
 import android.Manifest;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -146,6 +148,17 @@ public class OkHeartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(io.okheart.android.R.layout.activity_okheart);
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(new Intent(this, io.okheart.android.services.ForegroundService.class));
+            } else {
+                startService(new Intent(this, io.okheart.android.services.ForegroundService.class));
+            }
+        } catch (Exception jse) {
+            displayLog("jsonexception jse " + jse.toString());
+        }
+
         completedWell = false;
         isWebInterface = false;
         //checkInternet();
@@ -370,7 +383,7 @@ public class OkHeartActivity extends AppCompatActivity {
         //myWebView.loadUrl("https://manager-v4.okhi.dev");
         //myWebView.loadUrl("https://7b70b228.ngrok.io");
         if (apiKey != null) {
-            if (apiKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
+            if (apiKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
                 myWebView.loadUrl("https://manager-v4.okhi.dev");
             } else if (apiKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
                 myWebView.loadUrl("https://sandbox-manager-v4.okhi.dev");
@@ -403,7 +416,7 @@ public class OkHeartActivity extends AppCompatActivity {
         try {
             Boolean production = false;
             if (apiKey != null) {
-                if (apiKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
+                if (apiKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
 
                 } else if (apiKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
 

@@ -28,7 +28,7 @@ public class TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
-        OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true);
+        OkHi.initialize("r:6d828427b625cda9bf9013dd80a93f97", true);
 
         firstnameedt = findViewById(R.id.firstname);
         lastnameedt = findViewById(R.id.lastname);
