@@ -10,7 +10,7 @@ import android.util.Log;
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "okverify.db";
+    private static final String DATABASE_NAME = "io.okheart.android.database.db";
     private static final int DATABASE_VERSION = 3;
 
     private static final String DATABASE_CREATE_RUNLIST =

@@ -20,19 +20,19 @@ import android.net.wifi.WifiManager;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.IBinder;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.text.HtmlCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.location.SettingsClient;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -49,7 +49,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static android.app.NotificationManager.IMPORTANCE_LOW;
+import io.okheart.android.R;
+import io.okheart.android.activity.SettingsActivity;
 
 public class ForegroundService extends Service {
 
@@ -105,7 +106,7 @@ public class ForegroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
+/*
         //OkVerifyApplication.setForegroundServiceStatus(false);
         displayLog("foreground service destroyed");
 
@@ -149,7 +150,7 @@ public class ForegroundService extends Service {
         } else {
             //maybe an event
         }
-
+*/
 
 
         /*
@@ -210,7 +211,7 @@ public class ForegroundService extends Service {
         */
 
 
-        displayLog("Alarm set in " + remotePingFrequency + " seconds");
+        //displayLog("Alarm set in " + remotePingFrequency + " seconds");
 
 
     }
@@ -219,8 +220,9 @@ public class ForegroundService extends Service {
     public void onCreate() {
         super.onCreate();
         displayLog("My foreground service onCreate().");
+        notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
         //firestore = false;
-        parsedb = false;
+        //parsedb = false;
         //Constants.scheduleJob(ForegroundService.this, "Foreground service");
 
         /*
@@ -242,6 +244,7 @@ public class ForegroundService extends Service {
                 " gps_accuracy "+OkHi.getGps_accuracy()+" kill_switch "+OkHi.getKill_switch());
         */
 
+        /*
         remotelocationfrequency = 30000;
         remoteaddressfrequency = 1;
         remotePingFrequency = 900000;
@@ -269,6 +272,7 @@ public class ForegroundService extends Service {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
+        */
         try {
             //ForegroundService.this = OkHi.getForegroundService.this();
         } catch (Exception e) {
@@ -323,10 +327,17 @@ public class ForegroundService extends Service {
         */
 
 
+        /*
         notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
         dataProvider = new io.okheart.android.database.DataProvider(io.okheart.android.services.ForegroundService.this);
         //addressItemList = dataProvider.getAllAddressList();
-
+        try {
+            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(io.okheart.android.services.ForegroundService.this);
+            mSettingsClient = LocationServices.getSettingsClient(io.okheart.android.services.ForegroundService.this);
+        } catch (Exception e) {
+            displayLog("mfusedlocationclient error " + e.toString());
+        }
+        */
         /*
         mFirestore = FirebaseFirestore.getInstance();
         query = mFirestore.collection("addresses").document(uniqueId)
@@ -335,12 +346,7 @@ public class ForegroundService extends Service {
         */
 
 
-        try {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(io.okheart.android.services.ForegroundService.this);
-            mSettingsClient = LocationServices.getSettingsClient(io.okheart.android.services.ForegroundService.this);
-        } catch (Exception e) {
-            displayLog("mfusedlocationclient error " + e.toString());
-        }
+
 
         /*
         try {
@@ -480,9 +486,11 @@ public class ForegroundService extends Service {
 
 
 
+        /*
         createLocationCallback();
         createLocationRequest();
         buildLocationSettingsRequest();
+        */
     }
 
     @Override
@@ -495,6 +503,7 @@ public class ForegroundService extends Service {
         catch (Exception e){
             displayLog("onstart command error "+e.toString());
         }
+        /*
 
         if (remotekillswitch) {
             displayLog("don't collect data");
@@ -551,7 +560,7 @@ public class ForegroundService extends Service {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-
+*/
 
         return super.onStartCommand(intent, flags, startId);
     }
@@ -561,6 +570,52 @@ public class ForegroundService extends Service {
 
     private void startForegroundService() {
 
+
+        Bitmap largeIconBitmap = BitmapFactory.decodeResource(this.getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
+
+        String channelId = this.getString(io.okheart.android.R.string.default_notification_channel_id);
+        Intent playIntent = new Intent(this, SettingsActivity.class);
+        //playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, playIntent, 0);
+        NotificationCompat.Action playAction = new NotificationCompat.Action(android.R.drawable.ic_media_play,
+                HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(this, R.color.colorPrimary) +
+                        "\">HIDE</font>", HtmlCompat.FROM_HTML_MODE_LEGACY), pendingIntent);
+
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(this, channelId)
+                        .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
+                        .setContentTitle("OkVerify")
+                        .setContentText("Location verification in progress")
+                        .setAutoCancel(false)
+                        .setOngoing(true)
+                        .setLargeIcon(largeIconBitmap)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setWhen(System.currentTimeMillis())
+                        //.setSound(defaultSoundUri)
+                        .addAction(playAction)
+                        .setFullScreenIntent(pendingIntent, true)
+                        //.setStyle(bigTextStyle)
+                        .setContentIntent(pendingIntent);
+
+
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId,
+                    "Notification",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+        Notification notification = notificationBuilder.build();
+
+        notificationManager.notify(1, notification);
+
+        startForeground(1, notification);
+/*
         if (notificationManager != null) {
             displayLog("notification is not null");
             notificationManager.cancelAll();
@@ -570,11 +625,6 @@ public class ForegroundService extends Service {
 
         displayLog("Start foreground service.");
         Bitmap largeIconBitmap = BitmapFactory.decodeResource(getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
-        /*
-        NotificationCompat.BigTextStyle bigTextStyle = new NotificationCompat.BigTextStyle();
-        bigTextStyle.setBigContentTitle("Address verification service.");
-        bigTextStyle.bigText("Proof of address powered by OkHi");
-        */
 
 
         Intent playIntent = new Intent(this, ForegroundService.class);
@@ -623,7 +673,7 @@ public class ForegroundService extends Service {
         } else {
             startLocationUpdates();
         }
-
+*/
 
     }
 
@@ -1620,6 +1670,7 @@ public class ForegroundService extends Service {
             }
         }
     }
+
 
     private void displayLog(String log) {
         Log.i(TAG, log);

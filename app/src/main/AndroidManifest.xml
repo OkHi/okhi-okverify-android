@@ -12,54 +12,41 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <application
-
         android:allowBackup="true"
         android:launchMode="singleInstance"
         android:supportsRtl="true">
+
         <activity
-            android:name="io.okheart.android.activity.TestActivity"
+            android:name=".activity.TestActivity"
             android:theme="@style/AppTheme">
-
             <!--
-                        <intent-filter>
-                            <action android:name="android.intent.action.MAIN" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
-                            <category android:name="android.intent.category.LAUNCHER" />
-                        </intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
             -->
-
-
         </activity>
         <activity
             android:name="io.okheart.android.activity.OkHeartActivity"
             android:exported="true"
-            android:theme="@style/AppTheme"></activity>
+            android:theme="@style/AppTheme" />
+        <activity
+            android:name="io.okheart.android.activity.SettingsActivity"
+            android:exported="true"
+            android:theme="@style/AppTheme" />
 
         <provider
-            android:name="io.okheart.android.OkHi"
+            android:name=".OkHi"
             android:authorities="${applicationId}.OkHeart"
             android:enabled="true"
             android:exported="true" />
 
         <service
-            android:name="io.okheart.android.services.ForegroundService"
+            android:name=".services.ForegroundService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="location" />
-        <!--
-                <receiver
-                    android:name="io.okheart.android.receivers.BootReceiver"
-                    android:enabled="false">
-                    <intent-filter>
-                        <action android:name="android.intent.action.BOOT_COMPLETED" />
-                    </intent-filter>
-                </receiver>
-                <receiver
-                    android:name="io.okheart.android.receivers.MyBroadcastReceiver"
-                    android:enabled="false"></receiver>
-
-
-                -->
     </application>
 
 </manifest>

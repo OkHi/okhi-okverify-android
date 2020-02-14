@@ -2,13 +2,20 @@ package io.okheart.android;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -19,6 +26,9 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.text.HtmlCompat;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
@@ -47,6 +57,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.okheart.android.activity.SettingsActivity;
 import io.okheart.android.asynctask.SendCustomLinkSmsTask;
 import io.okheart.android.callback.SendCustomLinkSmsCallBack;
 import io.okheart.android.utilities.MyWorker;
@@ -69,6 +80,7 @@ public final class OkHi extends ContentProvider {
     private static String uniqueId;
     //private static String remoteSmsTemplate;
     private static Analytics analytics;
+    private static NotificationManager notificationManager;
 
     public OkHi() {
     }
@@ -76,6 +88,7 @@ public final class OkHi extends ContentProvider {
     public static void initialize(final String applicationKey, final Boolean verify) throws RuntimeException {
 
         displayLog("initialize");
+
 
         if (applicationKey != null) {
             if (applicationKey.length() > 0) {
@@ -285,6 +298,20 @@ public final class OkHi extends ContentProvider {
             } catch (Exception e) {
                 displayLog("Error initializing analytics_omtm " + e.toString());
             }
+        } catch (Exception jse) {
+            displayLog("jsonexception jse " + jse.toString());
+        }
+
+        //notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
+        //startForegroundNotification();
+
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
+            } else {
+                mContext.startService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
+            }
+
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
@@ -1210,7 +1237,7 @@ public final class OkHi extends ContentProvider {
 
     ///Please enable this after testing
     private static void stopPeriodicPing() {
-        /*
+
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -1225,7 +1252,7 @@ public final class OkHi extends ContentProvider {
             displayLog("error attaching afl to ual " + e1.toString());
         }
         WorkManager.getInstance().cancelUniqueWork("ramogi");
-        */
+
     }
 
     private static void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
@@ -1827,5 +1854,56 @@ public final class OkHi extends ContentProvider {
 
 
         return true;
+    }
+
+    private static void startForegroundNotification2() {
+
+        displayLog("startForegroundNotification");
+
+
+        Bitmap largeIconBitmap = BitmapFactory.decodeResource(mContext.getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
+
+        String channelId = mContext.getString(io.okheart.android.R.string.default_notification_channel_id);
+        Intent playIntent = new Intent(mContext, SettingsActivity.class);
+        //playIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(mContext, 0, playIntent, 0);
+        NotificationCompat.Action playAction = new NotificationCompat.Action(android.R.drawable.ic_media_play,
+                HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(mContext, R.color.colorPrimary) +
+                        "\">HIDE</font>", HtmlCompat.FROM_HTML_MODE_LEGACY), pendingIntent);
+
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(mContext, channelId)
+                        .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
+                        .setContentTitle("OkVerify")
+                        .setContentText("Location verification in progress")
+                        .setAutoCancel(false)
+                        .setOngoing(true)
+                        .setLargeIcon(largeIconBitmap)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setWhen(System.currentTimeMillis())
+                        //.setSound(defaultSoundUri)
+                        .addAction(playAction)
+                        .setFullScreenIntent(pendingIntent, true)
+                        //.setStyle(bigTextStyle)
+                        .setContentIntent(pendingIntent);
+
+
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId,
+                    "Notification",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+        Notification notification = notificationBuilder.build();
+
+        notificationManager.notify(1, notification);
+
+
     }
 }

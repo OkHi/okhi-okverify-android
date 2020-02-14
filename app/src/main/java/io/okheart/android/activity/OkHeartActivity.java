@@ -1,11 +1,9 @@
 package io.okheart.android.activity;
 
 import android.Manifest;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -149,6 +147,7 @@ public class OkHeartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(io.okheart.android.R.layout.activity_okheart);
 
+        /*
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(new Intent(this, io.okheart.android.services.ForegroundService.class));
@@ -158,6 +157,7 @@ public class OkHeartActivity extends AppCompatActivity {
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
+        */
 
         completedWell = false;
         isWebInterface = false;

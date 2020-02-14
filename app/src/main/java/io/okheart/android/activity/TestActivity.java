@@ -78,6 +78,8 @@ public class TestActivity extends AppCompatActivity {
         pingbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+
                 OkHiCallback okHiCallback = new OkHiCallback() {
                     @Override
                     public void querycomplete(JSONObject result) {
@@ -108,12 +110,11 @@ public class TestActivity extends AppCompatActivity {
                     displayLog("json exception error " + e.toString());
                 }
 
+
             }
         });
 
     }
-
-
 
     /*
 

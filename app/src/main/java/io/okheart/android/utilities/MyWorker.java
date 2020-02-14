@@ -63,6 +63,7 @@ public class MyWorker extends Worker {
     @Override
     public Result doWork() {
 
+        /*
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(new Intent(context, io.okheart.android.services.ForegroundService.class));
@@ -73,6 +74,9 @@ public class MyWorker extends Worker {
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
+        */
+
+        //OkHi.startForegroundNotification();
 
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(context);
