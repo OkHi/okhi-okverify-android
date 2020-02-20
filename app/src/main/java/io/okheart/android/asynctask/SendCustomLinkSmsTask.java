@@ -25,6 +25,10 @@ import static io.okheart.android.utilities.Constants.COLUMN_BRANCH;
 import static io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER;
 import static io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID;
 import static io.okheart.android.utilities.Constants.DEVMASTER_REST_KEY;
+import static io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
+import static io.okheart.android.utilities.Constants.PROD_REST_KEY;
+import static io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
+import static io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
 import static io.okheart.android.utilities.Constants.product;
 
 
@@ -38,13 +42,15 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
     private HashMap<String, String> postDataParams = new HashMap<>();
     private int responseCode;
     private Context context;
+    private String environment;
 
 
-    public SendCustomLinkSmsTask(Context context, SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack, HashMap<String, String> parameters) {
+    public SendCustomLinkSmsTask(Context context, SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack, HashMap<String, String> parameters, String environment) {
         displayLog("SendCustomLinkSmsTask called");
 
         this.sendCustomLinkSmsCallBack = sendCustomLinkSmsCallBack;
         this.context = context;
+        this.environment = environment;
         try {
             if (parameters.containsKey("uniqueId")) {
                 postDataParams.put("uniqueId", parameters.get("uniqueId"));
@@ -237,9 +243,24 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
 
         try {
             String appId, restApi, urlString;
-            appId = DEVMASTER_APPLICATION_ID;
-            restApi = DEVMASTER_REST_KEY;
-            urlString = "https://okhicore-development-master.back4app.com/send-sms";
+
+            if (environment.equalsIgnoreCase("PROD")) {
+                appId = PROD_APPLICATION_ID;
+                restApi = PROD_REST_KEY;
+                urlString = "https://okhi.back4app.io/send-sms";
+            } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                appId = DEVMASTER_APPLICATION_ID;
+                restApi = DEVMASTER_REST_KEY;
+                urlString = "https://okhicore-development-master.back4app.com/send-sms";
+            } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                appId = SANDBOX_APPLICATION_ID;
+                restApi = SANDBOX_REST_KEY;
+                urlString = "https://okhi-sbox.back4app.io/send-sms";
+            } else {
+                appId = PROD_APPLICATION_ID;
+                restApi = PROD_REST_KEY;
+                urlString = "https://okhi.back4app.io/send-sms";
+            }
 
             OkHttpClient.Builder b = new OkHttpClient.Builder();
             b.connectTimeout(15, TimeUnit.SECONDS);
@@ -341,8 +362,8 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            OkAnalytics okAnalytics = new OkAnalytics(context);
-            okAnalytics.sendToAnalytics(parameters, loans);
+            OkAnalytics okAnalytics = new OkAnalytics(context, environment);
+            okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }

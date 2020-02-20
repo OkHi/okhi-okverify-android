@@ -6,6 +6,39 @@ import java.util.Date;
 import java.util.TimeZone;
 
 public class Constants {
+/*
+    public final static boolean productionVersion = true;
+    public final static boolean STAGING = false;
+    public final static boolean DEVMASTER = false;
+    public final static boolean SANDBOX = false;
+    public final static boolean DEV1 = false;
+    public final static boolean DEV3 = false;
+    public final static boolean DEV4 = false;
+*/
+
+    public static final String DEV1_APPLICATION_ID = "7eSfutlTynvfoNUJjlsb2sHbFIiOaU8lW1eXY6uB";
+    public static final String DEV1_CLIENT_ID = "TDYUmNnHNZ4E9liMee1PeczdYUTfblxmDC1SAV5Y";
+    public static final String DEV1_REST_KEY = "SAj9R13u6edRklbj0WLF9xDLyfoUedx4LJG6zkd2";
+    public static final String PROD_APPLICATION_ID = "nJXDQ0HXsM8uTP9pDLmL2BQmHL2c0AnE0vDPGrL7";
+    public static final String PROD_CLIENT_ID = "e2yAvICaalNCARmdmB6lNvRgUpwODVjqqzGuv7cx";
+    public static final String PROD_REST_KEY = "aL41lwOjUcqaADriWfkMFQG49qqBl4tGoI3n838n";
+    public static final String DEV4_APPLICATION_ID = "juaQQrDRQtRziwbnC7ndZPKNsHeKjKf6n23J99xd";
+    public static final String DEV4_CLIENT_ID = "5BlG7MEBgZuauunGfJeK7q043wzqu5bS6VbWiBF2";
+    public static final String DEV4_REST_KEY = "rSYDGF4byKy8DYkXMTTpCJzGZMoRUAzwiwGr3KQb";
+    public static final String STAGING_APPLICATION_ID = "VRgeJfEKH9rY9QrzKUuYFBzvpOqjrOWOqApyZGmo";
+    public static final String STAGING_CLIENT_ID = "LXnZjWJCy3TCwAkqyNYtn0vFcuefV9S4Kaw5qa9o";
+    public static final String STAGING_REST_KEY = "PDMszkFWvLWfNUOgKxyI2lPuruNK8qZY2o7rQfAd";
+    public static final String SANDBOX_APPLICATION_ID = "mZreSEAR2Fln1CimT5J35k5WV883ivQQesDBqUMH";
+    public static final String SANDBOX_CLIENT_ID = "QcvY9LeVNvabdL5RB0VSBXYypcCQSEYfA4UpzcnB";
+    public static final String SANDBOX_REST_KEY = "3qnm1vJyGA93YrsRKnVQJiO6CeXIKglER140fiK5";
+    public static final String DEV3_APPLICATION_ID = "o4ocKvjP6QMc1QHIKV2oMoASqVhUqTYPsdzxC0LZ";
+    public static final String DEV3_CLIENT_ID = "csXrHr3kzHkXqaliJ8sFR696J8y7t2YMY6IHIvJ4";
+    public static final String DEV3_REST_KEY = "3xmLgHVXIlqRC1If9Tw0JtSQAm2Rc6E56Ac89uqX";
+    public static final String DEVMASTER_APPLICATION_ID = "39qx0cn6q1IZM7XCA0H2uYstqwLazABGupEUTMg0";
+    public static final String DEVMASTER_CLIENT_ID = "2s23x3Bsqhattvq2VzPNJwnNCbpoja2DkoN2v4OR";
+    public static final String DEVMASTER_REST_KEY = "RZPpMBEsL9S6rfcTAyXEp623AxZwXxQeHXFAJT4R";
+    public static final String ANALYTICS_WRITE_KEY = "1WVXBz8WdoFA29enq6zH0dQ33c3rxzPQ";
+
 
     public static final String ANALYTICS_WRITE_KEY_PROD_OMTM = "peBXJt77v4yE3eI23IKFIMUAw6paI6UH";
     public static final String ANALYTICS_WRITE_KEY_DEV_OMTM = "peBXJt77v4yE3eI23IKFIMUAw6paI6UH";
@@ -73,10 +106,6 @@ public class Constants {
     public static final String appType = "native";
     public static final String librarytrackerwaybill = "OkAnalytics.java";
     public static final String versiontrackerwaybill = "2.0.0";
-    public static final String ANALYTICS_WRITE_KEY = "1WVXBz8WdoFA29enq6zH0dQ33c3rxzPQ";
-    public static final String DEVMASTER_APPLICATION_ID = "39qx0cn6q1IZM7XCA0H2uYstqwLazABGupEUTMg0";
-    public static final String DEVMASTER_REST_KEY = "RZPpMBEsL9S6rfcTAyXEp623AxZwXxQeHXFAJT4R";
-    public static final String DEVMASTER_CLIENT_ID = "2s23x3Bsqhattvq2VzPNJwnNCbpoja2DkoN2v4OR";
 
 
     public static String getUTCtimestamp() {

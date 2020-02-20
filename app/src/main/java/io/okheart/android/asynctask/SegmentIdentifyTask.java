@@ -37,10 +37,10 @@ public class SegmentIdentifyTask extends AsyncTask<Void, Void, String> {
     private SegmentIdentifyCallBack segmentIdentifyCallBack;
     private JSONObject jsonObject;
     private int responseCode;
-    private Boolean production;
+    private String production;
 
 
-    public SegmentIdentifyTask(SegmentIdentifyCallBack segmentIdentifyCallBack, JSONObject jsonObject, Boolean production) {
+    public SegmentIdentifyTask(SegmentIdentifyCallBack segmentIdentifyCallBack, JSONObject jsonObject, String production) {
         displayLog("SegmentIdentifyTask called");
 
         this.segmentIdentifyCallBack = segmentIdentifyCallBack;
@@ -113,10 +113,14 @@ public class SegmentIdentifyTask extends AsyncTask<Void, Void, String> {
         try {
             String urlString = "https://api.segment.io/v1/identify";
             String writekey;
-            if (production) {
+            if (production.equalsIgnoreCase("PROD")) {
                 writekey = ANALYTICS_WRITE_KEY_PROD_OMTM;
-            } else {
+            } else if (production.equalsIgnoreCase("DEVMASTER")) {
                 writekey = ANALYTICS_WRITE_KEY_DEV_OMTM;
+            } else if (production.equalsIgnoreCase("SANDBOX")) {
+                writekey = ANALYTICS_WRITE_KEY_DEV_OMTM;
+            } else {
+                writekey = ANALYTICS_WRITE_KEY_PROD_OMTM;
             }
 
             OkHttpClient.Builder b = new OkHttpClient.Builder();

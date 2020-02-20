@@ -53,6 +53,7 @@ public class MyWorker extends Worker {
     private Float acc;
     private String uniqueId;
     private io.okheart.android.database.DataProvider dataProvider;
+    private String environment;
 
     public MyWorker(@NonNull Context appContext, @NonNull WorkerParameters workerParams) {
         super(appContext, workerParams);
@@ -62,6 +63,7 @@ public class MyWorker extends Worker {
     @NonNull
     @Override
     public Result doWork() {
+        displayLog("doWork ");
 
         /*
         try {
@@ -80,6 +82,26 @@ public class MyWorker extends Worker {
 
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(context);
+        environment = dataProvider.getPropertyValue("environment");
+
+        if (environment != null) {
+            if (environment.length() > 0) {
+                if (environment.equalsIgnoreCase("PROD")) {
+
+                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+
+                } else if (environment.equalsIgnoreCase("SANDBOX")) {
+
+                } else {
+
+                }
+            } else {
+                environment = "PROD";
+            }
+        } else {
+            environment = "PROD";
+        }
+
 
         try {
             HashMap<String, String> loans = new HashMap<>();
@@ -270,7 +292,7 @@ public class MyWorker extends Worker {
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
 
         if (addressItemList.size() > 0) {
-            List<Map<String, Object>> addresses = new ArrayList<>();
+            //List<Map<String, Object>> addresses = new ArrayList<>();
 
             try {
                 stopLocationUpdates();
@@ -463,13 +485,15 @@ public class MyWorker extends Worker {
                     HashMap<String, String> paramText = getTitleText(addressItem);
                     nestedData.put("title", paramText.get("header"));
                     nestedData.put("text", paramText.get("text"));
-                    addresses.add(nestedData);
+                    //addresses.add(nestedData);
+                    parseObject.put("address", nestedData.toString());
+                    parseObject.put("ualId", addressItem.getUalid());
+                    saveData(parseObject);
                 } catch (Exception e) {
 
                 }
             }
-            parseObject.put("addresses", addresses);
-            saveData(parseObject);
+
         } else {
             //add an event here saying we don't have addresses
             //saveData(parseObject,  timemilliseconds);
@@ -878,8 +902,8 @@ public class MyWorker extends Worker {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(context);
-            okAnalytics.sendToAnalytics(parameters, loans);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(context, environment);
+            okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }

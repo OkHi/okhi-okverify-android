@@ -25,6 +25,7 @@ import io.okheart.android.OkHi;
 import io.okheart.android.datamodel.AddressItem;
 import io.okheart.android.utilities.MyWorker;
 
+
 class WebAppInterface {
     private static final String TAG = "WebAppInterface";
     private static String appkey;
@@ -32,6 +33,7 @@ class WebAppInterface {
     //private FirebaseFirestore mFirestore;
     private String uniqueId;
     private io.okheart.android.database.DataProvider dataProvider;
+    private String environment;
 
     /**
      * Instantiate the interface and set the context
@@ -42,6 +44,7 @@ class WebAppInterface {
         //mFirestore = FirebaseFirestore.getInstance();
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(mContext);
+        environment = dataProvider.getPropertyValue("environment");
     }
 
     private static void stopPeriodicPing() {
@@ -555,6 +558,7 @@ class WebAppInterface {
 
     private void sendEvent(final String appkey, final String action) {
         try {
+            /*
             Boolean production = false;
             if (appkey != null) {
                 if (appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
@@ -567,6 +571,7 @@ class WebAppInterface {
             }
 
             final Boolean productionVersion = production;
+            */
 
             /*
             JSONObject identifyjson = new JSONObject();
@@ -597,11 +602,22 @@ class WebAppInterface {
 
                 JSONObject trackjson = new JSONObject();
 
-                if (productionVersion) {
-                    trackjson.put("environment", "PROD");
+                if (environment != null) {
+                    if (environment.length() > 0) {
+                        if (environment.equalsIgnoreCase("PROD")) {
+                            trackjson.put("environment", "PROD");
+                        } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                            trackjson.put("environment", "DEVMASTER");
+                        } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                            trackjson.put("environment", "SANDBOX");
+                        } else {
+                            trackjson.put("environment", "PROD");
+                        }
+                    } else {
+                        trackjson.put("environment", "PROD");
+                    }
                 } else {
-                    trackjson.put("environment", "DEV");
-
+                    trackjson.put("environment", "PROD");
                 }
                 trackjson.put("event", "SDK Events");
 
@@ -624,7 +640,7 @@ class WebAppInterface {
 
 
                 eventjson.put("properties", trackjson);
-                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, environment);
                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (JSONException e) {
                 displayLog("track error omtm error " + e.toString());
@@ -767,8 +783,8 @@ class WebAppInterface {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
-            okAnalytics.sendToAnalytics(parameters, loans);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
+            okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }

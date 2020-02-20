@@ -109,7 +109,7 @@ public class OkAnalytics {
     }
     */
 
-    public OkAnalytics(Context context) {
+    public OkAnalytics(Context context, String environment) {
         this.context = context;
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         try {
@@ -122,7 +122,7 @@ public class OkAnalytics {
             displayLog("Error initializing stuff " + e.toString());
         }
         eventProperties = new Properties();
-        initializeStaticParameters();
+        initializeStaticParameters(environment);
         initializeProperties();
         populateProperties();
     }
@@ -137,10 +137,35 @@ public class OkAnalytics {
         }
     }
 
-    public void initializeStaticParameters() {
+    public void initializeStaticParameters(String environment) {
 
         try {
-            setEnvironment("PROD");
+            setEnvironment(environment);
+            /*
+            if(productionVersion){
+                setEnvironment("PROD");
+            }
+            else if(DEVMASTER){
+                setEnvironment("DEVMASTER");
+            }else if(SANDBOX){
+                setEnvironment( "SANDBOX");
+            }
+            else{
+                setEnvironment( "PROD");
+            }
+
+            if(environment.equalsIgnoreCase("PROD")){
+                trackjson.put("environment", "PROD");
+            }
+            else if(environment.equalsIgnoreCase("DEVMASTER")){
+                trackjson.put("environment", "DEVMASTER");
+            }else if(environment.equalsIgnoreCase("SANDBOX")){
+                trackjson.put("environment", "SANDBOX");
+            }
+            else{
+                trackjson.put("environment", "PROD");
+            }
+            */
         } catch (Exception e) {
             displayLog(" getenvironment error " + e.toString());
         }
@@ -341,7 +366,7 @@ public class OkAnalytics {
         getEvent().putValue("communication", getCommunication());
     }
 
-    public void sendToAnalytics(String branch, String deliveryId, String userId, String userAffiliation) {
+    public void sendToAnalytics(String branch, String deliveryId, String userId, String userAffiliation, String environment) {
 
         try {
             contextdeviceandproduct.putValue("view", getView());
@@ -355,6 +380,41 @@ public class OkAnalytics {
         }
         eventProperties.putValue("deliveryId", deliveryId);
         eventProperties.putValue("environment", environment);
+        /*
+        if(productionVersion){
+            eventProperties.putValue("environment", "PROD");
+        }
+        else if(DEVMASTER){
+            eventProperties.putValue("environment", "DEVMASTER");
+        }else if(SANDBOX){
+            eventProperties.putValue("environment", "SANDBOX");
+        }
+        else{
+            eventProperties.putValue("environment", "PROD");
+        }
+        String environment = dataProvider.getPropertyValue("environment");
+        if(environment != null){
+            if(environment.length() > 0){
+                if(environment.equalsIgnoreCase("PROD")){
+                    trackjson.put("environment", "PROD");
+                }
+                else if(environment.equalsIgnoreCase("DEVMASTER")){
+                    trackjson.put("environment", "DEVMASTER");
+                }else if(environment.equalsIgnoreCase("SANDBOX")){
+                    trackjson.put("environment", "SANDBOX");
+                }
+                else{
+                    trackjson.put("environment", "PROD");
+                }
+            }
+            else{
+                trackjson.put("environment", "PROD");
+            }
+        }
+        else{
+            trackjson.put("environment", "PROD");
+        }
+        */
         eventProperties.putValue("type", type);
         eventProperties.putValue("subtype", subtype);
         eventProperties.putValue("onObject", onObject);
@@ -386,7 +446,7 @@ public class OkAnalytics {
     }
 
     public void sendToAnalytics(String branch, String deliveryId, String userId, String userAffiliation,
-                                String eventName, String isOddress, String isOkAppUser, String pageurlraw, String lookupId, String error) {
+                                String eventName, String isOddress, String isOkAppUser, String pageurlraw, String lookupId, String error, String environment) {
         pageUrl.putValue("raw", pageurlraw);
 
         try {
@@ -405,6 +465,19 @@ public class OkAnalytics {
         eventProperties.putValue("isOddress", isOddress);
         eventProperties.putValue("deliveryId", deliveryId);
         eventProperties.putValue("environment", environment);
+        /*
+        if(productionVersion){
+            eventProperties.putValue("environment", "PROD");
+        }
+        else if(DEVMASTER){
+            eventProperties.putValue("environment", "DEVMASTER");
+        }else if(SANDBOX){
+            eventProperties.putValue("environment", "SANDBOX");
+        }
+        else{
+            eventProperties.putValue("environment", "PROD");
+        }
+        */
         eventProperties.putValue("type", type);
         eventProperties.putValue("subtype", subtype);
         eventProperties.putValue("onObject", onObject);
@@ -437,7 +510,7 @@ public class OkAnalytics {
         //getSubmit().clear();
     }
 
-    public void sendToAnalytics(HashMap<String, String> parameters, HashMap<String, String> loans) {
+    public void sendToAnalytics(HashMap<String, String> parameters, HashMap<String, String> loans, String environment) {
 
         try {
             setSubmit(loans);
@@ -561,6 +634,19 @@ public class OkAnalytics {
         }
         eventProperties.putValue("userId", userId);
         eventProperties.putValue("environment", environment);
+        /*
+        if(productionVersion){
+            eventProperties.putValue("environment", "PROD");
+        }
+        else if(DEVMASTER){
+            eventProperties.putValue("environment", "DEVMASTER");
+        }else if(SANDBOX){
+            eventProperties.putValue("environment", "SANDBOX");
+        }
+        else{
+            eventProperties.putValue("environment", "PROD");
+        }
+        */
         eventProperties.putValue("userRoles", userRoles);
         eventProperties.putValue("customerCode", customerCode);
         eventProperties.putValue("event", getEvent());

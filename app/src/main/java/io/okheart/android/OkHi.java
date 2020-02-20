@@ -2,20 +2,13 @@ package io.okheart.android;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.location.Location;
-import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -26,9 +19,6 @@ import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.text.HtmlCompat;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
@@ -37,10 +27,6 @@ import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
-import com.parse.Parse;
-import com.parse.ParseException;
-import com.parse.ParseObject;
-import com.parse.SaveCallback;
 import com.segment.analytics.Analytics;
 
 import org.json.JSONException;
@@ -57,7 +43,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import io.okheart.android.activity.SettingsActivity;
 import io.okheart.android.asynctask.SendCustomLinkSmsTask;
 import io.okheart.android.callback.SendCustomLinkSmsCallBack;
 import io.okheart.android.utilities.MyWorker;
@@ -125,13 +110,28 @@ public final class OkHi extends ContentProvider {
             displayLog("error attaching afl to ual " + e1.toString());
         }
         try {
+
+            String environment;
+            if (applicationKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
+                environment = "DEVMASTER";
+            } else if (applicationKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
+                environment = "SANDBOX";
+            } else {
+                environment = "PROD";
+            }
+            dataProvider.insertStuff("environment", environment);
+        } catch (Exception io) {
+
+        } finally {
+
+        }
+        try {
             writeToFile(applicationKey);
         } catch (Exception io) {
 
         } finally {
 
         }
-
         dataProvider.insertStuff("verify", "" + verify);
         try {
             if (verify != null) {
@@ -174,6 +174,7 @@ public final class OkHi extends ContentProvider {
 
 
         try {
+            /*
             Boolean production = false;
             if (applicationKey != null) {
                 if (applicationKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
@@ -186,8 +187,10 @@ public final class OkHi extends ContentProvider {
             }
 
             final Boolean productionVersion = production;
+            */
 
             JSONObject identifyjson = new JSONObject();
+            final String environment = dataProvider.getPropertyValue("environment");
             //identifyjson.put("userId", userId);
             try {
                 io.okheart.android.callback.SegmentIdentifyCallBack segmentIdentifyCallBack = new io.okheart.android.callback.SegmentIdentifyCallBack() {
@@ -213,12 +216,24 @@ public final class OkHi extends ContentProvider {
 
                                 JSONObject trackjson = new JSONObject();
 
-                                if (productionVersion) {
-                                    trackjson.put("environment", "PROD");
+                                if (environment != null) {
+                                    if (environment.length() > 0) {
+                                        if (environment.equalsIgnoreCase("PROD")) {
+                                            trackjson.put("environment", "PROD");
+                                        } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                                            trackjson.put("environment", "DEVMASTER");
+                                        } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                                            trackjson.put("environment", "SANDBOX");
+                                        } else {
+                                            trackjson.put("environment", "PROD");
+                                        }
+                                    } else {
+                                        trackjson.put("environment", "PROD");
+                                    }
                                 } else {
-                                    trackjson.put("environment", "DEVMASTER");
-
+                                    trackjson.put("environment", "PROD");
                                 }
+
                                 trackjson.put("event", "SDK Initialization");
 
                                 trackjson.put("action", "initialization");
@@ -281,7 +296,7 @@ public final class OkHi extends ContentProvider {
 
 
                                 eventjson.put("properties", trackjson);
-                                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, environment);
                                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             } catch (JSONException e) {
                                 displayLog("track error omtm error " + e.toString());
@@ -292,7 +307,7 @@ public final class OkHi extends ContentProvider {
 
                     }
                 };
-                io.okheart.android.asynctask.SegmentIdentifyTask segmentIdentifyTask = new io.okheart.android.asynctask.SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
+                io.okheart.android.asynctask.SegmentIdentifyTask segmentIdentifyTask = new io.okheart.android.asynctask.SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, environment);
                 segmentIdentifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             } catch (Exception e) {
@@ -306,11 +321,13 @@ public final class OkHi extends ContentProvider {
         //startForegroundNotification();
 
         try {
+            /*
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
             } else {
                 mContext.startService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
             }
+            */
 
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
@@ -383,6 +400,7 @@ public final class OkHi extends ContentProvider {
 
 
         try {
+            /*
             Boolean production = false;
             if (appkey != null) {
                 if (appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
@@ -397,6 +415,7 @@ public final class OkHi extends ContentProvider {
             final Boolean productionVersion = production;
             displayLog("things went ok with send to omtm identify");
 
+            */
             try {
                 io.okheart.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okheart.android.callback.SegmentTrackCallBack() {
                     @Override
@@ -413,13 +432,37 @@ public final class OkHi extends ContentProvider {
                 eventjson.put("event", "SDK Initialization");
 
                 JSONObject trackjson = new JSONObject();
-
-                if (productionVersion) {
-                    trackjson.put("environment", "PROD");
+                String environment = dataProvider.getPropertyValue("environment");
+                if (environment != null) {
+                    if (environment.length() > 0) {
+                        if (environment.equalsIgnoreCase("PROD")) {
+                            trackjson.put("environment", "PROD");
+                        } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                            trackjson.put("environment", "DEVMASTER");
+                        } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                            trackjson.put("environment", "SANDBOX");
+                        } else {
+                            trackjson.put("environment", "PROD");
+                        }
+                    } else {
+                        trackjson.put("environment", "PROD");
+                    }
                 } else {
-                    trackjson.put("environment", "DEVMASTER");
-
+                    trackjson.put("environment", "PROD");
                 }
+                /*
+                if(productionVersion){
+                    trackjson.put("environment", "PROD");
+                }
+                else if(DEVMASTER){
+                    trackjson.put("environment", "DEVMASTER");
+                }else if(SANDBOX){
+                    trackjson.put("environment", "SANDBOX");
+                }
+                else{
+                    trackjson.put("environment", "PROD");
+                }
+                */
                 trackjson.put("event", "SDK Customize");
 
                 trackjson.put("action", "customization");
@@ -434,7 +477,7 @@ public final class OkHi extends ContentProvider {
 
 
                 eventjson.put("properties", trackjson);
-                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, environment);
                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             } catch (JSONException e) {
                 displayLog("track error omtm error " + e.toString());
@@ -598,6 +641,27 @@ public final class OkHi extends ContentProvider {
 
     private static String checkPermissionCause() {
 
+        String environment = dataProvider.getPropertyValue("environment");
+
+        if (environment != null) {
+            if (environment.length() > 0) {
+                if (environment.equalsIgnoreCase("PROD")) {
+
+                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+
+                } else if (environment.equalsIgnoreCase("SANDBOX")) {
+
+                } else {
+
+                }
+            } else {
+                environment = "PROD";
+            }
+        } else {
+            environment = "PROD";
+        }
+
+
         String permission;
 
         boolean permissionAccessFineLocationApproved =
@@ -606,13 +670,13 @@ public final class OkHi extends ContentProvider {
 
         if (permissionAccessFineLocationApproved) {
             try {
-                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -627,13 +691,13 @@ public final class OkHi extends ContentProvider {
                     // Start your service that doesn't have a foreground service type
                     // defined.
                     try {
-                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -645,13 +709,13 @@ public final class OkHi extends ContentProvider {
                     // location in order to function properly. Then, request background
                     // location.
                     try {
-                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -664,13 +728,13 @@ public final class OkHi extends ContentProvider {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
             try {
-                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -681,6 +745,25 @@ public final class OkHi extends ContentProvider {
 
 
     public static boolean checkPermission() {
+        String environment = dataProvider.getPropertyValue("environment");
+
+        if (environment != null) {
+            if (environment.length() > 0) {
+                if (environment.equalsIgnoreCase("PROD")) {
+
+                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+
+                } else if (environment.equalsIgnoreCase("SANDBOX")) {
+
+                } else {
+
+                }
+            } else {
+                environment = "PROD";
+            }
+        } else {
+            environment = "PROD";
+        }
 
         Boolean permission;
 
@@ -690,13 +773,13 @@ public final class OkHi extends ContentProvider {
 
         if (permissionAccessFineLocationApproved) {
             try {
-                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -711,13 +794,13 @@ public final class OkHi extends ContentProvider {
                     // Start your service that doesn't have a foreground service type
                     // defined.
                     try {
-                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -729,13 +812,13 @@ public final class OkHi extends ContentProvider {
                     // location in order to function properly. Then, request background
                     // location.
                     try {
-                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -748,13 +831,13 @@ public final class OkHi extends ContentProvider {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
             try {
-                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -801,8 +884,9 @@ public final class OkHi extends ContentProvider {
                     tempPhonenumber = phonenumber;
                 }
                 List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+                String environment = dataProvider.getPropertyValue("environment");
                 if (addressItemList.size() > 0) {
-                    sendPingSMS(okHiCallback, tempPhonenumber);
+                    sendPingSMS(okHiCallback, tempPhonenumber, environment);
                 } else {
                     try {
                         JSONObject responseJson = new JSONObject();
@@ -850,7 +934,7 @@ public final class OkHi extends ContentProvider {
         }
     }
 
-    private static void sendPingSMS(final io.okheart.android.callback.OkHiCallback okHiCallback, String phonenumber) {
+    private static void sendPingSMS(final io.okheart.android.callback.OkHiCallback okHiCallback, String phonenumber, String environment) {
         try {
             String remoteSmsTemplate = dataProvider.getPropertyValue("sms_template");
             String message = remoteSmsTemplate + uniqueId;
@@ -899,7 +983,7 @@ public final class OkHi extends ContentProvider {
                     }
                 }
             };
-            SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject);
+            SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject, environment);
             sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } catch (Exception jse) {
             displayLog("jsonexception " + jse.toString());
@@ -1024,6 +1108,25 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void requestPermission(Activity activity, int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
+        String environment = dataProvider.getPropertyValue("environment");
+        if (environment != null) {
+            if (environment.length() > 0) {
+                if (environment.equalsIgnoreCase("PROD")) {
+
+                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+
+                } else if (environment.equalsIgnoreCase("SANDBOX")) {
+
+                } else {
+
+                }
+            } else {
+                environment = "PROD";
+            }
+        } else {
+            environment = "PROD";
+        }
+
 
         Boolean permission = false;
 
@@ -1033,13 +1136,13 @@ public final class OkHi extends ContentProvider {
 
         if (permissionAccessFineLocationApproved) {
             try {
-                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "requestPermission", activity.getLocalClassName(), null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -1054,13 +1157,13 @@ public final class OkHi extends ContentProvider {
                     // Start your service that doesn't have a foreground service type
                     // defined.
                     try {
-                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "requestPermission", activity.getLocalClassName(), null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -1072,13 +1175,13 @@ public final class OkHi extends ContentProvider {
                     // location in order to function properly. Then, request background
                     // location.
                     try {
-                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                        io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -1094,13 +1197,13 @@ public final class OkHi extends ContentProvider {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
             try {
-                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
+                io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "requestPermission", activity.getLocalClassName(), null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi");
+                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -1185,8 +1288,28 @@ public final class OkHi extends ContentProvider {
 
     private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext);
-            okAnalytics.sendToAnalytics(parameters, loans);
+            String environment = dataProvider.getPropertyValue("environment");
+
+            if (environment != null) {
+                if (environment.length() > 0) {
+                    if (environment.equalsIgnoreCase("PROD")) {
+
+                    } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+
+                    } else if (environment.equalsIgnoreCase("SANDBOX")) {
+
+                    } else {
+
+                    }
+                } else {
+                    environment = "PROD";
+                }
+            } else {
+                environment = "PROD";
+            }
+
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
+            okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
@@ -1256,7 +1379,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void startKeepPeriodicPing(Integer pingTime, String uniqueId) {
-        displayLog("workmanager startKeepPeriodicPing");
+        displayLog("workmanager startKeepPeriodicPing " + pingTime);
         try {
 
             try {
@@ -1547,6 +1670,8 @@ public final class OkHi extends ContentProvider {
     }
 */
 
+/*
+
     private String getDeviceModelAndBrand() {
 
         String manufacturer = Build.MANUFACTURER;
@@ -1755,6 +1880,8 @@ public final class OkHi extends ContentProvider {
         OkHi.kill_switch = kill_switch;
     }
 
+    */
+
     @Nullable
     @Override
     public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
@@ -1787,14 +1914,7 @@ public final class OkHi extends ContentProvider {
     public boolean onCreate() {
         // get the context (Application context)
         mContext = getContext();
-        try {
-            Parse.initialize(new Parse.Configuration.Builder(mContext)
-                    .applicationId(io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID)
-                    .clientKey(io.okheart.android.utilities.Constants.DEVMASTER_CLIENT_ID)
-                    .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-        } catch (Exception e) {
-            displayLog("parse initialize error " + e.toString());
-        }
+
 
         try {
             analytics = new Analytics.Builder(mContext, io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY).build();
@@ -1828,6 +1948,7 @@ public final class OkHi extends ContentProvider {
         }
         */
 
+
         try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -1850,12 +1971,10 @@ public final class OkHi extends ContentProvider {
             displayLog("my worker error " + e.toString());
         }
 
-        displayLog("okhi create");
-
-
         return true;
     }
 
+    /*
     private static void startForegroundNotification2() {
 
         displayLog("startForegroundNotification");
@@ -1906,4 +2025,5 @@ public final class OkHi extends ContentProvider {
 
 
     }
+    */
 }

@@ -27,6 +27,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import io.okheart.android.OkHi;
+import io.okheart.android.database.DataProvider;
 
 
 public class OkHeartActivity extends AppCompatActivity {
@@ -42,6 +43,8 @@ public class OkHeartActivity extends AppCompatActivity {
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
     private static String verify;
+    private static DataProvider dataProvider;
+    private static String environment;
 
 
     private static String convertStreamToString(InputStream is) throws IOException {
@@ -146,6 +149,9 @@ public class OkHeartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(io.okheart.android.R.layout.activity_okheart);
+        dataProvider = new DataProvider(this);
+        environment = dataProvider.getPropertyValue("environment");
+        displayLog("environment " + environment);
 
         /*
         try {
@@ -382,6 +388,41 @@ public class OkHeartActivity extends AppCompatActivity {
         myWebView.addJavascriptInterface(new WebAppInterface(OkHeartActivity.this, apiKey), "Android");
         //myWebView.loadUrl("https://manager-v4.okhi.dev");
         //myWebView.loadUrl("https://7b70b228.ngrok.io");
+
+
+        if (environment != null) {
+            if (environment.length() > 0) {
+                if (environment.equalsIgnoreCase("PROD")) {
+                    myWebView.loadUrl("https://manager-v4.okhi.co");
+                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                    myWebView.loadUrl("https://manager-v4.okhi.dev");
+                } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                    myWebView.loadUrl("https://sandbox-manager-v4.okhi.dev");
+                } else {
+                    myWebView.loadUrl("https://manager-v4.okhi.co");
+                }
+            } else {
+                myWebView.loadUrl("https://manager-v4.okhi.co");
+            }
+        } else {
+            myWebView.loadUrl("https://manager-v4.okhi.co");
+        }
+
+        /*
+        if(productionVersion){
+            myWebView.loadUrl("https://manager-v4.okhi.co");
+        }
+        else if(DEVMASTER){
+            myWebView.loadUrl("https://manager-v4.okhi.dev");
+        }else if(SANDBOX){
+            myWebView.loadUrl("https://sandbox-manager-v4.okhi.dev");
+        }
+        else{
+            myWebView.loadUrl("https://manager-v4.okhi.co");
+        }
+        */
+
+        /*
         if (apiKey != null) {
             if (apiKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
                 myWebView.loadUrl("https://manager-v4.okhi.dev");
@@ -393,7 +434,44 @@ public class OkHeartActivity extends AppCompatActivity {
         } else {
             // myWebView.loadUrl("https://manager-v4.okhi.co");
         }
+        */
 
+
+        /*
+        if(environment == null){
+            if (apiKey != null) {
+                if (apiKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
+                    environment = "DEVMASTER";
+                    myWebView.loadUrl("https://manager-v4.okhi.dev");
+                } else if (apiKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
+                    environment = "SANDBOX";
+                    myWebView.loadUrl("https://sandbox-manager-v4.okhi.dev");
+                } else {
+                    environment = "PROD";
+                    myWebView.loadUrl("https://manager-v4.okhi.co");
+                }
+            } else {
+                // myWebView.loadUrl("https://manager-v4.okhi.co");
+            }
+        }
+        else{
+            if(environment.length() > 0){
+
+            }
+            else{
+                if (apiKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
+                    environment = "DEVMASTER";
+                    myWebView.loadUrl("https://manager-v4.okhi.dev");
+                } else if (apiKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
+                    environment = "SANDBOX";
+                    myWebView.loadUrl("https://sandbox-manager-v4.okhi.dev");
+                } else {
+                    environment = "PROD";
+                    myWebView.loadUrl("https://manager-v4.okhi.co");
+                }
+            }
+        }
+        */
 
         myWebView.setWebChromeClient(new WebChromeClient() {
             @Override
@@ -414,6 +492,7 @@ public class OkHeartActivity extends AppCompatActivity {
         }
 
         try {
+            /*
             Boolean production = false;
             if (apiKey != null) {
                 if (apiKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
@@ -428,6 +507,7 @@ public class OkHeartActivity extends AppCompatActivity {
             }
 
             final Boolean productionVersion = production;
+            */
 
             JSONObject identifyjson = new JSONObject();
             identifyjson.put("userId", "8VXRqG8YhN");
@@ -455,11 +535,22 @@ public class OkHeartActivity extends AppCompatActivity {
 
                                 JSONObject trackjson = new JSONObject();
 
-                                if (productionVersion) {
-                                    trackjson.put("environment", "PROD");
+                                if (environment != null) {
+                                    if (environment.length() > 0) {
+                                        if (environment.equalsIgnoreCase("PROD")) {
+                                            trackjson.put("environment", "PROD");
+                                        } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                                            trackjson.put("environment", "DEVMASTER");
+                                        } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                                            trackjson.put("environment", "SANDBOX");
+                                        } else {
+                                            trackjson.put("environment", "PROD");
+                                        }
+                                    } else {
+                                        trackjson.put("environment", "PROD");
+                                    }
                                 } else {
-                                    trackjson.put("environment", "DEVMASTER");
-
+                                    trackjson.put("environment", "PROD");
                                 }
                                 trackjson.put("event", "SDK start");
 
@@ -476,7 +567,7 @@ public class OkHeartActivity extends AppCompatActivity {
                                 trackjson.put("uniqueId", uniqueId);
 
                                 eventjson.put("properties", trackjson);
-                                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, productionVersion);
+                                io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, environment);
                                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                             } catch (JSONException e) {
                                 displayLog("track error omtm error " + e.toString());
@@ -487,7 +578,7 @@ public class OkHeartActivity extends AppCompatActivity {
 
                     }
                 };
-                io.okheart.android.asynctask.SegmentIdentifyTask segmentIdentifyTask = new io.okheart.android.asynctask.SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, productionVersion);
+                io.okheart.android.asynctask.SegmentIdentifyTask segmentIdentifyTask = new io.okheart.android.asynctask.SegmentIdentifyTask(segmentIdentifyCallBack, identifyjson, environment);
                 segmentIdentifyTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
             } catch (Exception e) {

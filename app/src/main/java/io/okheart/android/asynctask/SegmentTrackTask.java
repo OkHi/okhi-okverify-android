@@ -38,10 +38,10 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
     private SegmentTrackCallBack segmentTrackCallBack;
     private JSONObject jsonObject;
     private int responseCode;
-    private Boolean production;
+    private String production;
 
 
-    public SegmentTrackTask(SegmentTrackCallBack segmentTrackCallBack, JSONObject jsonObject, Boolean production) {
+    public SegmentTrackTask(SegmentTrackCallBack segmentTrackCallBack, JSONObject jsonObject, String production) {
         displayLog("SegmentIdentifyTask called");
 
         try {
@@ -82,10 +82,14 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
         try {
             String urlString = "https://api.segment.io/v1/track";
             String writekey;
-            if (production) {
+            if (production.equalsIgnoreCase("PROD")) {
                 writekey = ANALYTICS_WRITE_KEY_PROD_OMTM;
-            } else {
+            } else if (production.equalsIgnoreCase("DEVMASTER")) {
                 writekey = ANALYTICS_WRITE_KEY_DEV_OMTM;
+            } else if (production.equalsIgnoreCase("SANDBOX")) {
+                writekey = ANALYTICS_WRITE_KEY_DEV_OMTM;
+            } else {
+                writekey = ANALYTICS_WRITE_KEY_PROD_OMTM;
             }
 
             OkHttpClient.Builder b = new OkHttpClient.Builder();

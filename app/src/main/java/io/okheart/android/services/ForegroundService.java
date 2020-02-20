@@ -90,6 +90,7 @@ public class ForegroundService extends Service {
     private Boolean remotekillswitch;
     private Boolean remoteautostop;
     //private List<io.okheart.android.datamodel.AddressItem> addressItemList;
+    private String environment;
 
 
 
@@ -221,6 +222,8 @@ public class ForegroundService extends Service {
         super.onCreate();
         displayLog("My foreground service onCreate().");
         notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        dataProvider = new io.okheart.android.database.DataProvider(io.okheart.android.services.ForegroundService.this);
+        environment = dataProvider.getPropertyValue("environment");
         //firestore = false;
         //parsedb = false;
         //Constants.scheduleJob(ForegroundService.this, "Foreground service");
@@ -328,8 +331,6 @@ public class ForegroundService extends Service {
 
 
         /*
-        notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-        dataProvider = new io.okheart.android.database.DataProvider(io.okheart.android.services.ForegroundService.this);
         //addressItemList = dataProvider.getAllAddressList();
         try {
             mFusedLocationClient = LocationServices.getFusedLocationProviderClient(io.okheart.android.services.ForegroundService.this);
@@ -1651,8 +1652,8 @@ public class ForegroundService extends Service {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(ForegroundService.this);
-            okAnalytics.sendToAnalytics(parameters, loans);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(ForegroundService.this, environment);
+            okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
