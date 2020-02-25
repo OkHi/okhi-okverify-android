@@ -1,7 +1,9 @@
 package io.okheart.android.activity;
 
 import android.content.ContentValues;
+import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.provider.Settings;
 import android.util.Log;
 import android.webkit.JavascriptInterface;
@@ -168,6 +170,7 @@ class WebAppInterface {
                         displayLog("location_created");
                         try {
                             Long i = saveAddressToFirestore(payload);
+                            startForegroundService();
                             if (i > 0) {
                                 displayLog("saveAddressToFirestore " + i);
                                 String tempVerify = dataProvider.getPropertyValue("verify");
@@ -241,6 +244,7 @@ class WebAppInterface {
                         displayLog("location_updated");
                         try {
                             Long i = saveAddressToFirestore(payload);
+                            startForegroundService();
                             if (i > 0) {
                                 displayLog("saveAddressToFirestore " + i);
                                 String tempVerify = dataProvider.getPropertyValue("verify");
@@ -314,6 +318,7 @@ class WebAppInterface {
                         displayLog("location_selected");
                         try {
                             Long i = saveAddressToFirestore(payload);
+                            startForegroundService();
                             if (i > 0) {
                                 displayLog("saveAddressToFirestore " + i);
                                 String tempVerify = dataProvider.getPropertyValue("verify");
@@ -665,6 +670,69 @@ class WebAppInterface {
         }
 
     }
+
+
+    private void startForegroundService() {
+        String noForeground = dataProvider.getPropertyValue("noforeground");
+        String verify = dataProvider.getPropertyValue("verify");
+        displayLog("foreground " + noForeground);
+        displayLog("verify " + verify);
+        if (verify != null) {
+            if (verify.length() > 0) {
+                if (verify.equalsIgnoreCase("true")) {
+                    if (noForeground != null) {
+                        displayLog("noforeground is not null");
+                        if (noForeground.length() > 0) {
+                            displayLog("noforeground length is not zero");
+                            String brand = Build.MANUFACTURER;
+                            if (noForeground.toLowerCase().contains(brand.toLowerCase())) {
+                                displayLog("we have brand " + noForeground + " " + brand);
+                            } else {
+                                displayLog("we do not have brand " + noForeground + " " + brand);
+                                try {
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.LocationService.class));
+                                    } else {
+                                        mContext.startService(new Intent(mContext, io.okheart.android.services.LocationService.class));
+                                    }
+
+                                } catch (Exception jse) {
+                                    displayLog("jsonexception jse " + jse.toString());
+                                }
+                            }
+                        } else {
+                            displayLog("noforeground length is zero");
+                            try {
+                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                    mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.LocationService.class));
+                                } else {
+                                    mContext.startService(new Intent(mContext, io.okheart.android.services.LocationService.class));
+                                }
+
+                            } catch (Exception jse) {
+                                displayLog("jsonexception jse " + jse.toString());
+                            }
+                        }
+                    } else {
+                        displayLog("noforeground is null");
+                        try {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.LocationService.class));
+                            } else {
+                                mContext.startService(new Intent(mContext, io.okheart.android.services.LocationService.class));
+                            }
+
+                        } catch (Exception jse) {
+                            displayLog("jsonexception jse " + jse.toString());
+                        }
+                    }
+                }
+            }
+        }
+
+
+    }
+
 
     private void decideWhatToStart() {
         List<AddressItem> addressItemList = dataProvider.getAllAddressList();

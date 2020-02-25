@@ -2,6 +2,8 @@ package io.okheart.android.utilities;
 
 
 import android.content.Context;
+import android.content.Intent;
+import android.os.Build;
 import android.util.Log;
 
 import com.parse.GetCallback;
@@ -59,6 +61,7 @@ public class ConfigurationFile {
 
                                     try {
                                         String applicationKey = dataProvider.getPropertyValue("applicationKey");
+                                        String verify = dataProvider.getPropertyValue("verify");
                                         JSONObject jsonObject = new JSONObject(bytes);
                                         JSONObject verifyObject = jsonObject.optJSONObject("verify");
                                         JSONObject defaultObject = verifyObject.optJSONObject("default");
@@ -68,6 +71,63 @@ public class ConfigurationFile {
                                         String sms_template = defaultObject.optString("sms_template");
                                         Double gps_accuracy = defaultObject.optDouble("gps_accuracy");
                                         Boolean kill_switch = defaultObject.optBoolean("kill_switch");
+                                        String noForeground = jsonObject.optString("noForeground");
+                                        displayLog("foreground " + noForeground);
+                                        displayLog("verify " + verify);
+                                        if (verify != null) {
+                                            if (verify.length() > 0) {
+                                                if (verify.equalsIgnoreCase("true")) {
+                                                    if (noForeground != null) {
+                                                        displayLog("noforeground is not null");
+                                                        if (noForeground.length() > 0) {
+                                                            displayLog("noforeground length is not zero");
+                                                            String brand = Build.MANUFACTURER;
+                                                            if (noForeground.toLowerCase().contains(brand.toLowerCase())) {
+                                                                displayLog("we have brand " + noForeground + " " + brand);
+                                                            } else {
+                                                                displayLog("we do not have brand " + noForeground + " " + brand);
+                                                                try {
+                                                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                        context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                                                    } else {
+                                                                        context.startService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                                                    }
+
+                                                                } catch (Exception jse) {
+                                                                    displayLog("jsonexception jse " + jse.toString());
+                                                                }
+                                                            }
+                                                        } else {
+                                                            displayLog("noforeground length is zero");
+                                                            try {
+                                                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                    context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                                                } else {
+                                                                    context.startService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                                                }
+
+                                                            } catch (Exception jse) {
+                                                                displayLog("jsonexception jse " + jse.toString());
+                                                            }
+                                                        }
+                                                    } else {
+                                                        displayLog("noforeground is null");
+                                                        try {
+                                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                                            } else {
+                                                                context.startService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                                            }
+
+                                                        } catch (Exception jse) {
+                                                            displayLog("jsonexception jse " + jse.toString());
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+
+
 
                                         if (applicationKey != null) {
                                             if (applicationKey.length() > 0) {
@@ -152,7 +212,7 @@ public class ConfigurationFile {
                                             }
 
                                         }
-
+                                        dataProvider.insertStuff("noforeground", "" + noForeground);
                                         dataProvider.insertStuff("resume_ping_frequency", "" + resume_ping_frequency);
                                         dataProvider.insertStuff("ping_frequency", "" + ping_frequency);
                                         dataProvider.insertStuff("background_frequency", "" + background_frequency);

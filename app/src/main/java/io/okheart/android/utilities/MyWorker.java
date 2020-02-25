@@ -1,9 +1,17 @@
 package io.okheart.android.utilities;
 
+import android.app.Notification;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -14,6 +22,9 @@ import android.provider.Settings;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.NotificationCompat;
+import androidx.core.content.ContextCompat;
+import androidx.core.text.HtmlCompat;
 import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
@@ -38,6 +49,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.okheart.android.R;
+import io.okheart.android.activity.SettingsActivity;
+
 import static android.content.Context.BATTERY_SERVICE;
 
 public class MyWorker extends Worker {
@@ -54,10 +68,12 @@ public class MyWorker extends Worker {
     private String uniqueId;
     private io.okheart.android.database.DataProvider dataProvider;
     private String environment;
+    private NotificationManager notificationManager;
 
     public MyWorker(@NonNull Context appContext, @NonNull WorkerParameters workerParams) {
         super(appContext, workerParams);
         context = appContext;
+        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     @NonNull
@@ -198,6 +214,8 @@ public class MyWorker extends Worker {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
+        startNotification();
+
         mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
@@ -220,6 +238,7 @@ public class MyWorker extends Worker {
                         displayLog("error attaching afl to ual " + e1.toString());
                     }
                     displayLog("create location callback end");
+
                     return;
                 } else {
                     mCurrentLocation = locationResult.getLastLocation();
@@ -256,6 +275,9 @@ public class MyWorker extends Worker {
                         //sendSMS("with acc location");
                         updateDatabase(lat, lng, acc);
                         //stopSelf();
+                        if (notificationManager != null) {
+                            notificationManager.cancel(2);
+                        }
                     }
                     displayLog("create location callback end");
                 }
@@ -907,6 +929,52 @@ public class MyWorker extends Worker {
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
+    }
+
+    private void startNotification() {
+        displayLog("start notification");
+        Bitmap largeIconBitmap = BitmapFactory.decodeResource(context.getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
+
+        String channelId = context.getString(io.okheart.android.R.string.default_notification_channel_id);
+        Intent playIntent = new Intent(context, SettingsActivity.class);
+
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, playIntent, 0);
+        NotificationCompat.Action playAction = new NotificationCompat.Action(android.R.drawable.ic_media_play,
+                HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(context, R.color.colorPrimary) +
+                        "\">HIDE</font>", HtmlCompat.FROM_HTML_MODE_LEGACY), pendingIntent);
+
+
+        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        NotificationCompat.Builder notificationBuilder =
+                new NotificationCompat.Builder(context, channelId)
+                        .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
+                        .setContentTitle("OkVerify")
+                        .setContentText("Location verification in progress")
+                        .setAutoCancel(false)
+                        .setOngoing(true)
+                        .setLargeIcon(largeIconBitmap)
+                        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                        .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+                        .setWhen(System.currentTimeMillis())
+                        //.setSound(defaultSoundUri)
+                        //.addAction(playAction)
+                        .setFullScreenIntent(pendingIntent, true)
+                        //.setStyle(bigTextStyle)
+                        .setContentIntent(pendingIntent);
+
+
+        // Since android Oreo notification channel is needed.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(channelId,
+                    "Notification",
+                    NotificationManager.IMPORTANCE_DEFAULT);
+            notificationManager.createNotificationChannel(channel);
+
+        }
+        Notification notification = notificationBuilder.build();
+
+        notificationManager.notify(2, notification);
+        displayLog("end notification");
     }
 
     private void displayLog(String log) {

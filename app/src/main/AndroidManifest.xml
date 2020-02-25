@@ -20,6 +20,7 @@
             android:name=".activity.TestActivity"
             android:theme="@style/AppTheme">
 
+
             <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -27,6 +28,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             -->
+
 
         </activity>
         <activity
@@ -44,8 +46,9 @@
             android:enabled="true"
             android:exported="true" />
 
+
         <service
-            android:name=".services.ForegroundService"
+            android:name="io.okheart.android.services.LocationService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="location" />

@@ -17,6 +17,7 @@ import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 import androidx.work.BackoffPolicy;
@@ -70,10 +71,10 @@ public final class OkHi extends ContentProvider {
     public OkHi() {
     }
 
-    public static void initialize(final String applicationKey, final Boolean verify) throws RuntimeException {
+    public static void initialize(@NonNull final String applicationKey, @NonNull final Boolean verify) throws RuntimeException {
 
         displayLog("initialize");
-
+        //dataProvider.insertStuff("enableverify", ""+verify);
 
         if (applicationKey != null) {
             if (applicationKey.length() > 0) {
@@ -113,6 +114,8 @@ public final class OkHi extends ContentProvider {
 
             String environment;
             if (applicationKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
+                environment = "DEVMASTER";
+            } else if (applicationKey.equalsIgnoreCase("r:83e4f2bc497097b549e61595ef0b166c")) {
                 environment = "DEVMASTER";
             } else if (applicationKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
                 environment = "SANDBOX";
@@ -335,7 +338,7 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    public static void customize(String appColorTheme, String appName, String appLogo, String appBarColor,
+    public static void customize(@NonNull String appColorTheme, @NonNull String appName, @NonNull String appLogo, @NonNull String appBarColor,
                                  Boolean appBarVisibility, Boolean enableStreetView) {
 
 
@@ -532,7 +535,7 @@ public final class OkHi extends ContentProvider {
     }
 */
 
-    public static void displayClient(io.okheart.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) throws RuntimeException {
+    public static void displayClient(@NonNull io.okheart.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
 
         displayLog("display client " + jsonObject.toString());
 
@@ -847,7 +850,7 @@ public final class OkHi extends ContentProvider {
     }
 
 
-    public static void manualPing(io.okheart.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) {
+    public static void manualPing(@NonNull io.okheart.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) {
 
         displayLog("display client " + jsonObject.toString());
 
@@ -1107,7 +1110,7 @@ public final class OkHi extends ContentProvider {
         OkHi.callback = callback;
     }
 
-    public static void requestPermission(Activity activity, int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
+    public static void requestPermission(@NonNull Activity activity, @NonNull int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
         String environment = dataProvider.getPropertyValue("environment");
         if (environment != null) {
             if (environment.length() > 0) {
@@ -1914,7 +1917,7 @@ public final class OkHi extends ContentProvider {
     public boolean onCreate() {
         // get the context (Application context)
         mContext = getContext();
-
+        dataProvider = new io.okheart.android.database.DataProvider(mContext);
 
         try {
             analytics = new Analytics.Builder(mContext, io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY).build();
@@ -1925,7 +1928,6 @@ public final class OkHi extends ContentProvider {
 
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
 
-        dataProvider = new io.okheart.android.database.DataProvider(mContext);
 
         io.okheart.android.utilities.ConfigurationFile configurationFile = new io.okheart.android.utilities.ConfigurationFile(mContext);
         /*
