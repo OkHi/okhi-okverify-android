@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -400,6 +399,6 @@ public class DataProvider {
     }
 
     private void displayLog(String me) {
-        Log.i(TAG, me);
+        //Log.i(TAG, me);
     }
 }

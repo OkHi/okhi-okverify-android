@@ -1,7 +1,6 @@
 package io.okheart.android.asynctask;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import org.json.JSONObject;
 
@@ -136,6 +135,6 @@ public class SegmentTrackTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String me) {
-        Log.i(TAG, "% " + me);
+        //Log.i(TAG, "% " + me);
     }
 }

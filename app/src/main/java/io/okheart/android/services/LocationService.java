@@ -14,7 +14,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
@@ -45,7 +44,7 @@ public class LocationService extends Service {
     private String uniqueId;
 
     private static void displayLog(String log) {
-        Log.i(TAG, log);
+        // Log.i(TAG, log);
     }
 
     @Override
@@ -61,7 +60,25 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         displayLog("onStartCommand");
-        //String input = intent.getStringExtra("inputExtra");
+        startLoop();
+        return START_STICKY;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+    }
+
+    @Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
+    }
+
+    private void startNotification() {
+        if (notificationManager != null) {
+            notificationManager.cancel(1);
+        }
         Bitmap largeIconBitmap = BitmapFactory.decodeResource(this.getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
 
         String channelId = this.getString(io.okheart.android.R.string.default_notification_channel_id);
@@ -105,23 +122,38 @@ public class LocationService extends Service {
         notificationManager.notify(1, notification);
 
         startForeground(1, notification);
+
         startVerification();
-        return START_STICKY;
+
+
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
+    private void startLoop() {
+        displayLog("1 startLoop");
+        new Thread() {
+            public void run() {
+                displayLog("2 startLoop");
+                while (true) {
+                    displayLog("3 startLoop");
+                    try {
+                        startNotification();
+                        displayLog("4 startLoop");
+                        sleep(1800000);
+                        displayLog("5 startLoop");
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+
+                        displayLog("6 startLoop");
+                    } catch (Exception e) {
+                    }
+                    displayLog("7 startLoop");
+                }
+            }
+
+        }.start();
+        displayLog("8 startLoop");
     }
 
     private void startVerification() {
-
         String verify = "true";
 
         try {
@@ -156,7 +188,6 @@ public class LocationService extends Service {
         } finally {
             // writeToFileVerify("false", "one");
         }
-
     }
 
     private void decideWhatToStart() {

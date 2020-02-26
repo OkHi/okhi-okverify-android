@@ -13,7 +13,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -144,30 +143,30 @@ public final class OkHi extends ContentProvider {
                         writeToFileVerify(tempVerify, "six");
                         if (verify) {
                             displayLog("decideWhatToStart");
-                            decideWhatToStart();
+                            //decideWhatToStart();
                         } else {
                             displayLog("stopPeriodicPing");
-                            stopPeriodicPing();
+                            //stopPeriodicPing();
                         }
 
 
                     } else {
                         writeToFileVerify("false", "five");
-                        stopPeriodicPing();
+                        //stopPeriodicPing();
                     }
 
                 } else {
                     writeToFileVerify("false", "four");
-                    stopPeriodicPing();
+                    //stopPeriodicPing();
                 }
 
             } else {
                 writeToFileVerify("false", "three");
-                stopPeriodicPing();
+                //stopPeriodicPing();
             }
         } catch (Exception io) {
             writeToFileVerify("false", "two");
-            stopPeriodicPing();
+            //stopPeriodicPing();
         } finally {
             // writeToFileVerify("false", "one");
         }
@@ -994,7 +993,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
     private static void writeToFile(String customString) {
@@ -1224,6 +1223,7 @@ public final class OkHi extends ContentProvider {
 
         }
     }
+    /*
 
     private static void decideWhatToStart() {
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
@@ -1288,6 +1288,7 @@ public final class OkHi extends ContentProvider {
             stopPeriodicPing();
         }
     }
+    */
 
     private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
@@ -1361,7 +1362,7 @@ public final class OkHi extends ContentProvider {
         return ret;
     }
 
-    ///Please enable this after testing
+  /*
     private static void stopPeriodicPing() {
 
         try {
@@ -1460,7 +1461,7 @@ public final class OkHi extends ContentProvider {
             displayLog("my worker error " + e.toString());
         }
     }
-
+*/
 
 /*
     private void updateDatabase() {

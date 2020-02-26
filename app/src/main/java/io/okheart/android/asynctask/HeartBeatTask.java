@@ -1,7 +1,6 @@
 package io.okheart.android.asynctask;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -95,6 +94,6 @@ public class HeartBeatTask extends AsyncTask<Void, Void, Boolean> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

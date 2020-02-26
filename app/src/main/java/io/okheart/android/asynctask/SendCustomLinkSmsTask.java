@@ -2,7 +2,6 @@ package io.okheart.android.asynctask;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -370,6 +369,6 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String me) {
-        Log.i(TAG, me);
+        //Log.i(TAG, me);
     }
 }

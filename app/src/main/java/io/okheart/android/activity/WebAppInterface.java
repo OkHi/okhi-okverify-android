@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 import android.webkit.JavascriptInterface;
 
 import androidx.work.BackoffPolicy;
@@ -859,7 +858,7 @@ class WebAppInterface {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }
 

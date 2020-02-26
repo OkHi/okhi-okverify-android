@@ -19,7 +19,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
@@ -978,6 +977,6 @@ public class MyWorker extends Worker {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }
