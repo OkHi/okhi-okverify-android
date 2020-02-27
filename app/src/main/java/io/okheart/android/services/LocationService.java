@@ -67,6 +67,16 @@ public class LocationService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                startForegroundService(new Intent(this, io.okheart.android.services.LocationService.class));
+            } else {
+                startService(new Intent(this, io.okheart.android.services.LocationService.class));
+            }
+
+        } catch (Exception jse) {
+            displayLog("jsonexception jse " + jse.toString());
+        }
     }
 
     @Nullable

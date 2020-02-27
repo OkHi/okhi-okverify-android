@@ -80,21 +80,6 @@ public class MyWorker extends Worker {
     public Result doWork() {
         displayLog("doWork ");
 
-        /*
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                context.startForegroundService(new Intent(context, io.okheart.android.services.ForegroundService.class));
-            } else {
-                context.startService(new Intent(context, io.okheart.android.services.ForegroundService.class));
-            }
-
-        } catch (Exception jse) {
-            displayLog("jsonexception jse " + jse.toString());
-        }
-        */
-
-        //OkHi.startForegroundNotification();
-
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(context);
         environment = dataProvider.getPropertyValue("environment");
@@ -302,7 +287,7 @@ public class MyWorker extends Worker {
         }
         LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
         builder.addLocationRequest(mLocationRequest);
-        builder.setNeedBle(true);
+        //builder.setNeedBle(true);
         mLocationSettingsRequest = builder.build();
         displayLog("buildLocationSettingsRequest end");
     }
@@ -510,6 +495,26 @@ public class MyWorker extends Worker {
                     parseObject.put("address", nestedData.toString());
                     parseObject.put("ualId", addressItem.getUalid());
                     saveData(parseObject);
+                    try {
+                        parameters.put("ualId", "" + addressItem.getUalid());
+                        parameters.put("latitude", "" + addressItem.getLat());
+                        parameters.put("longitude", "" + addressItem.getLng());
+                        if (distance < 100.0) {
+                            parameters.put("verified", "" + true);
+                        } else {
+                            parameters.put("verified", "" + false);
+                        }
+
+                        parameters.put("distance", "" + distance);
+                        parameters.put("title", paramText.get("header"));
+                        parameters.put("text", paramText.get("text"));
+                        //addresses.add(nestedData);
+                        parameters.put("address", nestedData.toString());
+                        parameters.put("ualId", addressItem.getUalid());
+                        sendEvent(parameters, loans);
+                    } catch (Exception e) {
+                        displayLog("OkAnalytics error " + e.toString());
+                    }
                 } catch (Exception e) {
 
                 }
@@ -975,6 +980,7 @@ public class MyWorker extends Worker {
         notificationManager.notify(2, notification);
         displayLog("end notification");
     }
+
 
     private void displayLog(String log) {
         //Log.i(TAG, log);
