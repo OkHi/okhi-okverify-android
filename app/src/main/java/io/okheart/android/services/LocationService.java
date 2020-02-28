@@ -60,13 +60,21 @@ public class LocationService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         displayLog("onStartCommand");
-        startLoop();
+        startNotification();
+
         return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+    }
+
+    @Override
+    public void onLowMemory() {
+        //Send broadcast to the Activity to kill this service and restart it.
+        super.onLowMemory();
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 startForegroundService(new Intent(this, io.okheart.android.services.LocationService.class));
@@ -79,6 +87,7 @@ public class LocationService extends Service {
         }
     }
 
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
@@ -86,9 +95,7 @@ public class LocationService extends Service {
     }
 
     private void startNotification() {
-        if (notificationManager != null) {
-            notificationManager.cancel(1);
-        }
+
         Bitmap largeIconBitmap = BitmapFactory.decodeResource(this.getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
 
         String channelId = this.getString(io.okheart.android.R.string.default_notification_channel_id);
@@ -129,11 +136,11 @@ public class LocationService extends Service {
         }
         Notification notification = notificationBuilder.build();
 
-        notificationManager.notify(1, notification);
+        notificationManager.notify(32, notification);
 
-        startForeground(1, notification);
+        startForeground(32, notification);
+        startLoop();
 
-        startVerification();
 
 
     }
@@ -146,7 +153,8 @@ public class LocationService extends Service {
                 while (true) {
                     displayLog("3 startLoop");
                     try {
-                        startNotification();
+
+                        startVerification();
                         displayLog("4 startLoop");
                         sleep(1800000);
                         displayLog("5 startLoop");

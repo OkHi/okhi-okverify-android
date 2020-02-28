@@ -67,12 +67,12 @@ public class MyWorker extends Worker {
     private String uniqueId;
     private io.okheart.android.database.DataProvider dataProvider;
     private String environment;
-    private NotificationManager notificationManager;
+    //private NotificationManager notificationManager;
 
     public MyWorker(@NonNull Context appContext, @NonNull WorkerParameters workerParams) {
         super(appContext, workerParams);
         context = appContext;
-        notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        //notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
     }
 
     @NonNull
@@ -198,7 +198,7 @@ public class MyWorker extends Worker {
             displayLog("error attaching afl to ual " + e1.toString());
         }
 
-        startNotification();
+        // startNotification();
 
         mLocationCallback = new LocationCallback() {
             @Override
@@ -259,9 +259,11 @@ public class MyWorker extends Worker {
                         //sendSMS("with acc location");
                         updateDatabase(lat, lng, acc);
                         //stopSelf();
+                        /*
                         if (notificationManager != null) {
                             notificationManager.cancel(2);
                         }
+                        */
                     }
                     displayLog("create location callback end");
                 }
@@ -972,12 +974,12 @@ public class MyWorker extends Worker {
             NotificationChannel channel = new NotificationChannel(channelId,
                     "Notification",
                     NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(channel);
+            //notificationManager.createNotificationChannel(channel);
 
         }
         Notification notification = notificationBuilder.build();
 
-        notificationManager.notify(2, notification);
+        //notificationManager.notify(2, notification);
         displayLog("end notification");
     }
 
