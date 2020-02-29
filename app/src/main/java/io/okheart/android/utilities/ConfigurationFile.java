@@ -44,8 +44,8 @@ public class ConfigurationFile {
 
         try {
             Parse.initialize(new Parse.Configuration.Builder(context)
-                    .applicationId(io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID)
-                    .clientKey(io.okheart.android.utilities.Constants.DEVMASTER_CLIENT_ID)
+                    .applicationId(Constants.SANDBOX_APPLICATION_ID)
+                    .clientKey(Constants.SANDBOX_CLIENT_ID)
                     .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
         } catch (Exception e4) {
             displayLog("parse initialize error " + e4.toString());
@@ -198,6 +198,7 @@ public class ConfigurationFile {
                                                     Parse.destroy();
                                                     dataProvider.insertStuff("environment", "" + environment);
 
+
                                                     if (environment != null) {
                                                         if (environment.length() > 0) {
                                                             if (environment.equalsIgnoreCase("PROD")) {
@@ -206,6 +207,7 @@ public class ConfigurationFile {
                                                                             .applicationId(io.okheart.android.utilities.Constants.PROD_APPLICATION_ID)
                                                                             .clientKey(Constants.PROD_CLIENT_ID)
                                                                             .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+
                                                                 } catch (Exception e4) {
                                                                     displayLog("parse initialize error " + e4.toString());
                                                                 }
@@ -215,6 +217,7 @@ public class ConfigurationFile {
                                                                             .applicationId(io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID)
                                                                             .clientKey(io.okheart.android.utilities.Constants.DEVMASTER_CLIENT_ID)
                                                                             .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+
                                                                 } catch (Exception e4) {
                                                                     displayLog("parse initialize error " + e4.toString());
                                                                 }
@@ -224,6 +227,9 @@ public class ConfigurationFile {
                                                                             .applicationId(io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID)
                                                                             .clientKey(Constants.SANDBOX_CLIENT_ID)
                                                                             .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+                                                                    //OneTimeWorkRequest request1 = new OneTimeWorkRequest.Builder(MyWorker.class).build();
+                                                                    //WorkManager.getInstance().enqueue(request1);
+
                                                                 } catch (Exception e4) {
                                                                     displayLog("parse initialize error " + e4.toString());
                                                                 }
@@ -233,6 +239,7 @@ public class ConfigurationFile {
                                                                             .applicationId(io.okheart.android.utilities.Constants.PROD_APPLICATION_ID)
                                                                             .clientKey(Constants.PROD_CLIENT_ID)
                                                                             .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+
                                                                 } catch (Exception e4) {
                                                                     displayLog("parse initialize error " + e4.toString());
                                                                 }
@@ -243,6 +250,7 @@ public class ConfigurationFile {
                                                                         .applicationId(io.okheart.android.utilities.Constants.PROD_APPLICATION_ID)
                                                                         .clientKey(Constants.PROD_CLIENT_ID)
                                                                         .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+
                                                             } catch (Exception e4) {
                                                                 displayLog("parse initialize error " + e4.toString());
                                                             }
@@ -253,13 +261,17 @@ public class ConfigurationFile {
                                                                     .applicationId(io.okheart.android.utilities.Constants.PROD_APPLICATION_ID)
                                                                     .clientKey(Constants.PROD_CLIENT_ID)
                                                                     .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
+
                                                         } catch (Exception e4) {
                                                             displayLog("parse initialize error " + e4.toString());
                                                         }
                                                     }
+
+
                                                 } catch (Exception e1) {
 
                                                 }
+
                                                 JSONArray killArray = jsonObject.optJSONArray("kill_switch");
                                                 for (int i = 0; i < killArray.length(); i++) {
                                                     String affiliation = killArray.getString(i);
@@ -316,6 +328,40 @@ public class ConfigurationFile {
         } catch (Exception e) {
             displayLog("parse query configuration file error " + e.toString());
         }
+
+        /*
+        try {
+            String environment = dataProvider.getPropertyValue("environment");
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("environment", environment);
+            jsonObject.put("firstName", "Ramogi");
+            jsonObject.put("lastName", "Ochola");
+            jsonObject.put("phonenumber", "+254713567907");
+            jsonObject.put("sessionToken", "r:ee30a6552f7e5dfab48f4234bd1ffc1b");
+            jsonObject.put("environment", "prod");
+            jsonObject.put("affiliation", "okhi");
+            jsonObject.put("branch", "hq_okhi");
+
+
+            GetAddressCallBack getAddressCallBack = new GetAddressCallBack() {
+                @Override
+                public void querycomplete(String response, boolean me) {
+                    if (me) {
+                        displayLog("good response " + response);
+                        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+                        displayLog("addressItemList size " + addressItemList.size());
+                    } else {
+                        displayLog("bad response " + me);
+                    }
+                }
+            };
+            GetAddressTask getAddressTask = new GetAddressTask(context, getAddressCallBack, jsonObject);
+            getAddressTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        }
+        catch (Exception e){
+            displayLog("getaddresserror "+e.toString());
+        }
+        */
     }
 
 

@@ -13,19 +13,13 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
-import androidx.work.BackoffPolicy;
-import androidx.work.Constraints;
-import androidx.work.Data;
-import androidx.work.ExistingPeriodicWorkPolicy;
-import androidx.work.NetworkType;
-import androidx.work.PeriodicWorkRequest;
-import androidx.work.WorkManager;
 
 import com.segment.analytics.Analytics;
 
@@ -41,11 +35,11 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
+import io.okheart.android.asynctask.GetAddressTask;
 import io.okheart.android.asynctask.SendCustomLinkSmsTask;
+import io.okheart.android.callback.GetAddressCallBack;
 import io.okheart.android.callback.SendCustomLinkSmsCallBack;
-import io.okheart.android.utilities.MyWorker;
 
 
 public final class OkHi extends ContentProvider {
@@ -593,7 +587,49 @@ public final class OkHi extends ContentProvider {
         } else {
             throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
         }
+        fetchAddresses(jsonObject);
 
+
+    }
+
+    private static void fetchAddresses(JSONObject jsonObject) {
+        try {
+            String tologinwith;
+            String tempphonenumber = jsonObject.optString("phone");
+            requestSource = jsonObject.optString("phone");
+            if ((tempphonenumber.startsWith("07")) && (tempphonenumber.length() == 10)) {
+                tologinwith = "+2547" + tempphonenumber.substring(2);
+            } else {
+                tologinwith = tempphonenumber;
+            }
+            String environment = dataProvider.getPropertyValue("environment");
+            jsonObject.put("environment", environment);
+            jsonObject.put("firstName", jsonObject.optString("firstName"));
+            jsonObject.put("lastName", jsonObject.optString("lastName"));
+            jsonObject.put("phonenumber", tologinwith);
+            jsonObject.put("sessionToken", appkey);
+            jsonObject.put("environment", "prod");
+            jsonObject.put("affiliation", "okhi");
+            jsonObject.put("branch", "hq_okhi");
+
+
+            GetAddressCallBack getAddressCallBack = new GetAddressCallBack() {
+                @Override
+                public void querycomplete(String response, boolean me) {
+                    if (me) {
+                        displayLog("good response " + response);
+                        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+                        displayLog("addressItemList size " + addressItemList.size());
+                    } else {
+                        displayLog("bad response " + me);
+                    }
+                }
+            };
+            GetAddressTask getAddressTask = new GetAddressTask(mContext, getAddressCallBack, jsonObject);
+            getAddressTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } catch (Exception e) {
+            displayLog("error obtaining addresses " + e.toString());
+        }
     }
 
 
@@ -848,7 +884,6 @@ public final class OkHi extends ContentProvider {
         return permission;
     }
 
-
     public static void manualPing(@NonNull io.okheart.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) {
 
         displayLog("display client " + jsonObject.toString());
@@ -945,6 +980,7 @@ public final class OkHi extends ContentProvider {
             jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
             jsonObject.put("customName", "test");
             //jsonObject.put("ualId", verifyDataItem.getUalId());
+
             jsonObject.put("phoneNumber", phonenumber);
             jsonObject.put("phone", phonenumber);
             jsonObject.put("message", message);
@@ -993,7 +1029,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
     private static void writeToFile(String customString) {
@@ -1953,6 +1989,7 @@ public final class OkHi extends ContentProvider {
 
 
         try {
+            /*
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build();
@@ -1969,6 +2006,27 @@ public final class OkHi extends ContentProvider {
                             .build();
 
             WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
+            */
+
+            /*
+            Constraints constraints = new Constraints.Builder()
+                    .build();
+
+            Data inputData = new Data.Builder()
+                    .putString("uniqueId", uniqueId)
+                    .build();
+
+            PeriodicWorkRequest request =
+                    new PeriodicWorkRequest.Builder(MyWorker.class, 900, TimeUnit.SECONDS)
+                            .setInputData(inputData)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, 900, TimeUnit.SECONDS)
+                            .build();
+
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
+            */
+
+
 
         } catch (Exception e) {
             displayLog("my worker error " + e.toString());

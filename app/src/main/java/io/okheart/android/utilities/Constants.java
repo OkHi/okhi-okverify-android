@@ -15,7 +15,13 @@ public class Constants {
     public final static boolean DEV3 = false;
     public final static boolean DEV4 = false;
 */
-
+public static final String PROD_USERID = "A8dGsqkXNb";
+    public static final String DEVMASTER_USERID = "A8dGsqkXNb";
+    public static final String DEV4_USERID = "A8dGsqkXNb";
+    public static final String DEV1_USERID = "A8dGsqkXNb";
+    public static final String DEV3_USERID = "A8dGsqkXNb";
+    public static final String SANDBOX_USERID = "A8dGsqkXNb";
+    public static final String STAGING_USERID = "A8dGsqkXNb";
     public static final String DEV1_APPLICATION_ID = "7eSfutlTynvfoNUJjlsb2sHbFIiOaU8lW1eXY6uB";
     public static final String DEV1_CLIENT_ID = "TDYUmNnHNZ4E9liMee1PeczdYUTfblxmDC1SAV5Y";
     public static final String DEV1_REST_KEY = "SAj9R13u6edRklbj0WLF9xDLyfoUedx4LJG6zkd2";

@@ -153,15 +153,12 @@ public class LocationService extends Service {
                 while (true) {
                     displayLog("3 startLoop");
                     try {
-
                         startVerification();
                         displayLog("4 startLoop");
                         sleep(1800000);
-                        displayLog("5 startLoop");
-
-
                         displayLog("6 startLoop");
                     } catch (Exception e) {
+                        displayLog("while loop error " + e.toString());
                     }
                     displayLog("7 startLoop");
                 }
