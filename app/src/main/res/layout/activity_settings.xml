@@ -33,12 +33,33 @@
             android:textSize="20sp" />
 
         <Button
+            android:background="@drawable/buttonroundmaterial"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
             android:id="@+id/settingsbtn"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/info2"
             android:layout_centerHorizontal="true"
+            android:textColor="@color/white"
+            android:textSize="20sp"
             android:text="Settings" />
+
+        <Button
+            android:id="@+id/closebtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/settingsbtn"
+            android:layout_alignStart="@+id/settingsbtn"
+            android:layout_alignEnd="@+id/settingsbtn"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="30dip"
+            android:background="@drawable/buttonroundmaterial"
+            android:paddingLeft="40dp"
+            android:paddingRight="40dp"
+            android:text="Close"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
     </RelativeLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

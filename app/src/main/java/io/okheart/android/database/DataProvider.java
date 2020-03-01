@@ -395,6 +395,12 @@ public class DataProvider {
             close();
         }
 
+        if ((carupgradedelivered.startsWith("07")) && (carupgradedelivered.length() == 10)) {
+            carupgradedelivered = "+2547" + carupgradedelivered.substring(2);
+        } else {
+            carupgradedelivered = carupgradedelivered;
+        }
+
         return carupgradedelivered;
     }
 

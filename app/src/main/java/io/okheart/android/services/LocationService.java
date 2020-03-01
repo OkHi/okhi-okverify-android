@@ -9,16 +9,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.media.RingtoneManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
 import androidx.core.app.NotificationCompat;
-import androidx.core.content.ContextCompat;
-import androidx.core.text.HtmlCompat;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
@@ -41,7 +37,7 @@ public class LocationService extends Service {
     private NotificationManager notificationManager;
     private String environment;
     private io.okheart.android.database.DataProvider dataProvider;
-    private String uniqueId;
+    private String uniqueId, phonenumber;
 
     private static void displayLog(String log) {
         // Log.i(TAG, log);
@@ -55,6 +51,7 @@ public class LocationService extends Service {
         uniqueId = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(io.okheart.android.services.LocationService.this);
         environment = dataProvider.getPropertyValue("environment");
+        phonenumber = dataProvider.getPropertyValue("phonenumber");
     }
 
     @Override
@@ -102,17 +99,20 @@ public class LocationService extends Service {
         Intent playIntent = new Intent(this, SettingsActivity.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, playIntent, 0);
+        /*
         NotificationCompat.Action playAction = new NotificationCompat.Action(android.R.drawable.ic_media_play,
-                HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(this, R.color.colorPrimary) +
+                HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(this, R.color.newdarkgreen) +
                         "\">HIDE</font>", HtmlCompat.FROM_HTML_MODE_LEGACY), pendingIntent);
+        */
 
 
-        Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        //Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
                         .setContentTitle("OkVerify")
-                        .setContentText("Location verification in progress")
+                        .setColor(this.getColor(R.color.newdarkgreen))
+                        .setContentText("Your address is being verified in the background")
                         .setAutoCancel(false)
                         .setOngoing(true)
                         .setLargeIcon(largeIconBitmap)
@@ -120,7 +120,7 @@ public class LocationService extends Service {
                         .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                         .setWhen(System.currentTimeMillis())
                         //.setSound(defaultSoundUri)
-                        .addAction(playAction)
+                        .addAction(android.R.drawable.ic_menu_view, "HIDE", pendingIntent)
                         .setFullScreenIntent(pendingIntent, true)
                         //.setStyle(bigTextStyle)
                         .setContentIntent(pendingIntent);
@@ -275,6 +275,7 @@ public class LocationService extends Service {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "stopPeriodicPing");
@@ -285,7 +286,7 @@ public class LocationService extends Service {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-        WorkManager.getInstance().cancelUniqueWork("locationservice");
+        WorkManager.getInstance().cancelUniqueWork("ramogi");
 
     }
 
@@ -296,6 +297,7 @@ public class LocationService extends Service {
             try {
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "startKeepPeriodicPing");
@@ -322,7 +324,7 @@ public class LocationService extends Service {
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
                             .build();
 
-            WorkManager.getInstance().enqueueUniquePeriodicWork("locationservice", ExistingPeriodicWorkPolicy.KEEP, request);
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
 
         } catch (Exception e) {
             displayLog("my worker error " + e.toString());
@@ -335,6 +337,7 @@ public class LocationService extends Service {
             try {
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "startReplacePeriodicPing");
@@ -361,7 +364,7 @@ public class LocationService extends Service {
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
                             .build();
 
-            WorkManager.getInstance().enqueueUniquePeriodicWork("locationservice", ExistingPeriodicWorkPolicy.REPLACE, request);
+            WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.REPLACE, request);
 
 
         } catch (Exception e) {

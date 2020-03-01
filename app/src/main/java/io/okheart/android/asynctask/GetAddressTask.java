@@ -3,7 +3,7 @@ package io.okheart.android.asynctask;
 import android.content.ContentValues;
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
+import android.provider.Settings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import io.okheart.android.callback.GetAddressCallBack;
-import io.okheart.android.database.DataProvider;
 import io.okheart.android.datamodel.OrderItem;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
@@ -51,24 +50,26 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
     private HashMap<String, String> postDataParams = new HashMap<>();
     private String phoneNumber;
     private int responseCode;
-    private DataProvider dataProvider;
+    private io.okheart.android.database.DataProvider dataProvider;
     private Context context;
-    private String firstName, ualId, environment;
-    private JSONObject jsonObject;
+    private String firstName, ualId, environment, uniqueId;
 
-    public GetAddressTask(Context context, GetAddressCallBack getAddressCallBack, JSONObject jsonObject) {
+    public GetAddressTask(Context context, GetAddressCallBack getAddressCallBack) {
 
         this.context = context;
-        this.jsonObject = jsonObject;
-        this.dataProvider = new DataProvider(context);
+        this.dataProvider = new io.okheart.android.database.DataProvider(context);
         this.getAddressCallBack = getAddressCallBack;
-        this.phoneNumber = jsonObject.optString("phonenumber");
-        this.environment = jsonObject.optString("environment");
-        displayLog("phonenumber " + phoneNumber);
+        String tempphonenumber = dataProvider.getPropertyValue("phonenumber");
+        if ((tempphonenumber.startsWith("07")) && (tempphonenumber.length() == 10)) {
+            this.phoneNumber = "+2547" + tempphonenumber.substring(2);
+        } else {
+            this.phoneNumber = tempphonenumber;
+        }
+        this.environment = dataProvider.getPropertyValue("environment");
+        uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         postDataParams.put("phone", phoneNumber);
-        postDataParams.put("branch", jsonObject.optString("branch"));
-        postDataParams.put("affiliation", jsonObject.optString("affiliation"));
-        postDataParams.put("sessionToken", jsonObject.optString("sessionToken"));
+        postDataParams.put("branch", "hq_okhi");
+        postDataParams.put("affiliation", "okhi");
         try {
             postDataParams.put("product", product);
             postDataParams.put("appType", "android");
@@ -709,7 +710,7 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_okhi");
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LAT, orderItem.getLat());
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LNG, orderItem.getLng());
-                                            contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, jsonObject.optString("uniqueId"));
+                                            contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, uniqueId);
 
                                             Long y = dataProvider.insertAddressList(contentValues);
                                             displayLog("inserted address " + y);
@@ -738,7 +739,7 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String me) {
-        Log.i(TAG, me);
+        //Log.i(TAG, me);
     }
 }
 

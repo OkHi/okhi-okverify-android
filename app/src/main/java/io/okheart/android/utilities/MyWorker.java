@@ -51,7 +51,7 @@ public class MyWorker extends Worker {
     private Location mCurrentLocation;
     private Double lat, lng;
     private Float acc;
-    private String uniqueId;
+    private String uniqueId, phonenumber;
     private io.okheart.android.database.DataProvider dataProvider;
     private String environment;
     //private NotificationManager notificationManager;
@@ -70,6 +70,7 @@ public class MyWorker extends Worker {
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(context);
         environment = dataProvider.getPropertyValue("environment");
+        phonenumber = dataProvider.getPropertyValue("phonenumber");
 
         if (environment != null) {
             if (environment.length() > 0) {
@@ -93,6 +94,7 @@ public class MyWorker extends Worker {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -151,6 +153,7 @@ public class MyWorker extends Worker {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -174,6 +177,7 @@ public class MyWorker extends Worker {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -198,6 +202,7 @@ public class MyWorker extends Worker {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "result");
@@ -222,6 +227,7 @@ public class MyWorker extends Worker {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "result");
@@ -264,6 +270,7 @@ public class MyWorker extends Worker {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -283,21 +290,18 @@ public class MyWorker extends Worker {
 
 
     private void updateDatabase(final Double lat, final Double lng, final Float acc) {
+        try {
+            stopLocationUpdates();
+        } catch (Exception e) {
+            displayLog("Error stopping location update " + e.toString());
+        }
 
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
 
         if (addressItemList.size() > 0) {
-            //List<Map<String, Object>> addresses = new ArrayList<>();
-
-            try {
-                stopLocationUpdates();
-            } catch (Exception e) {
-                displayLog("Error stopping location update " + e.toString());
-            }
-
-
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
 
             final Long timemilliseconds = System.currentTimeMillis();
@@ -370,10 +374,11 @@ public class MyWorker extends Worker {
             }
 
             try {
-                String phonenumber = dataProvider.getPropertyValue("phonenumber");
+
                 if (phonenumber != null) {
                     if (phonenumber.length() > 0) {
                         parseObject.put("phonenumber", phonenumber);
+                        loans.put("phonenumber", phonenumber);
                     }
                 }
             } catch (Exception e) {
@@ -456,7 +461,9 @@ public class MyWorker extends Worker {
                 parameters.put("OSName", "Android");
                 parameters.put("appVersionCode", "" + io.okheart.android.BuildConfig.VERSION_CODE);
                 parameters.put("appVersionName", "" + io.okheart.android.BuildConfig.VERSION_NAME);
-                sendEvent(parameters, loans);
+                loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
+                //sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
@@ -504,6 +511,8 @@ public class MyWorker extends Worker {
                         //addresses.add(nestedData);
                         parameters.put("address", nestedData.toString());
                         parameters.put("ualId", addressItem.getUalid());
+                        loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         sendEvent(parameters, loans);
                     } catch (Exception e) {
                         displayLog("OkAnalytics error " + e.toString());
@@ -517,12 +526,155 @@ public class MyWorker extends Worker {
             //add an event here saying we don't have addresses
             //saveData(parseObject,  timemilliseconds);
             //stopSelf();
+
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
+            HashMap<String, String> parameters = new HashMap<>();
+
+            final Long timemilliseconds = System.currentTimeMillis();
+
+            try {
+                WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiInfo info = wifiManager.getConnectionInfo();
+                String ssid = info.getSSID();
+                displayLog("ssid " + ssid);
+                if (ssid.contains("unknown")) {
+
+                } else {
+                    if (ssid.length() > 0) {
+                        displayLog("ssid " + ssid.substring(1, ssid.length() - 1));
+                        parameters.put("ssid", ssid);
+                    } else {
+
+                    }
+                }
+
+
+                try {
+                    List<String> configuredSSIDList = new ArrayList<>();
+                    //List<String> scannedSSIDList = new ArrayList<>();
+                    List<WifiConfiguration> configuredList = wifiManager.getConfiguredNetworks();
+                    //List<ScanResult> scanResultList = wifiManager.getScanResults();
+                    //displayLog("configured list size "+configuredList.size());
+                    //displayLog("scanned list size "+scanResultList.size());
+                    for (WifiConfiguration config : configuredList) {
+                        //displayLog("configured list "+config.SSID);
+                        configuredSSIDList.add(config.SSID);
+                    }
+                    if (configuredSSIDList != null) {
+                        if (configuredSSIDList.size() > 0) {
+                            parameters.put("configuredSSIDs", configuredSSIDList.toString());
+                        }
+                    }
+                /*
+                for(ScanResult config : scanResultList) {
+                    displayLog("scanned list "+config.SSID);
+                    scannedSSIDList.add(config.SSID);
+                }
+                */
+                } catch (Exception e) {
+                    displayLog("error gettign scanned list " + e.toString());
+                }
+
+
+            } catch (Exception e) {
+                displayLog(" error getting wifi info " + e.toString());
+            }
+
+            try {
+
+                if (phonenumber != null) {
+                    if (phonenumber.length() > 0) {
+                        loans.put("phonenumber", phonenumber);
+                    }
+                }
+            } catch (Exception e) {
+                displayLog("error getting phonenumber " + e.toString());
+            }
+            try {
+                boolean isPlugged = false;
+                BatteryManager bm = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
+                int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                parameters.put("batteryLevel", "" + batLevel);
+
+                Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+                    isPlugged = isPlugged || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                }
+                parameters.put("isPlugged", "" + isPlugged);
+
+                // Are we charging / charged?
+                int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                        status == BatteryManager.BATTERY_STATUS_FULL;
+                parameters.put("isCharging", "" + isCharging);
+
+
+                // How are we charging?
+                int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                parameters.put("usbCharge", "" + usbCharge);
+                boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                parameters.put("acCharge", "" + acCharge);
+
+            } catch (Exception e) {
+                displayLog(" error getting battery status " + e.toString());
+            }
+
+            parameters.put("uniqueId", uniqueId);
+
+            try {
+
+                parameters.put("uniqueId", uniqueId);
+                parameters.put("cookieToken", uniqueId);
+                parameters.put("eventName", "Data collection Service");
+                parameters.put("subtype", "saveBackgroundData");
+                parameters.put("type", "saveData");
+                parameters.put("onObject", "backgroundService");
+                parameters.put("view", "worker");
+                parameters.put("branch", "hq_okhi");
+                //parameters.put("deliveryId", null);
+                //parameters.put("ualId", addressParseObject.getClaimUalId());
+                parameters.put("userAffiliation", "okhi");
+
+                parameters.put("latitude", "" + lat);
+                parameters.put("longitude", "" + lng);
+                parameters.put("gpsAccuracy", "" + acc);
+                try {
+                    Location location2 = new Location("geohash");
+                    location2.setLatitude(lat);
+                    location2.setLongitude(lng);
+
+                    io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                    parameters.put("location", hash.toString());
+                } catch (Exception e) {
+                    displayLog("geomap error " + e.toString());
+                }
+                parameters.put("geoPointSource", "clientBackgroundGPS");
+                parameters.put("timemilliseconds", "" + timemilliseconds);
+                parameters.put("device", getDeviceModelAndBrand());
+                parameters.put("model", Build.MODEL);
+                parameters.put("brand", Build.MANUFACTURER);
+                parameters.put("OSVersion", "" + Build.VERSION.SDK_INT);
+                parameters.put("OSName", "Android");
+                parameters.put("appVersionCode", "" + io.okheart.android.BuildConfig.VERSION_CODE);
+                parameters.put("appVersionName", "" + io.okheart.android.BuildConfig.VERSION_NAME);
+                loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+
         }
 
     }
 
 
-    private void saveData(ParseObject parseObject) {
+    private void saveData(final ParseObject parseObject) {
 
         displayLog("parse object save");
         parseObject.saveInBackground(new SaveCallback() {
@@ -533,12 +685,14 @@ public class MyWorker extends Worker {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "saveData");
                         parameters.put("type", "parse");
                         parameters.put("onObject", "success");
                         parameters.put("view", "worker");
+                        parameters.put("ualId", parseObject.getString("ualId"));
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
                         displayLog("error attaching afl to ual " + e1.toString());
@@ -548,12 +702,14 @@ public class MyWorker extends Worker {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "saveData");
                         parameters.put("type", "parse");
                         parameters.put("onObject", "failure");
                         parameters.put("view", "worker");
+                        parameters.put("ualId", parseObject.getString("ualId"));
                         parameters.put("error", e.toString());
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
@@ -570,6 +726,7 @@ public class MyWorker extends Worker {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "stop");
@@ -592,6 +749,7 @@ public class MyWorker extends Worker {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "start");
@@ -614,6 +772,7 @@ public class MyWorker extends Worker {
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
                                 loans.put("uniqueId", uniqueId);
+                                loans.put("phonenumber", phonenumber);
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Data Collection Service");
                                 parameters.put("subtype", "complete");
@@ -635,6 +794,7 @@ public class MyWorker extends Worker {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "success");
@@ -656,6 +816,7 @@ public class MyWorker extends Worker {
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
+                        loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
                         parameters.put("subtype", "failure");

@@ -3,6 +3,7 @@ package io.okheart.android.utilities;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
 
@@ -23,24 +24,30 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
+import io.okheart.android.BuildConfig;
+import io.okheart.android.asynctask.GetAddressTask;
+import io.okheart.android.callback.GetAddressCallBack;
+
 public class ConfigurationFile {
 
     private static final String TAG = "ConfigurationFile";
     private static Context context;
     private io.okheart.android.database.DataProvider dataProvider;
-    private String uniqueId;
+    private String uniqueId, phonenumber;
 
     public ConfigurationFile(final Context context) {
         displayLog("ConfigurationFile called ");
         ConfigurationFile.context = context;
         dataProvider = new io.okheart.android.database.DataProvider(context);
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        phonenumber = dataProvider.getPropertyValue("phonenumber");
 
         try {
             Parse.initialize(new Parse.Configuration.Builder(context)
@@ -123,6 +130,7 @@ public class ConfigurationFile {
                                                                 displayLog("jsonexception jse " + jse.toString());
                                                             }
                                                         } else {
+
                                                             displayLog("nothing is getting killed");
                                                             if (noForeground != null) {
                                                                 displayLog("noforeground is not null");
@@ -132,10 +140,40 @@ public class ConfigurationFile {
                                                                     String brand = Build.MANUFACTURER;
                                                                     if (noForeground.toLowerCase().contains(brand.toLowerCase())) {
                                                                         displayLog("we have brand " + noForeground + " " + brand);
+                                                                        try {
+                                                                            HashMap<String, String> loans = new HashMap<>();
+                                                                            loans.put("uniqueId", uniqueId);
+                                                                            loans.put("applicationKey", applicationKey);
+                                                                            loans.put("phonenumber", phonenumber);
+                                                                            HashMap<String, String> parameters = new HashMap<>();
+                                                                            parameters.put("eventName", "Foreground Notification");
+                                                                            parameters.put("subtype", "notShown");
+                                                                            parameters.put("type", "noshow");
+                                                                            parameters.put("onObject", "notification");
+                                                                            parameters.put("view", "configFile");
+                                                                            sendEvent(parameters, loans);
+                                                                        } catch (Exception e1) {
+                                                                            displayLog("error attaching afl to ual " + e1.toString());
+                                                                        }
                                                                         decideWhatToStart();
 
                                                                     } else {
                                                                         displayLog("we do not have brand " + noForeground + " " + brand);
+                                                                        try {
+                                                                            HashMap<String, String> loans = new HashMap<>();
+                                                                            loans.put("uniqueId", uniqueId);
+                                                                            loans.put("applicationKey", applicationKey);
+                                                                            loans.put("phonenumber", phonenumber);
+                                                                            HashMap<String, String> parameters = new HashMap<>();
+                                                                            parameters.put("eventName", "Foreground Notification");
+                                                                            parameters.put("subtype", "shown");
+                                                                            parameters.put("type", "show");
+                                                                            parameters.put("onObject", "notification");
+                                                                            parameters.put("view", "configFile");
+                                                                            sendEvent(parameters, loans);
+                                                                        } catch (Exception e1) {
+                                                                            displayLog("error attaching afl to ual " + e1.toString());
+                                                                        }
                                                                         try {
                                                                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                                 context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
@@ -151,6 +189,21 @@ public class ConfigurationFile {
                                                                 } else {
                                                                     displayLog("noforeground length is zero");
                                                                     try {
+                                                                        HashMap<String, String> loans = new HashMap<>();
+                                                                        loans.put("uniqueId", uniqueId);
+                                                                        loans.put("applicationKey", applicationKey);
+                                                                        loans.put("phonenumber", phonenumber);
+                                                                        HashMap<String, String> parameters = new HashMap<>();
+                                                                        parameters.put("eventName", "Foreground Notification");
+                                                                        parameters.put("subtype", "shown");
+                                                                        parameters.put("type", "show");
+                                                                        parameters.put("onObject", "notification");
+                                                                        parameters.put("view", "configFile");
+                                                                        sendEvent(parameters, loans);
+                                                                    } catch (Exception e1) {
+                                                                        displayLog("error attaching afl to ual " + e1.toString());
+                                                                    }
+                                                                    try {
                                                                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                             context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
                                                                         } else {
@@ -163,6 +216,21 @@ public class ConfigurationFile {
                                                                 }
                                                             } else {
                                                                 displayLog("noforeground is null");
+                                                                try {
+                                                                    HashMap<String, String> loans = new HashMap<>();
+                                                                    loans.put("uniqueId", uniqueId);
+                                                                    loans.put("applicationKey", applicationKey);
+                                                                    loans.put("phonenumber", phonenumber);
+                                                                    HashMap<String, String> parameters = new HashMap<>();
+                                                                    parameters.put("eventName", "Foreground Notification");
+                                                                    parameters.put("subtype", "shown");
+                                                                    parameters.put("type", "show");
+                                                                    parameters.put("onObject", "notification");
+                                                                    parameters.put("view", "configFile");
+                                                                    sendEvent(parameters, loans);
+                                                                } catch (Exception e1) {
+                                                                    displayLog("error attaching afl to ual " + e1.toString());
+                                                                }
                                                                 try {
                                                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                                                         context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
@@ -211,6 +279,7 @@ public class ConfigurationFile {
                                                                 } catch (Exception e4) {
                                                                     displayLog("parse initialize error " + e4.toString());
                                                                 }
+
                                                             } else if (environment.equalsIgnoreCase("DEVMASTER")) {
                                                                 try {
                                                                     Parse.initialize(new Parse.Configuration.Builder(context)
@@ -267,6 +336,7 @@ public class ConfigurationFile {
                                                         }
                                                     }
 
+                                                    fetchAddresses(verify, noForeground, phonenumber);
 
                                                 } catch (Exception e1) {
 
@@ -441,7 +511,7 @@ public class ConfigurationFile {
             parameters.put("subtype", "stopPeriodicPing");
             parameters.put("type", "doWork");
             parameters.put("onObject", "app");
-            parameters.put("view", "OkHi");
+            parameters.put("view", "configFile");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -457,12 +527,13 @@ public class ConfigurationFile {
             try {
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "startKeepPeriodicPing");
                 parameters.put("type", "doWork");
                 parameters.put("onObject", "app");
-                parameters.put("view", "OkHi");
+                parameters.put("view", "configFile");
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
@@ -496,12 +567,13 @@ public class ConfigurationFile {
             try {
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "startReplacePeriodicPing");
                 parameters.put("type", "doWork");
                 parameters.put("onObject", "app");
-                parameters.put("view", "OkHi");
+                parameters.put("view", "configFile");
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
@@ -558,6 +630,213 @@ public class ConfigurationFile {
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
+    }
+
+    private void sendNotificationEvent(String environment, String applicationKey, String action, String actionSubtype) {
+        try {
+            io.okheart.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okheart.android.callback.SegmentTrackCallBack() {
+                @Override
+                public void querycomplete(String response, boolean status) {
+                    if (status) {
+                        displayLog("things went ok with send to omtm track");
+                    } else {
+                        displayLog("something went wrong with send to omtm track");
+                    }
+                }
+            };
+            JSONObject eventjson = new JSONObject();
+            //eventjson.put("userId", userId);
+            eventjson.put("event", "Foreground Notification");
+
+            JSONObject trackjson = new JSONObject();
+
+            if (environment != null) {
+                if (environment.length() > 0) {
+                    if (environment.equalsIgnoreCase("PROD")) {
+                        trackjson.put("environment", "PROD");
+                    } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+                        trackjson.put("environment", "DEVMASTER");
+                    } else if (environment.equalsIgnoreCase("SANDBOX")) {
+                        trackjson.put("environment", "SANDBOX");
+                    } else {
+                        trackjson.put("environment", "PROD");
+                    }
+                } else {
+                    trackjson.put("environment", "PROD");
+                }
+            } else {
+                trackjson.put("environment", "PROD");
+            }
+
+            trackjson.put("event", "Foreground Notification");
+
+            trackjson.put("action", action);
+            trackjson.put("actionSubtype", actionSubtype);
+            trackjson.put("clientProduct", "okHeartAndroidSDK");
+            trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+            trackjson.put("clientKey", applicationKey);
+            trackjson.put("appLayer", "client");
+            trackjson.put("onObject", "sdk");
+            trackjson.put("product", "okHeartAndroidSDK");
+            trackjson.put("uniqueId", uniqueId);
+
+
+            eventjson.put("properties", trackjson);
+            io.okheart.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okheart.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, environment);
+            segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        } catch (JSONException e) {
+            displayLog("track error omtm error " + e.toString());
+        }
+    }
+
+
+    private void fetchAddresses(final String verify, final String noforeground, String phonenumber) {
+
+        try {
+            final String tempPhonenumber;
+            if (phonenumber != null) {
+                if (phonenumber.length() > 0) {
+                    if ((phonenumber.startsWith("07")) && (phonenumber.length() == 10)) {
+                        tempPhonenumber = "+2547" + phonenumber.substring(2);
+                    } else {
+                        tempPhonenumber = phonenumber;
+                    }
+
+                } else {
+                    tempPhonenumber = getPhonenumber(verify, noforeground);
+                }
+            } else {
+                tempPhonenumber = getPhonenumber(verify, noforeground);
+            }
+
+            Boolean tempVerify;
+            if (verify != null) {
+                if (verify.length() > 0) {
+                    tempVerify = Boolean.parseBoolean(verify);
+
+                } else {
+                    tempVerify = false;
+                }
+            } else {
+                tempVerify = false;
+            }
+
+            final Boolean tempNoforeground;
+            if (noforeground != null) {
+                if (noforeground.length() > 0) {
+                    tempNoforeground = Boolean.parseBoolean(noforeground);
+
+                } else {
+                    tempNoforeground = false;
+                }
+            } else {
+                tempNoforeground = false;
+            }
+
+            if (tempPhonenumber != null) {
+                if (tempVerify) {
+
+                    GetAddressCallBack getAddressCallBack = new GetAddressCallBack() {
+                        @Override
+                        public void querycomplete(String response, boolean me) {
+                            if (me) {
+                                displayLog("good response " + response);
+                                List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+                                //displayLog("addressItemList size " + addressItemList.size());
+                                if (addressItemList.size() > 0) {
+                                    if (tempNoforeground) {
+                                        try {
+                                            HashMap<String, String> loans = new HashMap<>();
+                                            loans.put("uniqueId", uniqueId);
+                                            //loans.put("applicationKey", applicationKey);
+                                            loans.put("phonenumber", tempPhonenumber);
+                                            HashMap<String, String> parameters = new HashMap<>();
+                                            parameters.put("eventName", "Foreground Notification");
+                                            parameters.put("subtype", "notShown");
+                                            parameters.put("type", "noshow");
+                                            parameters.put("onObject", "notification");
+                                            parameters.put("view", "configFile");
+                                            sendEvent(parameters, loans);
+                                        } catch (Exception e1) {
+                                            displayLog("error attaching afl to ual " + e1.toString());
+                                        }
+                                        decideWhatToStart();
+                                    } else {
+                                        try {
+                                            HashMap<String, String> loans = new HashMap<>();
+                                            loans.put("uniqueId", uniqueId);
+                                            //loans.put("applicationKey", applicationKey);
+                                            loans.put("phonenumber", tempPhonenumber);
+                                            HashMap<String, String> parameters = new HashMap<>();
+                                            parameters.put("eventName", "Foreground Notification");
+                                            parameters.put("subtype", "shown");
+                                            parameters.put("type", "show");
+                                            parameters.put("onObject", "notification");
+                                            parameters.put("view", "configFile");
+                                            sendEvent(parameters, loans);
+                                        } catch (Exception e1) {
+                                            displayLog("error attaching afl to ual " + e1.toString());
+                                        }
+                                        try {
+                                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                context.startForegroundService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                            } else {
+                                                context.startService(new Intent(context, io.okheart.android.services.LocationService.class));
+                                            }
+
+                                        } catch (Exception jse) {
+                                            displayLog("jsonexception jse " + jse.toString());
+                                        }
+                                    }
+
+                                }
+                            } else {
+                                displayLog("bad response " + me);
+                            }
+                        }
+                    };
+                    GetAddressTask getAddressTask = new GetAddressTask(context, getAddressCallBack);
+                    getAddressTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                }
+            }
+        } catch (Exception e) {
+            displayLog("error obtaining addresses " + e.toString());
+        }
+    }
+
+    private String getPhonenumber(final String verify, final String noForeground) {
+        ParseQuery<ParseObject> query = ParseQuery.getQuery("UserVerificationData");
+        query.whereEqualTo("uniqueId", uniqueId);
+        query.whereExists("phonenumber");
+        query.getFirstInBackground(new GetCallback<ParseObject>() {
+            @Override
+            public void done(ParseObject object, ParseException e) {
+                if (e == null) {
+                    if (object != null) {
+                        String phonenumber = object.getString("phonenumber");
+
+                        String tempPhonenumber;
+                        if (phonenumber != null) {
+                            if (phonenumber.length() > 0) {
+                                if ((phonenumber.startsWith("07")) && (phonenumber.length() == 10)) {
+                                    tempPhonenumber = "+2547" + phonenumber.substring(2);
+
+                                } else {
+                                    tempPhonenumber = phonenumber;
+                                }
+                                Long i = dataProvider.insertStuff("phonenumber", tempPhonenumber);
+
+                                fetchAddresses(verify, noForeground, tempPhonenumber);
+
+                            }
+                        }
+                    }
+                } else {
+
+                }
+            }
+        });
+        return null;
     }
 
     private void displayLog(String me) {

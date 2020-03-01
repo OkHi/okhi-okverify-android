@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:state_enabled="false">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/logingrey" />
+            <gradient android:angle="-90" android:endColor="@color/logingrey" android:startColor="@color/logingrey" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/logingrey" />
+            <gradient android:angle="-90" android:endColor="@color/logingrey" android:startColor="@color/logingrey" />
+        </shape>
+    </item>
+    <item android:state_enabled="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/newdarkgreen" />
+            <solid android:color="@color/newdarkgreen" />
+        </shape>
+    </item>
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/newdarkgreen" />
+            <solid android:color="@color/newdarkgreen" />
+        </shape>
+    </item>
+    <item android:state_selected="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/newdarkgreen" />
+            <solid android:color="@color/newdarkgreen" />
+        </shape>
+    </item>
+    <item android:state_checked="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/newdarkgreen" />
+            <solid android:color="@color/newdarkgreen" />
+        </shape>
+    </item>
+    <item android:state_activated="true">
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/newdarkgreen" />
+            <solid android:color="@color/newdarkgreen" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <corners android:radius="3dip" />
+            <stroke android:width="2dip" android:color="@color/newdarkgreen" />
+            <gradient android:angle="-90" android:endColor="@color/newdarkgreen" android:startColor="@color/newdarkgreen" />
+        </shape>
+    </item>
+</selector>

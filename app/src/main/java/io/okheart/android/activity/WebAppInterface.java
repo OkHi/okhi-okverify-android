@@ -34,7 +34,7 @@ class WebAppInterface {
     //private FirebaseFirestore mFirestore;
     private String uniqueId;
     private io.okheart.android.database.DataProvider dataProvider;
-    private String environment;
+    private String environment, phonenumber;
 
     /**
      * Instantiate the interface and set the context
@@ -46,9 +46,24 @@ class WebAppInterface {
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okheart.android.database.DataProvider(mContext);
         environment = dataProvider.getPropertyValue("environment");
+        phonenumber = dataProvider.getPropertyValue("phonenumber");
     }
 
-    private static void stopPeriodicPing() {
+    private void stopPeriodicPing() {
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Data Collection Service");
+            parameters.put("subtype", "startReplacePeriodicPing");
+            parameters.put("type", "doWork");
+            parameters.put("onObject", "app");
+            parameters.put("view", "webAppInterface");
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
         WorkManager.getInstance().cancelUniqueWork("ramogi");
     }
 
@@ -674,6 +689,7 @@ class WebAppInterface {
     private void startForegroundService() {
         String noForeground = dataProvider.getPropertyValue("noforeground");
         String verify = dataProvider.getPropertyValue("verify");
+        String applicationKey = dataProvider.getPropertyValue("applicationkey");
         displayLog("foreground " + noForeground);
         displayLog("verify " + verify);
         if (verify != null) {
@@ -686,8 +702,38 @@ class WebAppInterface {
                             String brand = Build.MANUFACTURER;
                             if (noForeground.toLowerCase().contains(brand.toLowerCase())) {
                                 displayLog("we have brand " + noForeground + " " + brand);
+                                try {
+                                    HashMap<String, String> loans = new HashMap<>();
+                                    loans.put("uniqueId", uniqueId);
+                                    loans.put("applicationKey", applicationKey);
+                                    loans.put("phonenumber", phonenumber);
+                                    HashMap<String, String> parameters = new HashMap<>();
+                                    parameters.put("eventName", "Foreground Notification");
+                                    parameters.put("subtype", "notShown");
+                                    parameters.put("type", "noshow");
+                                    parameters.put("onObject", "notification");
+                                    parameters.put("view", "webAppInterface");
+                                    sendEvent(parameters, loans);
+                                } catch (Exception e1) {
+                                    displayLog("error attaching afl to ual " + e1.toString());
+                                }
                             } else {
                                 displayLog("we do not have brand " + noForeground + " " + brand);
+                                try {
+                                    HashMap<String, String> loans = new HashMap<>();
+                                    loans.put("uniqueId", uniqueId);
+                                    loans.put("applicationKey", applicationKey);
+                                    loans.put("phonenumber", phonenumber);
+                                    HashMap<String, String> parameters = new HashMap<>();
+                                    parameters.put("eventName", "Foreground Notification");
+                                    parameters.put("subtype", "shown");
+                                    parameters.put("type", "show");
+                                    parameters.put("onObject", "notification");
+                                    parameters.put("view", "webAppInterface");
+                                    sendEvent(parameters, loans);
+                                } catch (Exception e1) {
+                                    displayLog("error attaching afl to ual " + e1.toString());
+                                }
                                 try {
                                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                         mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.LocationService.class));
@@ -702,6 +748,21 @@ class WebAppInterface {
                         } else {
                             displayLog("noforeground length is zero");
                             try {
+                                HashMap<String, String> loans = new HashMap<>();
+                                loans.put("uniqueId", uniqueId);
+                                loans.put("applicationKey", applicationKey);
+                                loans.put("phonenumber", phonenumber);
+                                HashMap<String, String> parameters = new HashMap<>();
+                                parameters.put("eventName", "Foreground Notification");
+                                parameters.put("subtype", "shown");
+                                parameters.put("type", "show");
+                                parameters.put("onObject", "notification");
+                                parameters.put("view", "webAppInterface");
+                                sendEvent(parameters, loans);
+                            } catch (Exception e1) {
+                                displayLog("error attaching afl to ual " + e1.toString());
+                            }
+                            try {
                                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                     mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.LocationService.class));
                                 } else {
@@ -714,6 +775,21 @@ class WebAppInterface {
                         }
                     } else {
                         displayLog("noforeground is null");
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            loans.put("uniqueId", uniqueId);
+                            loans.put("applicationKey", applicationKey);
+                            loans.put("phonenumber", phonenumber);
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Foreground Notification");
+                            parameters.put("subtype", "shown");
+                            parameters.put("type", "show");
+                            parameters.put("onObject", "notification");
+                            parameters.put("view", "webAppInterface");
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
                         try {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                                 mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.LocationService.class));
@@ -800,6 +876,21 @@ class WebAppInterface {
 
         displayLog("workmanager startKeepPeriodicPing");
         try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Data Collection Service");
+            parameters.put("subtype", "startKeepPeriodicPing");
+            parameters.put("type", "doWork");
+            parameters.put("onObject", "app");
+            parameters.put("view", "webAppInterface");
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
+
+        try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
                     .build();
@@ -824,6 +915,20 @@ class WebAppInterface {
 
     private void startReplacePeriodicPing(Integer pingTime, String uniqueId) {
         displayLog("workmanager startReplacePeriodicPing");
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            loans.put("phonenumber", phonenumber);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Data Collection Service");
+            parameters.put("subtype", "startReplacePeriodicPing");
+            parameters.put("type", "doWork");
+            parameters.put("onObject", "app");
+            parameters.put("view", "webAppInterface");
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
         try {
             Constraints constraints = new Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
