@@ -11,6 +11,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -677,7 +678,7 @@ public class MyWorker extends Worker {
     private void saveData(final ParseObject parseObject) {
 
         displayLog("parse object save");
-        parseObject.saveInBackground(new SaveCallback() {
+        parseObject.saveEventually(new SaveCallback() {
             @Override
             public void done(ParseException e) {
                 if (e == null) {
@@ -1090,6 +1091,6 @@ public class MyWorker extends Worker {
     }
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 }

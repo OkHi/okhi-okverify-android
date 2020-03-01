@@ -12,6 +12,7 @@ import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -296,8 +297,8 @@ public class ConfigurationFile {
                                                                             .applicationId(io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID)
                                                                             .clientKey(Constants.SANDBOX_CLIENT_ID)
                                                                             .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-                                                                    //OneTimeWorkRequest request1 = new OneTimeWorkRequest.Builder(MyWorker.class).build();
-                                                                    //WorkManager.getInstance().enqueue(request1);
+                                                                    OneTimeWorkRequest request1 = new OneTimeWorkRequest.Builder(MyWorker.class).build();
+                                                                    WorkManager.getInstance().enqueue(request1);
 
                                                                 } catch (Exception e4) {
                                                                     displayLog("parse initialize error " + e4.toString());

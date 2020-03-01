@@ -112,7 +112,7 @@ public class LocationService extends Service {
                         .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
                         .setContentTitle("OkVerify")
                         .setColor(this.getColor(R.color.newdarkgreen))
-                        .setContentText("Your address is being verified in the background")
+                        .setContentText("Your address is being verified")
                         .setAutoCancel(false)
                         .setOngoing(true)
                         .setLargeIcon(largeIconBitmap)
@@ -303,7 +303,7 @@ public class LocationService extends Service {
                 parameters.put("subtype", "startKeepPeriodicPing");
                 parameters.put("type", "doWork");
                 parameters.put("onObject", "app");
-                parameters.put("view", "OkHi");
+                parameters.put("view", "LocationService");
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
