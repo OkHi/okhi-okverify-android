@@ -1,5 +1,5 @@
-//apply plugin: 'com.android.library'
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+//apply plugin: 'com.android.application'
 apply plugin: 'com.github.dcendents.android-maven'
 group = 'com.github.okhi-android-sdk'
 
@@ -21,7 +21,7 @@ android {
 
     compileSdkVersion 29
     defaultConfig {
-        applicationId "io.okheart.android"
+        //applicationId "io.okheart.android"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 55
