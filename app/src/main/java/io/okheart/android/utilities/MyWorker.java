@@ -205,9 +205,9 @@ public class MyWorker extends Worker {
                         loans.put("phonenumber", phonenumber);
                         HashMap<String, String> parameters = new HashMap<>();
                         parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "result");
+                        parameters.put("subtype", "noLocation");
                         parameters.put("type", "onLocationResult");
-                        parameters.put("onObject", "null");
+                        parameters.put("onObject", "app");
                         parameters.put("view", "worker");
                         sendEvent(parameters, loans);
                     } catch (Exception e1) {
@@ -694,7 +694,23 @@ public class MyWorker extends Worker {
                 parameters.put("type", "parse");
                 parameters.put("onObject", "success");
                 parameters.put("view", "worker");
-                parameters.put("ualId", parseObject.getString("ualId"));
+
+                try {
+                    parameters.put("ualId", parseObject.getString("ualId"));
+                    parameters.put("address", parseObject.getString("address"));
+                    parameters.put("latitude", "" + parseObject.getDouble("latitude"));
+                    parameters.put("longitude", "" + parseObject.getDouble("longitude"));
+                    parameters.put("gpsAccuracy", "" + parseObject.getDouble("gpsAccuracy"));
+                    Location location2 = new Location("geohash");
+                    location2.setLatitude(lat);
+                    location2.setLongitude(lng);
+
+                    io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                    parameters.put("location", hash.toString());
+                } catch (Exception e) {
+                    displayLog("geomap error " + e.toString());
+                }
+
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
@@ -717,7 +733,21 @@ public class MyWorker extends Worker {
                             parameters.put("type", "parse");
                             parameters.put("onObject", "success");
                             parameters.put("view", "worker");
-                            parameters.put("ualId", parseObject.getString("ualId"));
+                            try {
+                                parameters.put("ualId", parseObject.getString("ualId"));
+                                parameters.put("address", parseObject.getString("address"));
+                                parameters.put("latitude", "" + parseObject.getDouble("latitude"));
+                                parameters.put("longitude", "" + parseObject.getDouble("longitude"));
+                                parameters.put("gpsAccuracy", "" + parseObject.getDouble("gpsAccuracy"));
+                                Location location2 = new Location("geohash");
+                                location2.setLatitude(lat);
+                                location2.setLongitude(lng);
+
+                                io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                                parameters.put("location", hash.toString());
+                            } catch (Exception e2) {
+                                displayLog("geomap error " + e2.toString());
+                            }
                             sendEvent(parameters, loans);
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
@@ -734,7 +764,21 @@ public class MyWorker extends Worker {
                             parameters.put("type", "parse");
                             parameters.put("onObject", "failure");
                             parameters.put("view", "worker");
-                            parameters.put("ualId", parseObject.getString("ualId"));
+                            try {
+                                parameters.put("ualId", parseObject.getString("ualId"));
+                                parameters.put("address", parseObject.getString("address"));
+                                parameters.put("latitude", "" + parseObject.getDouble("latitude"));
+                                parameters.put("longitude", "" + parseObject.getDouble("longitude"));
+                                parameters.put("gpsAccuracy", "" + parseObject.getDouble("gpsAccuracy"));
+                                Location location2 = new Location("geohash");
+                                location2.setLatitude(lat);
+                                location2.setLongitude(lng);
+
+                                io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                                parameters.put("location", hash.toString());
+                            } catch (Exception e2) {
+                                displayLog("geomap error " + e2.toString());
+                            }
                             parameters.put("error", e.toString());
                             sendEvent(parameters, loans);
                         } catch (Exception e1) {

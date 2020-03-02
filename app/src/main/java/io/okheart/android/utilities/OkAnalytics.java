@@ -530,7 +530,9 @@ public class OkAnalytics {
         } catch (Exception e) {
             displayLog(" Constants.getUTCtimestamp() error " + e.toString());
         }
-
+        if (parameters.containsKey("address")) {
+            eventProperties.putValue("address", parameters.get("address"));
+        }
         if (parameters.containsKey("latitude")) {
             eventProperties.putValue("latitude", parameters.get("latitude"));
         }
@@ -539,6 +541,30 @@ public class OkAnalytics {
         }
         if (parameters.containsKey("gpsAccuracy")) {
             eventProperties.putValue("gpsAccuracy", parameters.get("gpsAccuracy"));
+        }
+        if (parameters.containsKey("address")) {
+            eventProperties.putValue("address", parameters.get("address"));
+        }
+        if (parameters.containsKey("verified")) {
+            eventProperties.putValue("verified", parameters.get("verified"));
+        }
+        if (parameters.containsKey("distance")) {
+            eventProperties.putValue("distance", parameters.get("distance"));
+        }
+        if (parameters.containsKey("batteryLevel")) {
+            eventProperties.putValue("batteryLevel", parameters.get("batteryLevel"));
+        }
+        if (parameters.containsKey("isPlugged")) {
+            eventProperties.putValue("isPlugged", parameters.get("isPlugged"));
+        }
+        if (parameters.containsKey("isCharging")) {
+            eventProperties.putValue("isCharging", parameters.get("isCharging"));
+        }
+        if (parameters.containsKey("usbCharge")) {
+            eventProperties.putValue("usbCharge", parameters.get("usbCharge"));
+        }
+        if (parameters.containsKey("acCharge")) {
+            eventProperties.putValue("acCharge", parameters.get("acCharge"));
         }
         if (parameters.containsKey("remoteGPSAccuracy")) {
             eventProperties.putValue("remoteGPSAccuracy", parameters.get("remoteGPSAccuracy"));

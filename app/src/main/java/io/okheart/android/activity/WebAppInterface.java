@@ -2,6 +2,7 @@ package io.okheart.android.activity;
 
 import android.content.ContentValues;
 import android.content.Intent;
+import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
@@ -58,7 +59,7 @@ class WebAppInterface {
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "startReplacePeriodicPing");
             parameters.put("type", "doWork");
-            parameters.put("onObject", "app");
+            parameters.put("onObject", "webAppInterface");
             parameters.put("view", "webAppInterface");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
@@ -80,9 +81,9 @@ class WebAppInterface {
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Android SDK");
             parameters.put("type", "okHeartResponse");
-            parameters.put("subtype", results);
+            parameters.put("subtype", "results");
             parameters.put("onObject", "okHeartAndroidSDK");
-            parameters.put("view", "app");
+            parameters.put("view", "webAppInterface");
             parameters.put("appKey", "" + appkey);
             sendEvent(parameters, loans);
         } catch (Exception e1) {
@@ -127,7 +128,7 @@ class WebAppInterface {
                                         parameters.put("type", "okHeartResponse");
                                         parameters.put("subtype", "app_state");
                                         parameters.put("onObject", "okHeartAndroidSDK");
-                                        parameters.put("view", "ready");
+                                        parameters.put("view", "webAppInterface");
                                         parameters.put("appKey", "" + appkey);
                                         sendEvent(parameters, loans);
                                     } catch (Exception e1) {
@@ -183,7 +184,7 @@ class WebAppInterface {
                     case "location_created":
                         displayLog("location_created");
                         try {
-                            Long i = saveAddressToFirestore(payload);
+                            Long i = saveAddressToFirestore(payload, "location_created");
                             startForegroundService();
                             if (i > 0) {
                                 displayLog("saveAddressToFirestore " + i);
@@ -234,7 +235,7 @@ class WebAppInterface {
                             parameters.put("onObject", "okHeartAndroidSDK");
                             parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
-                            sendEvent(parameters, loans);
+                            //sendEvent(parameters, loans);
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
@@ -257,7 +258,7 @@ class WebAppInterface {
                     case "location_updated":
                         displayLog("location_updated");
                         try {
-                            Long i = saveAddressToFirestore(payload);
+                            Long i = saveAddressToFirestore(payload, "location_updated");
                             startForegroundService();
                             if (i > 0) {
                                 displayLog("saveAddressToFirestore " + i);
@@ -309,7 +310,7 @@ class WebAppInterface {
                             parameters.put("onObject", "okHeartAndroidSDK");
                             parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
-                            sendEvent(parameters, loans);
+                            //sendEvent(parameters, loans);
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
@@ -331,7 +332,7 @@ class WebAppInterface {
                     case "location_selected":
                         displayLog("location_selected");
                         try {
-                            Long i = saveAddressToFirestore(payload);
+                            Long i = saveAddressToFirestore(payload, "location_selected");
                             startForegroundService();
                             if (i > 0) {
                                 displayLog("saveAddressToFirestore " + i);
@@ -365,7 +366,7 @@ class WebAppInterface {
                             parameters.put("onObject", "okHeartAndroidSDK");
                             parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
-                            sendEvent(parameters, loans);
+                            //sendEvent(parameters, loans);
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
@@ -477,7 +478,7 @@ class WebAppInterface {
         }
     }
 
-    private Long saveAddressToFirestore(JSONObject payload) {
+    private Long saveAddressToFirestore(JSONObject payload, String action) {
 
         displayLog("saveAddressToFirestore");
 
@@ -514,6 +515,39 @@ class WebAppInterface {
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, uniqueId);
 
         Long i = dataProvider.insertAddressList(contentValues);
+
+        try {
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("phonenumber", phone);
+            loans.put("uniqueId", uniqueId);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("eventName", "Android SDK");
+            parameters.put("type", "okHeartResponse");
+            parameters.put("subtype", action);
+            parameters.put("onObject", "okHeartAndroidSDK");
+            parameters.put("view", "webAppInterface");
+            parameters.put("appKey", "" + appkey);
+            parameters.put("branch", "hq_acme");
+            parameters.put("userAffiliation", "acme");
+            parameters.put("ualId", ualId);
+            try {
+                Location location2 = new Location("geohash");
+                location2.setLatitude(lat);
+                location2.setLongitude(lng);
+
+                io.okheart.android.utilities.geohash.GeoHash hash = io.okheart.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                parameters.put("location", hash.toString());
+            } catch (Exception e) {
+                displayLog("geomap error " + e.toString());
+            }
+            parameters.put("latitude", "" + lat);
+            parameters.put("longitude", "" + lng);
+            //parameters.put("gpsAccuracy", "" + acc);
+            sendEvent(parameters, loans);
+        } catch (Exception e1) {
+            displayLog("error attaching afl to ual " + e1.toString());
+        }
+
         return i;
 
         /*
@@ -955,6 +989,13 @@ class WebAppInterface {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
+            try {
+                loans.put("phonenumber", phonenumber);
+                loans.put("uniqueId", uniqueId);
+
+            } catch (Exception e) {
+                displayLog("error adding phonenumber and uniqueId " + e.toString());
+            }
             io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
             okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
