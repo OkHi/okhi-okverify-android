@@ -434,10 +434,10 @@ public class MyWorker extends Worker {
                 parameters.put("type", "saveData");
                 parameters.put("onObject", "backgroundService");
                 parameters.put("view", "worker");
-                parameters.put("branch", "hq_okhi");
+                parameters.put("branch", "hq_acme");
                 //parameters.put("deliveryId", null);
                 //parameters.put("ualId", addressParseObject.getClaimUalId());
-                parameters.put("userAffiliation", "okhi");
+                parameters.put("userAffiliation", "acme");
 
                 parameters.put("latitude", "" + lat);
                 parameters.put("longitude", "" + lng);
@@ -640,10 +640,10 @@ public class MyWorker extends Worker {
                 parameters.put("type", "saveData");
                 parameters.put("onObject", "backgroundService");
                 parameters.put("view", "worker");
-                parameters.put("branch", "hq_okhi");
+                parameters.put("branch", "hq_acme");
                 //parameters.put("deliveryId", null);
                 //parameters.put("ualId", addressParseObject.getClaimUalId());
-                parameters.put("userAffiliation", "okhi");
+                parameters.put("userAffiliation", "acme");
 
                 parameters.put("latitude", "" + lat);
                 parameters.put("longitude", "" + lng);
@@ -933,8 +933,8 @@ public class MyWorker extends Worker {
             final HashMap<String, String> jsonObject = new HashMap<>();
             jsonObject.put("userId", "GrlaR3LHUP");
             jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
-            jsonObject.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_okhi");
-            jsonObject.put(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION, "okhi");
+            jsonObject.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_acme");
+            jsonObject.put(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION, "acme");
             jsonObject.put("customName", "test");
             jsonObject.put("phoneNumber", "+254713567907");
             jsonObject.put("phone", "+254713567907");

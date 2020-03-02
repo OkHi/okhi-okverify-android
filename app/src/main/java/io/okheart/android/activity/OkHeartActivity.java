@@ -605,10 +605,10 @@ public class OkHeartActivity extends AppCompatActivity {
                 if (name.length() > 0) {
 
                 } else {
-                    name = "OkHi";
+                    name = "Acme";
                 }
             } else {
-                name = "OkHi";
+                name = "Acme";
             }
             if (logo != null) {
                 if (logo.length() > 0) {

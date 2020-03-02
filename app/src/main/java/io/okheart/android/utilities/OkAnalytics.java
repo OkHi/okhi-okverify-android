@@ -176,8 +176,8 @@ public class OkAnalytics {
             displayLog(" getuserroles error " + e.toString());
         }
         try {
-            setUserAffiliation("okhi");
-            setCustomerCode("okhi");
+            setUserAffiliation("acme");
+            setCustomerCode("acme");
         } catch (Exception e) {
             displayLog(" getaffiliation error " + e.toString());
         }

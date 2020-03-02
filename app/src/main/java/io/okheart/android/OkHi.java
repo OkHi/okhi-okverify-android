@@ -671,7 +671,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -692,7 +692,7 @@ public final class OkHi extends ContentProvider {
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                        okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -710,7 +710,7 @@ public final class OkHi extends ContentProvider {
                         loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                        okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -729,7 +729,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -774,7 +774,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -795,7 +795,7 @@ public final class OkHi extends ContentProvider {
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                        okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -813,7 +813,7 @@ public final class OkHi extends ContentProvider {
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                        okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -832,7 +832,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -1137,7 +1137,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
                         "requestPermission", activity.getLocalClassName(), null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -1158,7 +1158,7 @@ public final class OkHi extends ContentProvider {
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
                                 "requestPermission", activity.getLocalClassName(), null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                        okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -1176,7 +1176,7 @@ public final class OkHi extends ContentProvider {
                         loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                         okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
                                 "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                        okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
@@ -1198,7 +1198,7 @@ public final class OkHi extends ContentProvider {
                 loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
                 okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
                         "requestPermission", activity.getLocalClassName(), null, loans);
-                okAnalytics.sendToAnalytics("hq_okhi", null, null, "okhi", environment);
+                okAnalytics.sendToAnalytics("hq_acme", null, null, "acme", environment);
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
@@ -1597,10 +1597,10 @@ public final class OkHi extends ContentProvider {
                 parameters.put("type", "saveData");
                 parameters.put("onObject", "backgroundService");
                 parameters.put("view", "worker");
-                parameters.put("branch", "hq_okhi");
+                parameters.put("branch", "hq_acme");
                 //parameters.put("deliveryId", null);
                 //parameters.put("ualId", addressParseObject.getClaimUalId());
-                parameters.put("userAffiliation", "okhi");
+                parameters.put("userAffiliation", "acme");
 
                 /*
                 parameters.put("latitude", "" + lat);

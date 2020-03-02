@@ -409,8 +409,8 @@ public class ConfigurationFile {
             jsonObject.put("phonenumber", "+254713567907");
             jsonObject.put("sessionToken", "r:ee30a6552f7e5dfab48f4234bd1ffc1b");
             jsonObject.put("environment", "prod");
-            jsonObject.put("affiliation", "okhi");
-            jsonObject.put("branch", "hq_okhi");
+            jsonObject.put("affiliation", "acme");
+            jsonObject.put("branch", "hq_acme");
 
 
             GetAddressCallBack getAddressCallBack = new GetAddressCallBack() {
@@ -691,6 +691,7 @@ public class ConfigurationFile {
 
 
     private void fetchAddresses(final String verify, final String noforeground, String phonenumber) {
+        displayLog("getaddress called verify " + verify + " noforeground " + noforeground + " phonenumber " + phonenumber);
 
         try {
             final String tempPhonenumber;

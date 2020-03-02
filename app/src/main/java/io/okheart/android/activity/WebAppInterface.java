@@ -494,7 +494,7 @@ class WebAppInterface {
         String url = location.optString("url");
         String title = location.optString("title");
         String plusCode = location.optString("plusCode");
-        String branch = "okhi";
+        String branch = "hq_acme";
         Double lat = location.optDouble("lat");
         Double lng = location.optDouble("lng");
 
@@ -508,7 +508,7 @@ class WebAppInterface {
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID, ualId);
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_IMAGEURL, url);
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME, title);
-        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "okhi");
+        contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_okhi");
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LAT, lat);
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LNG, lng);
         contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, uniqueId);

@@ -68,8 +68,8 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
         this.environment = dataProvider.getPropertyValue("environment");
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         postDataParams.put("phone", phoneNumber);
-        postDataParams.put("branch", "hq_okhi");
-        postDataParams.put("affiliation", "okhi");
+        postDataParams.put("branch", "hq_acme");
+        postDataParams.put("affiliation", "acme");
         try {
             postDataParams.put("product", product);
             postDataParams.put("appType", "android");
@@ -94,8 +94,8 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
                     urlString = "https://okhi.back4app.io/getAddressByPhone_forHD";
                     break;
                 case "sandbox":
-                    postDataParams.put("userId", "GrlaR3LHUP");
-                    postDataParams.put("sessionToken", "r:985e5e735e002e7d6efd93a5c59ad095");
+                    postDataParams.put("userId", "24Lilj8IIy");
+                    postDataParams.put("sessionToken", "r:ee30a6552f7e5dfab48f4234bd1ffc1b");
                     appId = SANDBOX_APPLICATION_ID;
                     restApi = SANDBOX_REST_KEY;
                     urlString = "https://okhi-sbox.back4app.io/getAddressByPhone_forHD";
@@ -707,7 +707,7 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID, ualId);
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_IMAGEURL, "");
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME, orderItem.getLocationNickName());
-                                            contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_okhi");
+                                            contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_acme");
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LAT, orderItem.getLat());
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LNG, orderItem.getLng());
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, uniqueId);
