@@ -281,7 +281,7 @@ public class LocationService extends Service {
             parameters.put("subtype", "stopPeriodicPing");
             parameters.put("type", "doWork");
             parameters.put("onObject", "app");
-            parameters.put("view", "OkHi");
+            parameters.put("view", "LocationService");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -343,7 +343,7 @@ public class LocationService extends Service {
                 parameters.put("subtype", "startReplacePeriodicPing");
                 parameters.put("type", "doWork");
                 parameters.put("onObject", "app");
-                parameters.put("view", "OkHi");
+                parameters.put("view", "LocationService");
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());

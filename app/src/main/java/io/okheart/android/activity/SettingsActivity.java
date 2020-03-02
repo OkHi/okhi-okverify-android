@@ -7,7 +7,6 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
@@ -170,7 +169,7 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
 }

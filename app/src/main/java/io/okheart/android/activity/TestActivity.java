@@ -192,8 +192,8 @@ public class TestActivity extends AppCompatActivity {
     }
 
 
-    private void displayLog(String logs) {
-        //Log.i("TestActivity", logs);
+    private void displayLog(String log) {
+        //Log.i("TestActivity", log);
     }
 
 }

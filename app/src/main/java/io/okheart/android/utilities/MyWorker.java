@@ -11,7 +11,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -469,6 +468,7 @@ public class MyWorker extends Worker {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
 
+            List<ParseObject> parseObjectList = new ArrayList<>();
 
             for (int i = 0; i < addressItemList.size(); i++) {
                 try {
@@ -491,12 +491,15 @@ public class MyWorker extends Worker {
                     //addresses.add(nestedData);
                     parseObject.put("address", nestedData.toString());
                     parseObject.put("ualId", addressItem.getUalid());
+                    parseObjectList.add(parseObject);
+
                     ParseObject targetObject = new ParseObject("UserVerificationData");
                     for (Iterator it = parseObject.keySet().iterator(); it.hasNext(); ) {
                         Object key = it.next();
                         targetObject.put(key.toString(), parseObject.get(key.toString()));
                     }
                     saveData(targetObject);
+
                     try {
                         parameters.put("latitudeAddress", "" + addressItem.getLat());
                         parameters.put("longitudeAddress", "" + addressItem.getLng());
@@ -522,6 +525,7 @@ public class MyWorker extends Worker {
 
                 }
             }
+            //saveData(parseObjectList);
 
         } else {
             //add an event here saying we don't have addresses
@@ -674,54 +678,129 @@ public class MyWorker extends Worker {
 
     }
 
-
     private void saveData(final ParseObject parseObject) {
 
-        displayLog("parse object save");
-        parseObject.saveEventually(new SaveCallback() {
-            @Override
-            public void done(ParseException e) {
-                if (e == null) {
-                    displayLog("save parseobject success ");
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "saveData");
-                        parameters.put("type", "parse");
-                        parameters.put("onObject", "success");
-                        parameters.put("view", "worker");
-                        parameters.put("ualId", parseObject.getString("ualId"));
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
+        displayLog(" parse object save ");
 
-                } else {
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "saveData");
-                        parameters.put("type", "parse");
-                        parameters.put("onObject", "failure");
-                        parameters.put("view", "worker");
-                        parameters.put("ualId", parseObject.getString("ualId"));
-                        parameters.put("error", e.toString());
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
-                    displayLog("save parseobject error " + e.toString());
-                }
+        try {
+            parseObject.save();
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                loans.put("phonenumber", phonenumber);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Data Collection Service");
+                parameters.put("subtype", "saveData");
+                parameters.put("type", "parse");
+                parameters.put("onObject", "success");
+                parameters.put("view", "worker");
+                parameters.put("ualId", parseObject.getString("ualId"));
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
             }
-        });
+            displayLog(" parse object saved successfully ");
+        } catch (ParseException e) {
+            displayLog("error saving parse object " + e.toString());
+            parseObject.saveEventually(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        displayLog(parseObject.getObjectId() + " save parseobject success " + parseObject.getString("ualId"));
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            loans.put("uniqueId", uniqueId);
+                            loans.put("phonenumber", phonenumber);
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Data Collection Service");
+                            parameters.put("subtype", "saveData");
+                            parameters.put("type", "parse");
+                            parameters.put("onObject", "success");
+                            parameters.put("view", "worker");
+                            parameters.put("ualId", parseObject.getString("ualId"));
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
+
+                    } else {
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            loans.put("uniqueId", uniqueId);
+                            loans.put("phonenumber", phonenumber);
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Data Collection Service");
+                            parameters.put("subtype", "saveData");
+                            parameters.put("type", "parse");
+                            parameters.put("onObject", "failure");
+                            parameters.put("view", "worker");
+                            parameters.put("ualId", parseObject.getString("ualId"));
+                            parameters.put("error", e.toString());
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
+                        displayLog("save parseobject error " + e.toString());
+                    }
+                }
+            });
+        }
+
+
     }
 
+
+/*
+    private void saveData(final List<ParseObject> parseObjectList) {
+
+        displayLog("parse object save "+parseObjectList.size());
+        for(final ParseObject parseObject : parseObjectList){
+            parseObject.saveInBackground(new SaveCallback() {
+                @Override
+                public void done(ParseException e) {
+                    if (e == null) {
+                        displayLog(parseObject.getObjectId()+" save parseobject success "+parseObject.getString("ualId"));
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            loans.put("uniqueId", uniqueId);
+                            loans.put("phonenumber", phonenumber);
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Data Collection Service");
+                            parameters.put("subtype", "saveData");
+                            parameters.put("type", "parse");
+                            parameters.put("onObject", "success");
+                            parameters.put("view", "worker");
+                            parameters.put("ualId", parseObject.getString("ualId"));
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
+
+                    } else {
+                        try {
+                            HashMap<String, String> loans = new HashMap<>();
+                            loans.put("uniqueId", uniqueId);
+                            loans.put("phonenumber", phonenumber);
+                            HashMap<String, String> parameters = new HashMap<>();
+                            parameters.put("eventName", "Data Collection Service");
+                            parameters.put("subtype", "saveData");
+                            parameters.put("type", "parse");
+                            parameters.put("onObject", "failure");
+                            parameters.put("view", "worker");
+                            parameters.put("ualId", parseObject.getString("ualId"));
+                            parameters.put("error", e.toString());
+                            sendEvent(parameters, loans);
+                        } catch (Exception e1) {
+                            displayLog("error attaching afl to ual " + e1.toString());
+                        }
+                        displayLog("save parseobject error " + e.toString());
+                    }
+                }
+            });
+        }
+
+    }
+*/
 
     private void stopLocationUpdates() {
         try {
@@ -1091,6 +1170,6 @@ public class MyWorker extends Worker {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

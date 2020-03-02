@@ -1332,7 +1332,7 @@ public class OkAnalytics {
         this.versionLibraryTrackerEtcContext = versionLibraryTrackerEtcContext;
     }
 
-    public void displayLog(String me) {
-        //Log.i(TAG, me);
+    public void displayLog(String log) {
+        //Log.i(TAG, log);
     }
 }

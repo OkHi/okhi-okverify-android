@@ -9,11 +9,11 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -33,6 +33,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
@@ -58,6 +59,7 @@ public final class OkHi extends ContentProvider {
     //private static String remoteSmsTemplate;
     private static Analytics analytics;
     private static NotificationManager notificationManager;
+    private static final int THREAD_WAIT_TIMEOUT_IN_MS = 100;
 
     public OkHi() {
     }
@@ -379,14 +381,7 @@ public final class OkHi extends ContentProvider {
         //startForegroundNotification();
 
         try {
-            /*
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                mContext.startForegroundService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
-            } else {
-                mContext.startService(new Intent(mContext, io.okheart.android.services.ForegroundService.class));
-            }
-            */
-
+            //restrictBackgroundData(false, THREAD_WAIT_TIMEOUT_IN_MS);
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
@@ -867,7 +862,7 @@ public final class OkHi extends ContentProvider {
             parameters.put("type", "initialize");
             parameters.put("subtype", "manualPing");
             parameters.put("onObject", "okHeartAndroidSDK");
-            parameters.put("view", "worker");
+            parameters.put("view", "app");
             parameters.put("appKey", "" + appkey);
             sendEvent(parameters, loans);
         } catch (Exception e1) {
@@ -991,7 +986,7 @@ public final class OkHi extends ContentProvider {
     }
 
     private static void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
     private static void writeToFile(String customString) {
@@ -2049,4 +2044,51 @@ public final class OkHi extends ContentProvider {
 
     }
     */
+
+
+    private static boolean restrictBackgroundData(boolean enable, int timeout) {
+        Boolean result = false;
+        try {
+            final ConnectivityManager connectivityManager = (ConnectivityManager) mContext
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            Class connectivityManagerClass = Class.forName(connectivityManager.getClass().getName());
+
+            final Method getNetworkPolicyManager = connectivityManagerClass.getDeclaredMethod(
+                    "getNetworkPolicyManager");
+            getNetworkPolicyManager.setAccessible(true);
+
+            final Object iNetworkPolicyManager = getNetworkPolicyManager.invoke(connectivityManager);
+            final Class iNetworkPolicyManagerClass = Class.forName(iNetworkPolicyManager.getClass()
+                    .getName());
+            final Method setRestrictBackground = iNetworkPolicyManagerClass.getDeclaredMethod("setRestrictBackground",
+                    boolean.class);
+            final Method getRestrictBackground = iNetworkPolicyManagerClass.getDeclaredMethod("getRestrictBackground");
+            setRestrictBackground.setAccessible(true);
+            getRestrictBackground.setAccessible(true);
+            // Check if the state is already set
+            result = (Boolean) getRestrictBackground.invoke(iNetworkPolicyManager);
+            result = ((result && enable) || ((!result) && (!enable)));
+
+            if (!result) {
+                // Set state
+                setRestrictBackground.invoke(iNetworkPolicyManager, enable);
+
+                while (timeout > 0) {
+                    // Check if the state is set
+                    result = (Boolean) getRestrictBackground.invoke(iNetworkPolicyManager);
+                    result = ((result && enable) || ((!result) && (!enable)));
+                    if (result) {
+                        break;
+                    }
+                    try {
+                        Thread.sleep(THREAD_WAIT_TIMEOUT_IN_MS);
+                    } catch (InterruptedException e) {
+                    }
+                    timeout -= THREAD_WAIT_TIMEOUT_IN_MS;
+                }
+            }
+        } catch (Exception e) {
+        }
+        return result;
+    }
 }

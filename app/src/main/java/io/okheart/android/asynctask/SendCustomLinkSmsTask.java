@@ -323,7 +323,7 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
                 parameters.put("subtype", "manualPing");
                 parameters.put("type", "onPostExecute");
                 parameters.put("onObject", "success");
-                parameters.put("view", "app");
+                parameters.put("view", "sendCustomLinkTask");
                 //parameters.put("branch", "branch");
                 //parameters.put("ualId", model.getUalId());
                 sendEvent(parameters, loans);
@@ -340,7 +340,7 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
                 parameters.put("subtype", "manualPing");
                 parameters.put("type", "onPostExecute");
                 parameters.put("onObject", "failed");
-                parameters.put("view", "app");
+                parameters.put("view", "sendCustomLinkTask");
                 //parameters.put("branch", "branch");
                 //parameters.put("ualId", model.getUalId());
                 sendEvent(parameters, loans);
@@ -368,7 +368,7 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
         }
     }
 
-    private void displayLog(String me) {
-        //Log.i(TAG, me);
+    private void displayLog(String log) {
+        //Log.i(TAG, log);
     }
 }

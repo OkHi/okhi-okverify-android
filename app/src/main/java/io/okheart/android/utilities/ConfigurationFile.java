@@ -839,8 +839,8 @@ public class ConfigurationFile {
         return null;
     }
 
-    private void displayLog(String me) {
-        //Log.i(TAG, me);
+    private void displayLog(String log) {
+        //Log.i(TAG, log);
     }
 
 }

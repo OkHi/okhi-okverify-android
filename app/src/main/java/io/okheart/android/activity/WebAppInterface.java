@@ -153,9 +153,9 @@ class WebAppInterface {
                                     HashMap<String, String> parameters = new HashMap<>();
                                     parameters.put("eventName", "Android SDK");
                                     parameters.put("type", "okHeartResponse");
-                                    parameters.put("subtype", "app_state");
+                                    parameters.put("subtype", "app_state notReady");
                                     parameters.put("onObject", "okHeartAndroidSDK");
-                                    parameters.put("view", "notReady");
+                                    parameters.put("view", "webAppInterface");
                                     parameters.put("appKey", "" + appkey);
                                     sendEvent(parameters, loans);
                                 } catch (Exception e1) {
@@ -170,9 +170,9 @@ class WebAppInterface {
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Android SDK");
                                 parameters.put("type", "okHeartResponse");
-                                parameters.put("subtype", "app_state");
+                                parameters.put("subtype", "app_state noPayload");
                                 parameters.put("onObject", "okHeartAndroidSDK");
-                                parameters.put("view", "noPayload");
+                                parameters.put("view", "webAppInterface");
                                 parameters.put("appKey", "" + appkey);
                                 sendEvent(parameters, loans);
                             } catch (Exception e1) {
@@ -232,7 +232,7 @@ class WebAppInterface {
                             parameters.put("type", "okHeartResponse");
                             parameters.put("subtype", "location_created");
                             parameters.put("onObject", "okHeartAndroidSDK");
-                            parameters.put("view", "callBackView");
+                            parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
                             sendEvent(parameters, loans);
                         } catch (Exception e1) {
@@ -307,7 +307,7 @@ class WebAppInterface {
                             parameters.put("type", "okHeartResponse");
                             parameters.put("subtype", "location_updated");
                             parameters.put("onObject", "okHeartAndroidSDK");
-                            parameters.put("view", "callBackView");
+                            parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
                             sendEvent(parameters, loans);
                         } catch (Exception e1) {
@@ -363,7 +363,7 @@ class WebAppInterface {
                             parameters.put("type", "okHeartResponse");
                             parameters.put("subtype", "location_selected");
                             parameters.put("onObject", "okHeartAndroidSDK");
-                            parameters.put("view", "callBackView");
+                            parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
                             sendEvent(parameters, loans);
                         } catch (Exception e1) {
@@ -395,7 +395,7 @@ class WebAppInterface {
                             parameters.put("type", "okHeartResponse");
                             parameters.put("subtype", "fatal_exit");
                             parameters.put("onObject", "okHeartAndroidSDK");
-                            parameters.put("view", "callBackView");
+                            parameters.put("view", "webAppInterface");
                             parameters.put("appKey", "" + appkey);
                             sendEvent(parameters, loans);
                         } catch (Exception e1) {

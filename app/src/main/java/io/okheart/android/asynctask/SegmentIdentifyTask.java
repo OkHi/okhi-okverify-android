@@ -162,7 +162,7 @@ public class SegmentIdentifyTask extends AsyncTask<Void, Void, String> {
         }
     }
 
-    private void displayLog(String me) {
-        //Log.i(TAG, "% " + me);
+    private void displayLog(String log) {
+        //Log.i(TAG, log);
     }
 }

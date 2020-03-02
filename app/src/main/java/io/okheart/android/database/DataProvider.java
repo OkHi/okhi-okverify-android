@@ -404,7 +404,7 @@ public class DataProvider {
         return carupgradedelivered;
     }
 
-    private void displayLog(String me) {
-        //Log.i(TAG, me);
+    private void displayLog(String log) {
+        //Log.i(TAG, log);
     }
 }
