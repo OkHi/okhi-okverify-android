@@ -495,7 +495,7 @@ class WebAppInterface {
         String url = location.optString("url");
         String title = location.optString("title");
         String plusCode = location.optString("plusCode");
-        String branch = "hq_acme";
+        String branch = "app_interswitch";
         Double lat = location.optDouble("lat");
         Double lng = location.optDouble("lng");
 
@@ -527,8 +527,8 @@ class WebAppInterface {
             parameters.put("onObject", "okHeartAndroidSDK");
             parameters.put("view", "webAppInterface");
             parameters.put("appKey", "" + appkey);
-            parameters.put("branch", "hq_acme");
-            parameters.put("userAffiliation", "acme");
+            parameters.put("branch", "app_interswitch");
+            parameters.put("userAffiliation", "interswitch");
             parameters.put("ualId", ualId);
             try {
                 Location location2 = new Location("geohash");

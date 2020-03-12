@@ -242,7 +242,7 @@ public class OkHeartActivity extends AppCompatActivity {
                         if (customString.length() > 0) {
                             JSONObject jsonObject = new JSONObject(customString);
                             String tempColor = jsonObject.optString("color", "rgb(0, 131, 143)");
-                            String tempName = jsonObject.optString("name", "Acme");
+                            String tempName = jsonObject.optString("name", "interswitch");
                             String tempLogo = jsonObject.optString("logo", "https://cdn.okhi.co/okhi-logo-white.svg");
                             String tempappbarcolor = jsonObject.optString("appbarcolor", "#f0f0f0");
                             Boolean tempappbarvisible = jsonObject.optBoolean("appbarvisibility", false);
@@ -605,10 +605,10 @@ public class OkHeartActivity extends AppCompatActivity {
                 if (name.length() > 0) {
 
                 } else {
-                    name = "Acme";
+                    name = "interswitch";
                 }
             } else {
-                name = "Acme";
+                name = "interswitch";
             }
             if (logo != null) {
                 if (logo.length() > 0) {

@@ -68,8 +68,8 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
         this.environment = dataProvider.getPropertyValue("environment");
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         postDataParams.put("phone", phoneNumber);
-        postDataParams.put("branch", "hq_acme");
-        postDataParams.put("affiliation", "acme");
+        postDataParams.put("branch", "app_interswitch");
+        postDataParams.put("affiliation", "interswitch");
         try {
             postDataParams.put("product", product);
             postDataParams.put("appType", "android");
@@ -94,8 +94,8 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
                     urlString = "https://okhi.back4app.io/getAddressByPhone_forHD";
                     break;
                 case "sandbox":
-                    postDataParams.put("userId", "24Lilj8IIy");
-                    postDataParams.put("sessionToken", "r:ee30a6552f7e5dfab48f4234bd1ffc1b");
+                    postDataParams.put("userId", "GFoHqSI6Ox");
+                    postDataParams.put("sessionToken", "r:4e66bc42f0aa3d96fc3dfd5dae088262");
                     appId = SANDBOX_APPLICATION_ID;
                     restApi = SANDBOX_REST_KEY;
                     urlString = "https://okhi-sbox.back4app.io/getAddressByPhone_forHD";
@@ -707,7 +707,7 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_CLAIMUALID, ualId);
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_IMAGEURL, "");
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LOCATIONNAME, orderItem.getLocationNickName());
-                                            contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_acme");
+                                            contentValues.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "app_interswitch");
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LAT, orderItem.getLat());
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_LNG, orderItem.getLng());
                                             contentValues.put(io.okheart.android.utilities.Constants.COLUMN_UNIQUEID, uniqueId);

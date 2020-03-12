@@ -24,8 +24,8 @@ android {
         //applicationId "io.okheart.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 61
-        versionName "1.7.11"
+        versionCode 62
+        versionName "1.7.12"
         signingConfig signingConfigs.config
     }
     buildTypes {

@@ -409,7 +409,7 @@ public class ConfigurationFile {
             jsonObject.put("phonenumber", "+254713567907");
             jsonObject.put("sessionToken", "r:ee30a6552f7e5dfab48f4234bd1ffc1b");
             jsonObject.put("environment", "prod");
-            jsonObject.put("affiliation", "acme");
+            jsonObject.put("affiliation", "interswitch");
             jsonObject.put("branch", "hq_acme");
 
 
