@@ -530,6 +530,9 @@ public class OkAnalytics {
         } catch (Exception e) {
             displayLog(" Constants.getUTCtimestamp() error " + e.toString());
         }
+        if (parameters.containsKey("customString")) {
+            eventProperties.putValue("customString", parameters.get("customString"));
+        }
         if (parameters.containsKey("address")) {
             eventProperties.putValue("address", parameters.get("address"));
         }

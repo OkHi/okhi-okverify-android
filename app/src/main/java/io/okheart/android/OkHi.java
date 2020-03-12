@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
-import android.net.ConnectivityManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -33,7 +32,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.List;
 
@@ -51,7 +49,7 @@ public final class OkHi extends ContentProvider {
     protected static Double gps_accuracy = null;
     protected static Boolean kill_switch = null;
     protected static io.okheart.android.database.DataProvider dataProvider;
-    private static String firstname, lastname, phonenumber, color, name, logo, requestSource;
+    private static String firstname, lastname, phonenumber, requestSource;
     private static Context mContext;
     private static io.okheart.android.callback.OkHiCallback callback;
     private static String appkey;
@@ -388,42 +386,27 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    public static void customize(@NonNull String appColorTheme, @NonNull String appName, @NonNull String appLogo, @NonNull String appBarColor,
-                                 Boolean appBarVisibility, Boolean enableStreetView) {
-
-
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Android SDK");
-            parameters.put("type", "initialize");
-            parameters.put("subtype", "customize");
-            parameters.put("onObject", "okHeartAndroidSDK");
-            parameters.put("view", "app");
-            parameters.put("appKey", "" + appkey);
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
+    public static void customize(@NonNull String appColorTheme, @NonNull String appName, @NonNull String appLogo,
+                                 @NonNull String appBarColor, @NonNull Boolean appBarVisibility,
+                                 @NonNull Boolean enableStreetView) {
 
         try {
             displayLog("okhi customized");
             JSONObject jsonObject = new JSONObject();
-            if (color != null) {
-                if (color.length() > 0) {
-                    jsonObject.put("color", color);
+            if (appColorTheme != null) {
+                if (appColorTheme.length() > 0) {
+                    jsonObject.put("color", appColorTheme);
                 }
             }
-            if (name != null) {
-                if (name.length() > 0) {
-                    jsonObject.put("name", name);
+            if (appName != null) {
+                if (appName.length() > 0) {
+                    jsonObject.put("name", appName);
                 }
             }
 
-            if (logo != null) {
-                if (logo.length() > 0) {
-                    jsonObject.put("logo", logo);
+            if (appLogo != null) {
+                if (appLogo.length() > 0) {
+                    jsonObject.put("logo", appLogo);
                 }
             }
             if (appBarColor != null) {
@@ -440,11 +423,24 @@ public final class OkHi extends ContentProvider {
             }
             String customString = jsonObject.toString();
             //displayLog("logo "+jsonObject.get("logo"));
-            String testString = "{\"color\":\"" + color + "\", \"name\": \"" + name + "\",\"logo\": \"" + logo + "\"}";
-
+            String testString = "{\"color\":\"" + appBarColor + "\", \"name\": \"" + appName + "\",\"logo\": \"" + appLogo + "\"}";
             displayLog("custom string " + customString);
-            displayLog(testString);
-            writeToFileCustomize(testString);
+            writeToFileCustomize(customString);
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("uniqueId", uniqueId);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Android SDK");
+                parameters.put("type", "initialize");
+                parameters.put("subtype", "customize");
+                parameters.put("onObject", "okHeartAndroidSDK");
+                parameters.put("view", "app");
+                parameters.put("customString ", customString);
+                parameters.put("appKey", "" + appkey);
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
         } catch (Exception io) {
 
         } finally {
@@ -2045,7 +2041,7 @@ public final class OkHi extends ContentProvider {
     }
     */
 
-
+/*
     private static boolean restrictBackgroundData(boolean enable, int timeout) {
         Boolean result = false;
         try {
@@ -2091,4 +2087,5 @@ public final class OkHi extends ContentProvider {
         }
         return result;
     }
+    */
 }

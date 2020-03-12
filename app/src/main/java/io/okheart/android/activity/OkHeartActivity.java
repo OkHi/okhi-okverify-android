@@ -241,9 +241,9 @@ public class OkHeartActivity extends AppCompatActivity {
                     if (customString != null) {
                         if (customString.length() > 0) {
                             JSONObject jsonObject = new JSONObject(customString);
-                            String tempColor = jsonObject.optString("color");
-                            String tempName = jsonObject.optString("name");
-                            String tempLogo = jsonObject.optString("logo");
+                            String tempColor = jsonObject.optString("color", "rgb(0, 131, 143)");
+                            String tempName = jsonObject.optString("name", "Acme");
+                            String tempLogo = jsonObject.optString("logo", "https://cdn.okhi.co/okhi-logo-white.svg");
                             String tempappbarcolor = jsonObject.optString("appbarcolor", "#f0f0f0");
                             Boolean tempappbarvisible = jsonObject.optBoolean("appbarvisibility", false);
                             Boolean tempstreetview = jsonObject.optBoolean("enablestreetview", false);
