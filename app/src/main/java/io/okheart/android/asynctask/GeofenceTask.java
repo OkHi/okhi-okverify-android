@@ -81,8 +81,8 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-        //decideToStartGeofence();
-        startGeofence();
+        decideToStartGeofence();
+        //startGeofence();
         return result;
     }
 

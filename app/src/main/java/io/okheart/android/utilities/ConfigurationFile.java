@@ -258,7 +258,6 @@ public class ConfigurationFile {
                                         }
 
 
-
                                         if (applicationKey != null) {
                                             if (applicationKey.length() > 0) {
                                                 try {

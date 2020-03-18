@@ -19,8 +19,8 @@ import io.okheart.android.database.DataProvider;
 
 public class SettingsActivity extends AppCompatActivity {
 
-    private static final String TAG = "SettingsActivity";
     static final int PICK_CONTACT_REQUEST = 1;
+    private static final String TAG = "SettingsActivity";
     private Button settingsBtn, closeBtn;
     private DataProvider dataProvider;
     private String phonenumber, applicationKey, uniqueId, environment;

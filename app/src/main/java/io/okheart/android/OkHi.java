@@ -42,6 +42,7 @@ import io.okheart.android.callback.SendCustomLinkSmsCallBack;
 public final class OkHi extends ContentProvider {
 
     private static final String TAG = "OkHi";
+    private static final int THREAD_WAIT_TIMEOUT_IN_MS = 100;
     protected static Integer resume_ping_frequency = null;
     protected static Integer ping_frequency = null;
     protected static Integer background_frequency = null;
@@ -57,7 +58,6 @@ public final class OkHi extends ContentProvider {
     //private static String remoteSmsTemplate;
     private static Analytics analytics;
     private static NotificationManager notificationManager;
-    private static final int THREAD_WAIT_TIMEOUT_IN_MS = 100;
 
     public OkHi() {
     }
@@ -581,11 +581,6 @@ public final class OkHi extends ContentProvider {
     }
 */
 
-    private void triggerSpecial() {
-
-    }
-
-
     private static void startActivity(io.okheart.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) {
         callback = okHiCallback;
         firstname = jsonObject.optString("firstName");
@@ -628,7 +623,6 @@ public final class OkHi extends ContentProvider {
         }
 
     }
-
 
     private static String checkPermissionCause() {
 
@@ -733,7 +727,6 @@ public final class OkHi extends ContentProvider {
         }
         return permission;
     }
-
 
     public static boolean checkPermission() {
         String environment = dataProvider.getPropertyValue("environment");
@@ -1212,6 +1205,35 @@ public final class OkHi extends ContentProvider {
 
         }
     }
+
+    private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
+        try {
+            String environment = dataProvider.getPropertyValue("environment");
+
+            if (environment != null) {
+                if (environment.length() > 0) {
+                    if (environment.equalsIgnoreCase("PROD")) {
+
+                    } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+
+                    } else if (environment.equalsIgnoreCase("SANDBOX")) {
+
+                    } else {
+
+                    }
+                } else {
+                    environment = "PROD";
+                }
+            } else {
+                environment = "PROD";
+            }
+
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
+            okAnalytics.sendToAnalytics(parameters, loans, environment);
+        } catch (Exception e) {
+            displayLog("error sending photoexpanded analytics event " + e.toString());
+        }
+    }
     /*
 
     private static void decideWhatToStart() {
@@ -1279,35 +1301,6 @@ public final class OkHi extends ContentProvider {
     }
     */
 
-    private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
-        try {
-            String environment = dataProvider.getPropertyValue("environment");
-
-            if (environment != null) {
-                if (environment.length() > 0) {
-                    if (environment.equalsIgnoreCase("PROD")) {
-
-                    } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-
-                    } else if (environment.equalsIgnoreCase("SANDBOX")) {
-
-                    } else {
-
-                    }
-                } else {
-                    environment = "PROD";
-                }
-            } else {
-                environment = "PROD";
-            }
-
-            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(mContext, environment);
-            okAnalytics.sendToAnalytics(parameters, loans, environment);
-        } catch (Exception e) {
-            displayLog("error sending photoexpanded analytics event " + e.toString());
-        }
-    }
-
     private static void displayToast(String msg, boolean show) {
         if (show) {
             try {
@@ -1349,6 +1342,10 @@ public final class OkHi extends ContentProvider {
         fin.close();
         displayLog("getStringFromFile2");
         return ret;
+    }
+
+    private void triggerSpecial() {
+
     }
 
   /*
@@ -1978,7 +1975,6 @@ public final class OkHi extends ContentProvider {
 
             WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
             */
-
 
 
         } catch (Exception e) {

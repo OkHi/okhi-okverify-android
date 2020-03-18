@@ -144,7 +144,6 @@ public class LocationService extends Service {
         startLoop();
 
 
-
     }
 
     private void startLoop() {
