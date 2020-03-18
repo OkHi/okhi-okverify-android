@@ -415,6 +415,7 @@ public class OkAnalytics {
             trackjson.put("environment", "PROD");
         }
         */
+
         eventProperties.putValue("type", type);
         eventProperties.putValue("subtype", subtype);
         eventProperties.putValue("onObject", onObject);

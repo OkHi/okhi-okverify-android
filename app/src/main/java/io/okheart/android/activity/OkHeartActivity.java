@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.webkit.GeolocationPermissions;
 import android.webkit.WebChromeClient;
@@ -125,7 +126,7 @@ public class OkHeartActivity extends AppCompatActivity {
     }
 
     private static void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
     private static boolean isCompletedWell() {
