@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import io.okheart.android.BuildConfig;
+import io.okheart.android.asynctask.GeofenceTask;
 import io.okheart.android.asynctask.GetAddressTask;
 import io.okheart.android.callback.GetAddressCallBack;
 
@@ -436,6 +438,8 @@ public class ConfigurationFile {
 
 
     private void decideWhatToStart() {
+        GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
+        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
@@ -841,7 +845,7 @@ public class ConfigurationFile {
     }
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
 }

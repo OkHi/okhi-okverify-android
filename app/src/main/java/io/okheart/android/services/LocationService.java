@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -29,6 +30,7 @@ import java.util.concurrent.TimeUnit;
 
 import io.okheart.android.R;
 import io.okheart.android.activity.SettingsActivity;
+import io.okheart.android.asynctask.GeofenceTask;
 import io.okheart.android.datamodel.AddressItem;
 import io.okheart.android.utilities.MyWorker;
 
@@ -206,6 +208,8 @@ public class LocationService extends Service {
     }
 
     private void decideWhatToStart() {
+        GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(this);
+        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         List<AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {

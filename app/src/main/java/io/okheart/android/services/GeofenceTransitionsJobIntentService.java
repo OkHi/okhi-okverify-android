@@ -1,4 +1,4 @@
-package io.okheart.android.utilities;
+package io.okheart.android.services;
 
 import android.content.Context;
 import android.content.Intent;
@@ -10,25 +10,14 @@ import android.net.wifi.WifiManager;
 import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
-import android.os.Looper;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.Log;
 
-import androidx.annotation.NonNull;
-import androidx.work.Data;
-import androidx.work.Worker;
-import androidx.work.WorkerParameters;
+import androidx.core.app.JobIntentService;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
-import com.google.android.gms.location.LocationCallback;
-import com.google.android.gms.location.LocationRequest;
-import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.location.LocationSettingsRequest;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.location.Geofence;
+import com.google.android.gms.location.GeofencingEvent;
 import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
@@ -40,268 +29,254 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import io.okheart.android.asynctask.GeofenceTask;
+import io.okheart.android.R;
+import io.okheart.android.asynctask.SendSMS;
+import io.okheart.android.database.DataProvider;
+import io.okheart.android.utilities.GeofenceErrorMessages;
 
-import static android.content.Context.BATTERY_SERVICE;
 
-public class MyWorker extends Worker {
+public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
-    private static final String TAG = "MyWorker";
-    private Context context;
-    private LocationCallback mLocationCallback;
-    private LocationSettingsRequest mLocationSettingsRequest;
-    private FusedLocationProviderClient mFusedLocationClient;
-    private LocationRequest mLocationRequest;
-    private Location mCurrentLocation;
-    private Double lat, lng;
-    private Float acc;
-    private String uniqueId, phonenumber;
-    private io.okheart.android.database.DataProvider dataProvider;
-    private String environment;
-    //private NotificationManager notificationManager;
+    private static final int JOB_ID = 573;
 
-    public MyWorker(@NonNull Context appContext, @NonNull WorkerParameters workerParams) {
-        super(appContext, workerParams);
-        context = appContext;
-        //notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-    }
+    private static final String TAG = "GeofenceTransitionsIS";
 
-    @NonNull
-    @Override
-    public Result doWork() {
-        displayLog("doWork ");
+    private static final String CHANNEL_ID = "channel_01";
+    //private static Context context;
+    private static DataProvider dataProvider;
+    private static String uniqueId, environment, phonenumber;
 
-        uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        dataProvider = new io.okheart.android.database.DataProvider(context);
-        environment = dataProvider.getPropertyValue("environment");
+    /**
+     * Convenience method for enqueuing work in to this service.
+     */
+    public static void enqueueWork(Context context, Intent intent) {
+        enqueueWork(context, GeofenceTransitionsJobIntentService.class, JOB_ID, intent);
+        //context = context;
+        dataProvider = new DataProvider(context);
         phonenumber = dataProvider.getPropertyValue("phonenumber");
+        uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        environment = dataProvider.getPropertyValue("environment");
+    }
 
-        GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
-        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    /**
+     * Handles incoming intents.
+     *
+     * @param intent sent by Location Services. This Intent is provided to Location
+     *               Services (inside a PendingIntent) when addGeofences() is called.
+     */
+    @Override
+    protected void onHandleWork(Intent intent) {
+        GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 
-        if (environment != null) {
-            if (environment.length() > 0) {
-                if (environment.equalsIgnoreCase("PROD")) {
+        if (geofencingEvent.hasError()) {
+            String errorMessage = GeofenceErrorMessages.getErrorString(this,
+                    geofencingEvent.getErrorCode());
+            displayLog(errorMessage);
+            sendSMS(errorMessage);
+            return;
+        }
 
-                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
+        // Get the transition type.
+        int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
-                } else if (environment.equalsIgnoreCase("SANDBOX")) {
+        // Test that the reported transition was of interest.
+        if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
-                } else {
+            // Get the geofences that were triggered. A single event can trigger multiple geofences.
+            try {
+                Location locationA = geofencingEvent.getTriggeringLocation();
 
-                }
-            } else {
-                environment = "PROD";
+                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit");
+            } catch (Exception e) {
+                displayLog("error updating database " + e.toString());
             }
+
+
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+
+            // Get the transition details as a String.
+            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition, triggeringGeofences);
+
+            // Send notification and log the transition details.
+            sendNotification(geofenceTransitionDetails);
+            displayLog(geofenceTransitionDetails);
+            sendSMS(geofenceTransitionDetails);
+
+
+        } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
+
+            try {
+                Location locationA = geofencingEvent.getTriggeringLocation();
+
+                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter");
+            } catch (Exception e) {
+                displayLog("error updating database " + e.toString());
+            }
+
+            // Get the geofences that were triggered. A single event can trigger multiple geofences.
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+
+            // Get the transition details as a String.
+            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
+                    triggeringGeofences);
+
+            // Send notification and log the transition details.
+            sendNotification(geofenceTransitionDetails);
+            displayLog(geofenceTransitionDetails);
+            sendSMS(geofenceTransitionDetails);
         } else {
-            environment = "PROD";
+            // Log the error.
+            displayLog(getString(R.string.geofence_transition_invalid_type, geofenceTransition));
+
+            sendSMS(getString(R.string.geofence_transition_invalid_type, geofenceTransition));
+        }
+    }
+
+    /**
+     * Gets transition details and returns them as a formatted string.
+     *
+     * @param geofenceTransition  The ID of the geofence transition.
+     * @param triggeringGeofences The geofence(s) triggered.
+     * @return The transition details formatted as String.
+     */
+    private String getGeofenceTransitionDetails(
+            int geofenceTransition,
+            List<Geofence> triggeringGeofences) {
+
+        String geofenceTransitionString = getTransitionString(geofenceTransition);
+
+        // Get the Ids of each geofence that was triggered.
+        ArrayList<String> triggeringGeofencesIdsList = new ArrayList<>();
+        for (Geofence geofence : triggeringGeofences) {
+            triggeringGeofencesIdsList.add(geofence.getRequestId());
+        }
+        String triggeringGeofencesIdsString = TextUtils.join(", ", triggeringGeofencesIdsList);
+        String returnStr = geofenceTransitionString + ": " + triggeringGeofencesIdsString;
+
+        displayLog(returnStr);
+        return returnStr;
+    }
+
+    /**
+     * Posts a notification in the notification bar when a transition is detected.
+     * If the user clicks the notification, control goes to the MainActivity.
+     */
+    private void sendNotification(String notificationDetails) {
+        displayLog(notificationDetails);
+        /*
+        // Get an instance of the Notification manager
+        NotificationManager mNotificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Android O requires a Notification Channel.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.app_name);
+            // Create the channel for the notification
+            NotificationChannel mChannel =
+                    new NotificationChannel(CHANNEL_ID, name, NotificationManager.IMPORTANCE_DEFAULT);
+
+            // Set the Notification Channel for the Notification Manager.
+            mNotificationManager.createNotificationChannel(mChannel);
         }
 
+        // Create an explicit content Intent that starts the main Activity.
+        Intent notificationIntent = new Intent(getApplicationContext(), MainActivity.class);
 
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "create");
-            parameters.put("type", "doWork");
-            parameters.put("onObject", "app");
-            parameters.put("view", "worker");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
+        // Construct a task stack.
+        TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
+
+        // Add the main Activity to the task stack as the parent.
+        stackBuilder.addParentStack(MainActivity.class);
+
+        // Push the content Intent onto the stack.
+        stackBuilder.addNextIntent(notificationIntent);
+
+        // Get a PendingIntent containing the entire back stack.
+        PendingIntent notificationPendingIntent =
+                stackBuilder.getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        // Get a notification builder that's compatible with platform versions >= 4
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this);
+
+        // Define the notification settings.
+        builder.setSmallIcon(R.drawable.ic_launcher_background)
+                // In a real app, you may want to use a library like Volley
+                // to decode the Bitmap.
+                .setLargeIcon(BitmapFactory.decodeResource(getResources(),
+                        R.drawable.ic_launcher_foreground))
+                .setColor(Color.RED)
+                .setContentTitle(notificationDetails)
+                .setContentText(getString(R.string.geofence_transition_notification_text))
+                .setContentIntent(notificationPendingIntent);
+
+        // Set the Channel ID for Android O.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            builder.setChannelId(CHANNEL_ID); // Channel ID
         }
 
-        try {
-            mFusedLocationClient = LocationServices.getFusedLocationProviderClient(context);
-        } catch (Exception e) {
-            displayLog("mfusedlocationclient error " + e.toString());
+        // Dismiss notification once the user touches it.
+        builder.setAutoCancel(true);
+
+        // Issue the notification
+        mNotificationManager.notify(0, builder.build());
+        */
+    }
+
+    /**
+     * Maps geofence transition types to their human-readable equivalents.
+     *
+     * @param transitionType A transition type constant defined in Geofence
+     * @return A String indicating the type of transition
+     */
+    private String getTransitionString(int transitionType) {
+        switch (transitionType) {
+            case Geofence.GEOFENCE_TRANSITION_ENTER:
+                return getString(R.string.geofence_transition_entered);
+            case Geofence.GEOFENCE_TRANSITION_EXIT:
+                return getString(R.string.geofence_transition_exited);
+            default:
+                return getString(R.string.unknown_geofence_transition);
         }
+    }
 
-        String tempGps_accuracy = dataProvider.getPropertyValue("gps_accuracy");
-        if (tempGps_accuracy != null) {
-            if (tempGps_accuracy.length() > 0) {
-                Double gps_accuracy = Double.parseDouble(tempGps_accuracy);
-                createLocationCallback(gps_accuracy);
-            } else {
-                createLocationCallback(50.0);
-            }
-        } else {
-            createLocationCallback(50.0);
+    private void sendSMS(String message) {
+
+        String model = Build.MODEL;
+        switch (model) {
+            case "TECNO RA6S":
+                message = "Ramogi " + message;
+                break;
+            case "Pixel 3a":
+                message = "Timbo " + message;
+                break;
+            case "Pixel 2 XL":
+                message = "Evans " + message;
+                break;
+            case "JKM-LX1":
+                message = "Navraj " + message;
+                break;
+            case "Pixel":
+                message = "Henry " + message;
+                break;
+            case "HD1900":
+                message = "Kiano " + message;
+                break;
+            case "Redmi 6":
+                message = "Dennis " + message;
+                break;
+            default:
+                message = model + " " + message;
+                break;
         }
+        SendSMS sendSMS = new SendSMS("+254713567907", message);
+        sendSMS.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        String tempBackground_frequency = dataProvider.getPropertyValue("background_frequency");
-        if (tempBackground_frequency != null) {
-            if (tempBackground_frequency.length() > 0) {
-                Integer background_frequency = Integer.parseInt(tempBackground_frequency);
-                createLocationRequest(background_frequency);
-            } else {
-                createLocationRequest(30000);
-            }
-        } else {
-            createLocationRequest(30000);
-        }
-
-        buildLocationSettingsRequest();
-
-        startLocationUpdates();
-
-        Data outputData = new Data.Builder().putString("work_result", "Foreground service started").build();
-        //sendSMS("dowork");
-
-        return Result.success(outputData);
+        SendSMS sendSMS1 = new SendSMS("+254723178381", message);
+        sendSMS1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 
-    private void createLocationRequest(Integer remotelocationfrequency) {
-
-        displayLog("createLocationRequest start frequency " + remotelocationfrequency);
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "create");
-            parameters.put("type", "createLocationRequest");
-            parameters.put("onObject", "app");
-            parameters.put("view", "worker");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(remotelocationfrequency);
-        mLocationRequest.setFastestInterval(remotelocationfrequency / 2);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-        displayLog("createLocationRequest end");
-    }
-
-    private void createLocationCallback(final Double remotegpsaccuracy) {
-        displayLog("create location callback start gpsaccuracy " + remotegpsaccuracy);
-
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "create");
-            parameters.put("type", "createLocationCallback");
-            parameters.put("onObject", "app");
-            parameters.put("view", "worker");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-
-        // startNotification();
-
-        mLocationCallback = new LocationCallback() {
-            @Override
-            public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-
-                if (locationResult == null) {
-                    displayLog("lat cannot get location");
-                    //sendSMS("with null location");
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "noLocation");
-                        parameters.put("type", "onLocationResult");
-                        parameters.put("onObject", "app");
-                        parameters.put("view", "worker");
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
-                    displayLog("create location callback end");
-
-                    return;
-                } else {
-                    mCurrentLocation = locationResult.getLastLocation();
-                    lat = mCurrentLocation.getLatitude();
-                    lng = mCurrentLocation.getLongitude();
-                    acc = mCurrentLocation.getAccuracy();
-
-                    displayLog("lat " + lat + " lng " + lng + " acc " + acc);
-
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "result");
-                        parameters.put("type", "onLocationResult");
-                        parameters.put("onObject", "app");
-                        parameters.put("view", "worker");
-                        parameters.put("latitude", "" + lat);
-                        parameters.put("longitude", "" + lng);
-                        parameters.put("gpsAccuracy", "" + acc);
-                        parameters.put("remoteGPSAccuracy", "" + remotegpsaccuracy);
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
-
-                    if (acc > remotegpsaccuracy) {
-                        displayLog("lat quick");
-                        //Constants.scheduleQuickJob(ForegroundService.this);
-                        //sendSMS("without acc location " + acc);
-                    } else {
-                        displayLog("lat updatedatabase");
-                        //sendSMS("with acc location");
-                        updateDatabase(lat, lng, acc);
-                        //stopSelf();
-                        /*
-                        if (notificationManager != null) {
-                            notificationManager.cancel(2);
-                        }
-                        */
-                    }
-                    displayLog("create location callback end");
-                }
-            }
-        };
-
-    }
-
-    private void buildLocationSettingsRequest() {
-        displayLog("buildLocationSettingsRequest start");
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "create");
-            parameters.put("type", "buildLocationSettingsRequest");
-            parameters.put("onObject", "app");
-            parameters.put("view", "worker");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-        LocationSettingsRequest.Builder builder = new LocationSettingsRequest.Builder();
-        builder.addLocationRequest(mLocationRequest);
-        //builder.setNeedBle(true);
-        mLocationSettingsRequest = builder.build();
-        displayLog("buildLocationSettingsRequest end");
-    }
-
-
-    private void updateDatabase(final Double lat, final Double lng, final Float acc) {
-        try {
-            stopLocationUpdates();
-        } catch (Exception e) {
-            displayLog("Error stopping location update " + e.toString());
-        }
+    private void updateDatabase(final Double lat, final Double lng, final Float acc, String transition) {
 
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
 
@@ -310,17 +285,19 @@ public class MyWorker extends Worker {
             loans.put("uniqueId", uniqueId);
             loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("transition", transition);
 
             final Long timemilliseconds = System.currentTimeMillis();
 
             final ParseObject parseObject = new ParseObject("UserVerificationData");
 
+            parseObject.put("transition", transition);
             parseObject.put("latitude", lat);
             parseObject.put("longitude", lng);
             parseObject.put("gpsAccuracy", acc);
             ParseGeoPoint parseGeoPoint = new ParseGeoPoint(lat, lng);
             parseObject.put("geoPoint", parseGeoPoint);
-            parseObject.put("geoPointSource", "clientBackgroundGPS");
+            parseObject.put("geoPointSource", "geofence");
             parseObject.put("timemilliseconds", timemilliseconds);
             parseObject.put("device", getDeviceModelAndBrand());
             parseObject.put("model", Build.MODEL);
@@ -331,7 +308,7 @@ public class MyWorker extends Worker {
             parseObject.put("appVersionName", io.okheart.android.BuildConfig.VERSION_NAME);
 
             try {
-                WifiManager wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
                 WifiInfo info = wifiManager.getConnectionInfo();
                 String ssid = info.getSSID();
                 displayLog("ssid " + ssid);
@@ -395,12 +372,12 @@ public class MyWorker extends Worker {
 
             try {
                 boolean isPlugged = false;
-                BatteryManager bm = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
+                BatteryManager bm = (BatteryManager) this.getSystemService(BATTERY_SERVICE);
                 int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                 parameters.put("batteryLevel", "" + batLevel);
                 parseObject.put("batteryLevel", batLevel);
 
-                Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                Intent intent = this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
@@ -425,6 +402,8 @@ public class MyWorker extends Worker {
                 parameters.put("acCharge", "" + acCharge);
                 parseObject.put("acCharge", acCharge);
 
+                displayLog("usbCharge " + usbCharge + " acCharge " + acCharge + " isCharging " +
+                        isCharging + " batteryLevel " + batLevel + " isPlugged " + isPlugged);
             } catch (Exception e) {
                 displayLog(" error getting battery status " + e.toString());
             }
@@ -439,8 +418,8 @@ public class MyWorker extends Worker {
                 parameters.put("eventName", "Data collection Service");
                 parameters.put("subtype", "saveBackgroundData");
                 parameters.put("type", "saveData");
-                parameters.put("onObject", "backgroundService");
-                parameters.put("view", "worker");
+                parameters.put("onObject", "geofence");
+                parameters.put("view", "geofence");
                 parameters.put("branch", "app_interswitch");
                 //parameters.put("deliveryId", null);
                 //parameters.put("ualId", addressParseObject.getClaimUalId());
@@ -459,7 +438,7 @@ public class MyWorker extends Worker {
                 } catch (Exception e) {
                     displayLog("geomap error " + e.toString());
                 }
-                parameters.put("geoPointSource", "clientBackgroundGPS");
+                parameters.put("geoPointSource", "geofence");
                 parameters.put("timemilliseconds", "" + timemilliseconds);
                 parameters.put("device", getDeviceModelAndBrand());
                 parameters.put("model", Build.MODEL);
@@ -505,7 +484,7 @@ public class MyWorker extends Worker {
                         Object key = it.next();
                         targetObject.put(key.toString(), parseObject.get(key.toString()));
                     }
-                    saveData(targetObject);
+                    saveData(targetObject, lat, lng);
 
                     try {
                         parameters.put("latitudeAddress", "" + addressItem.getLat());
@@ -524,7 +503,7 @@ public class MyWorker extends Worker {
                         parameters.put("ualId", addressItem.getUalid());
                         loans.put("uniqueId", uniqueId);
                         loans.put("phonenumber", phonenumber);
-                        sendEvent(parameters, loans);
+                        sendEvent(parameters, loans, "1");
                     } catch (Exception e) {
                         displayLog("OkAnalytics error " + e.toString());
                     }
@@ -543,7 +522,7 @@ public class MyWorker extends Worker {
             loans.put("uniqueId", uniqueId);
             loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
-
+            parameters.put("transition", transition);
             final Long timemilliseconds = System.currentTimeMillis();
 
             try {
@@ -606,11 +585,11 @@ public class MyWorker extends Worker {
             }
             try {
                 boolean isPlugged = false;
-                BatteryManager bm = (BatteryManager) context.getSystemService(BATTERY_SERVICE);
+                BatteryManager bm = (BatteryManager) this.getSystemService(BATTERY_SERVICE);
                 int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
                 parameters.put("batteryLevel", "" + batLevel);
 
-                Intent intent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                Intent intent = this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
                 int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
                 isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
                 if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
@@ -645,8 +624,8 @@ public class MyWorker extends Worker {
                 parameters.put("eventName", "Data collection Service");
                 parameters.put("subtype", "saveBackgroundData");
                 parameters.put("type", "saveData");
-                parameters.put("onObject", "backgroundService");
-                parameters.put("view", "worker");
+                parameters.put("onObject", "geofence");
+                parameters.put("view", "geofence");
                 parameters.put("branch", "app_interswitch");
                 //parameters.put("deliveryId", null);
                 //parameters.put("ualId", addressParseObject.getClaimUalId());
@@ -665,7 +644,7 @@ public class MyWorker extends Worker {
                 } catch (Exception e) {
                     displayLog("geomap error " + e.toString());
                 }
-                parameters.put("geoPointSource", "clientBackgroundGPS");
+                parameters.put("geoPointSource", "geofence");
                 parameters.put("timemilliseconds", "" + timemilliseconds);
                 parameters.put("device", getDeviceModelAndBrand());
                 parameters.put("model", Build.MODEL);
@@ -676,7 +655,7 @@ public class MyWorker extends Worker {
                 parameters.put("appVersionName", "" + io.okheart.android.BuildConfig.VERSION_NAME);
                 loans.put("uniqueId", uniqueId);
                 loans.put("phonenumber", phonenumber);
-                sendEvent(parameters, loans);
+                sendEvent(parameters, loans, "2");
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
@@ -685,7 +664,7 @@ public class MyWorker extends Worker {
 
     }
 
-    private void saveData(final ParseObject parseObject) {
+    private void saveData(final ParseObject parseObject, final double lat, final double lng) {
 
         displayLog(" parse object save ");
 
@@ -718,7 +697,7 @@ public class MyWorker extends Worker {
                     displayLog("geomap error " + e.toString());
                 }
 
-                sendEvent(parameters, loans);
+                sendEvent(parameters, loans, "3");
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
@@ -755,7 +734,7 @@ public class MyWorker extends Worker {
                             } catch (Exception e2) {
                                 displayLog("geomap error " + e2.toString());
                             }
-                            sendEvent(parameters, loans);
+                            sendEvent(parameters, loans, "4");
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
@@ -787,7 +766,7 @@ public class MyWorker extends Worker {
                                 displayLog("geomap error " + e2.toString());
                             }
                             parameters.put("error", e.toString());
-                            sendEvent(parameters, loans);
+                            sendEvent(parameters, loans, "5");
                         } catch (Exception e1) {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
@@ -796,221 +775,18 @@ public class MyWorker extends Worker {
                 }
             });
         }
-
-
     }
 
+    private String getDeviceModelAndBrand() {
 
-/*
-    private void saveData(final List<ParseObject> parseObjectList) {
-
-        displayLog("parse object save "+parseObjectList.size());
-        for(final ParseObject parseObject : parseObjectList){
-            parseObject.saveInBackground(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e == null) {
-                        displayLog(parseObject.getObjectId()+" save parseobject success "+parseObject.getString("ualId"));
-                        try {
-                            HashMap<String, String> loans = new HashMap<>();
-                            loans.put("uniqueId", uniqueId);
-                            loans.put("phonenumber", phonenumber);
-                            HashMap<String, String> parameters = new HashMap<>();
-                            parameters.put("eventName", "Data Collection Service");
-                            parameters.put("subtype", "saveData");
-                            parameters.put("type", "parse");
-                            parameters.put("onObject", "success");
-                            parameters.put("view", "worker");
-                            parameters.put("ualId", parseObject.getString("ualId"));
-                            sendEvent(parameters, loans);
-                        } catch (Exception e1) {
-                            displayLog("error attaching afl to ual " + e1.toString());
-                        }
-
-                    } else {
-                        try {
-                            HashMap<String, String> loans = new HashMap<>();
-                            loans.put("uniqueId", uniqueId);
-                            loans.put("phonenumber", phonenumber);
-                            HashMap<String, String> parameters = new HashMap<>();
-                            parameters.put("eventName", "Data Collection Service");
-                            parameters.put("subtype", "saveData");
-                            parameters.put("type", "parse");
-                            parameters.put("onObject", "failure");
-                            parameters.put("view", "worker");
-                            parameters.put("ualId", parseObject.getString("ualId"));
-                            parameters.put("error", e.toString());
-                            sendEvent(parameters, loans);
-                        } catch (Exception e1) {
-                            displayLog("error attaching afl to ual " + e1.toString());
-                        }
-                        displayLog("save parseobject error " + e.toString());
-                    }
-                }
-            });
-        }
-
-    }
-*/
-
-    private void stopLocationUpdates() {
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "stop");
-            parameters.put("type", "stopLocationUpdates");
-            parameters.put("onObject", "app");
-            parameters.put("view", "worker");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-        try {
-            mFusedLocationClient.removeLocationUpdates(mLocationCallback);
-        } catch (Exception e) {
-
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.contains(manufacturer)) {
+            return model;
+        } else {
+            return manufacturer + " " + model;
         }
     }
-
-    private void startLocationUpdates() {
-        displayLog("startLocationUpdates");
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "start");
-            parameters.put("type", "startLocationUpdates");
-            parameters.put("onObject", "app");
-            parameters.put("view", "worker");
-            //parameters.put("killswitch", "" + remotekillswitch);
-            //parameters.put("ualId", model.getUalId());
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-        try {
-            mFusedLocationClient.requestLocationUpdates(mLocationRequest,
-                    mLocationCallback, Looper.getMainLooper())
-                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                        @Override
-                        public void onComplete(@NonNull Task<Void> task) {
-                            displayLog("startLocationUpdates addOnCompleteListener 1 ");
-                            try {
-                                HashMap<String, String> loans = new HashMap<>();
-                                loans.put("uniqueId", uniqueId);
-                                loans.put("phonenumber", phonenumber);
-                                HashMap<String, String> parameters = new HashMap<>();
-                                parameters.put("eventName", "Data Collection Service");
-                                parameters.put("subtype", "complete");
-                                parameters.put("type", "startLocationUpdates");
-                                parameters.put("onObject", "app");
-                                parameters.put("view", "worker");
-                                //parameters.put("killswitch", "" + remotekillswitch);
-                                //parameters.put("ualId", model.getUalId());
-                                sendEvent(parameters, loans);
-                            } catch (Exception e1) {
-                                displayLog("error attaching afl to ual " + e1.toString());
-                            }
-                            //sendSMS("location callback complete");
-                        }
-                    }).addOnSuccessListener(new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    displayLog("startLocationUpdates addOnSuccessListener 3");
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "success");
-                        parameters.put("type", "startLocationUpdates");
-                        parameters.put("onObject", "app");
-                        parameters.put("view", "worker");
-                        //parameters.put("killswitch", "" + remotekillswitch);
-                        //parameters.put("ualId", model.getUalId());
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
-                    //sendSMS("location callback success");
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    displayLog("startLocationUpdates addOnFailureListener 2 " + e.getMessage());
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "failure");
-                        parameters.put("type", "startLocationUpdates");
-                        parameters.put("onObject", "app");
-                        parameters.put("view", "worker");
-                        //parameters.put("killswitch", "" + remotekillswitch);
-                        parameters.put("error", e.getMessage());
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
-                    //sendSMS("location callback failure");
-                    //startAlert(remotePingFrequency);
-
-                }
-            });
-        } catch (SecurityException e) {
-            displayLog("startLocationUpdates requestLocationUpdates error " + e.toString());
-            //displayToast("Please enable GPS location", true);
-            //sendSMS("location callback security exception");
-        }
-
-
-    }
-
-
-    /*
-    private void sendSMS(String who) {
-
-        try {
-            //String message = "https://hypertrack-996a0.firebaseapp.com/?id="+OkVerifyApplication.getUniqueId();
-            //String message = remoteSmsTemplate + OkVerifyApplication.getUniqueId();
-            final HashMap<String, String> jsonObject = new HashMap<>();
-            jsonObject.put("userId", "GrlaR3LHUP");
-            jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
-            jsonObject.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, "hq_acme");
-            jsonObject.put(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION, "interswitch");
-            jsonObject.put("customName", "test");
-            jsonObject.put("phoneNumber", "+254713567907");
-            jsonObject.put("phone", "+254713567907");
-            jsonObject.put("message", "we have received " + getDeviceModelAndBrand() + " status " + who);
-            io.okheart.android.callback.SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new io.okheart.android.callback.SendCustomLinkSmsCallBack() {
-                @Override
-                public void querycomplete(String response, boolean status) {
-                    if (status) {
-                        displayLog("send sms success " + response);
-                        //displayToast("SMS sent", true);
-                    } else {
-                        displayLog("send sms failure " + response);
-                        //displayToast("Error " + response, true);
-                    }
-                }
-            };
-            io.okheart.android.asynctask.SendCustomLinkSmsTask sendCustomLinkSmsTask = new io.okheart.android.asynctask.SendCustomLinkSmsTask(context, sendCustomLinkSmsCallBack, jsonObject);
-            sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } catch (Exception jse) {
-            displayLog("jsonexception " + jse.toString());
-        }
-
-    }
-    */
-
 
     private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {
 
@@ -1028,17 +804,6 @@ public class MyWorker extends Worker {
         displayLog("getDistance " + latA + " " + lngA + " " + latB + " " + lngB + " distance " + me);
         return me;
 
-    }
-
-    private String getDeviceModelAndBrand() {
-
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.contains(manufacturer)) {
-            return model;
-        } else {
-            return manufacturer + " " + model;
-        }
     }
 
     private HashMap<String, String> getTitleText(io.okheart.android.datamodel.AddressItem model) {
@@ -1125,100 +890,41 @@ public class MyWorker extends Worker {
         return titleText;
     }
 
-    private HashMap<String, String> getTitleText(io.okheart.android.datamodel.VerifyDataItem model) {
 
-        String streetName = model.getStreetName();
-        String propertyName = model.getPropertyName();
-        String directions = model.getDirections();
-        String title = model.getTitle();
-
-        displayLog(streetName + " " + propertyName + " " + directions + " " + title);
-
-        HashMap<String, String> titleText = new HashMap<>();
-
-        String header = "";
-        String text = "";
-        if (streetName != null) {
-            if (streetName.length() > 0) {
-                if (!(streetName.equalsIgnoreCase("null"))) {
-                    text = streetName;
-                } else {
-
-                    if (directions != null) {
-                        if (directions.length() > 0) {
-                            if (!(directions.equalsIgnoreCase("null"))) {
-                                text = directions;
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (directions != null) {
-                    if (directions.length() > 0) {
-                        if (!(directions.equalsIgnoreCase("null"))) {
-                            text = directions;
-                        }
-                    }
-                }
-            }
-        } else {
-            if (directions != null) {
-                if (directions.length() > 0) {
-                    if (!(directions.equalsIgnoreCase("null"))) {
-                        text = directions;
-                    }
-                }
-            }
-        }
-
-        if (title != null) {
-            if (title.length() > 0) {
-                if (!(title.equalsIgnoreCase("null"))) {
-                    header = title;
-                } else {
-
-                    if (propertyName != null) {
-                        if (propertyName.length() > 0) {
-                            if (!(propertyName.equalsIgnoreCase("null"))) {
-                                header = propertyName;
-                            }
-                        }
-                    }
-                }
-            } else {
-                if (propertyName != null) {
-                    if (propertyName.length() > 0) {
-                        if (!(propertyName.equalsIgnoreCase("null"))) {
-                            header = propertyName;
-                        }
-                    }
-                }
-            }
-        } else {
-            if (propertyName != null) {
-                if (propertyName.length() > 0) {
-                    if (!(propertyName.equalsIgnoreCase("null"))) {
-                        header = propertyName;
-                    }
-                }
-            }
-        }
-        titleText.put("header", header);
-        titleText.put("text", text);
-        displayLog("titletext " + titleText.get("header") + " " + titleText.get("text"));
-        return titleText;
-    }
-
-    private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
+    private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans, String one) {
+        displayLog("environment " + environment);
         try {
-            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(context, environment);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(this, environment);
             okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
-            displayLog("error sending photoexpanded analytics event " + e.toString());
+            displayLog(one + " error sending photoexpanded analytics event " + e.toString());
         }
     }
+
+    /*
+    private String getDistance(Location locationA) {
+        String geoname = null;
+        for (Map.Entry<String, LatLng> entry : Constants.BAY_AREA_LANDMARKS.entrySet()) {
+            Location locationB = new Location("B");
+            locationB.setLatitude(entry.getValue().latitude);
+            locationB.setLongitude(entry.getValue().longitude);
+            Float d = locationA.distanceTo(locationB);
+            displayLog("getDistance   " + d);
+            if(d < 500){
+                geoname = entry.getKey();
+            }
+            else{
+                geoname = null;
+            }
+        }
+
+        return geoname;
+
+    }
+    */
 
     private void displayLog(String log) {
         Log.i(TAG, log);
     }
+
 }

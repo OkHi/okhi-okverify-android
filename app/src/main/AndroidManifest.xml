@@ -23,12 +23,13 @@
         <activity
             android:name=".activity.TestActivity"
             android:theme="@style/AppTheme">
+            <!--
+                        <intent-filter>
+                            <action android:name="android.intent.action.MAIN" />
 
-            <intent-filter>
-                                        <action android:name="android.intent.action.MAIN" />
-
-                                        <category android:name="android.intent.category.LAUNCHER" />
-                                    </intent-filter>
+                            <category android:name="android.intent.category.LAUNCHER" />
+                        </intent-filter>
+                        -->
 
         </activity>
         <activity
@@ -52,6 +53,16 @@
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="location" />
+
+        <receiver
+            android:name="io.okheart.android.receivers.GeofenceBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
+        <service
+            android:name="io.okheart.android.services.GeofenceTransitionsJobIntentService"
+            android:exported="true"
+            android:permission="android.permission.BIND_JOB_SERVICE" />
     </application>
 
 </manifest>

@@ -591,7 +591,9 @@ public class OkAnalytics {
             eventProperties.putValue("verify", parameters.get("verify"));
         }
 
-
+        if (parameters.containsKey("geoPointSource")) {
+            eventProperties.putValue("geoPointSource", parameters.get("geoPointSource"));
+        }
         if (parameters.containsKey("error")) {
             eventProperties.putValue("error", parameters.get("error"));
         }
@@ -657,6 +659,23 @@ public class OkAnalytics {
         try {
             if (parameters.containsKey("userAffiliation")) {
                 eventProperties.put("userAffiliation", parameters.get("userAffiliation"));
+            }
+
+        } catch (Exception e) {
+            displayLog("error getting userAffiliation " + e.toString());
+        }
+
+        try {
+            if (parameters.containsKey("customString")) {
+                eventProperties.put("customString", parameters.get("customString"));
+            }
+
+        } catch (Exception e) {
+            displayLog("error setting geohash location " + e.toString());
+        }
+        try {
+            if (parameters.containsKey("transition")) {
+                eventProperties.put("transition", parameters.get("transition"));
             }
 
         } catch (Exception e) {
