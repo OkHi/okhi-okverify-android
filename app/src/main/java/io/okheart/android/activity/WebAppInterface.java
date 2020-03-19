@@ -23,10 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import io.okheart.android.OkHi;
-import io.okheart.android.datamodel.AddressItem;
-import io.okheart.android.utilities.MyWorker;
-
 
 class WebAppInterface {
     private static final String TAG = "WebAppInterface";
@@ -240,7 +236,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -315,7 +311,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -371,7 +367,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -403,7 +399,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            OkHi.getCallback().querycomplete(jsonObject);
+                            io.okheart.android.OkHi.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
 
@@ -844,7 +840,7 @@ class WebAppInterface {
 
 
     private void decideWhatToStart() {
-        List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
             String tempKill = dataProvider.getPropertyValue("kill_switch");
@@ -934,7 +930,7 @@ class WebAppInterface {
                     .build();
 
             PeriodicWorkRequest request =
-                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                    new PeriodicWorkRequest.Builder(io.okheart.android.utilities.MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
                             .setInputData(inputData)
                             .setConstraints(constraints)
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
@@ -973,7 +969,7 @@ class WebAppInterface {
                     .build();
 
             PeriodicWorkRequest request =
-                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                    new PeriodicWorkRequest.Builder(io.okheart.android.utilities.MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
                             .setInputData(inputData)
                             .setConstraints(constraints)
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)

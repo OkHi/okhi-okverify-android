@@ -35,9 +35,6 @@ import java.io.InputStreamReader;
 import java.util.HashMap;
 import java.util.List;
 
-import io.okheart.android.asynctask.SendCustomLinkSmsTask;
-import io.okheart.android.callback.SendCustomLinkSmsCallBack;
-
 
 public final class OkHi extends ContentProvider {
 
@@ -931,7 +928,7 @@ public final class OkHi extends ContentProvider {
             jsonObject.put("phone", phonenumber);
             jsonObject.put("message", message);
             jsonObject.put("uniqueId", uniqueId);
-            SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new SendCustomLinkSmsCallBack() {
+            io.okheart.android.callback.SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new io.okheart.android.callback.SendCustomLinkSmsCallBack() {
                 @Override
                 public void querycomplete(String response, boolean status) {
                     if (status) {
@@ -967,7 +964,7 @@ public final class OkHi extends ContentProvider {
                     }
                 }
             };
-            SendCustomLinkSmsTask sendCustomLinkSmsTask = new SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject, environment);
+            io.okheart.android.asynctask.SendCustomLinkSmsTask sendCustomLinkSmsTask = new io.okheart.android.asynctask.SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject, environment);
             sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         } catch (Exception jse) {
             displayLog("jsonexception " + jse.toString());

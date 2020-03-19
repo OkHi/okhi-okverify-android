@@ -6,8 +6,6 @@ import android.content.res.Resources;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.location.GeofenceStatusCodes;
 
-import io.okheart.android.R;
-
 
 public class GeofenceErrorMessages {
     /**
@@ -23,7 +21,7 @@ public class GeofenceErrorMessages {
         if (e instanceof ApiException) {
             return getErrorString(context, ((ApiException) e).getStatusCode());
         } else {
-            return context.getResources().getString(R.string.unknown_geofence_error);
+            return context.getResources().getString(io.okheart.android.R.string.unknown_geofence_error);
         }
     }
 
@@ -34,13 +32,13 @@ public class GeofenceErrorMessages {
         Resources mResources = context.getResources();
         switch (errorCode) {
             case GeofenceStatusCodes.GEOFENCE_NOT_AVAILABLE:
-                return mResources.getString(R.string.geofence_not_available);
+                return mResources.getString(io.okheart.android.R.string.geofence_not_available);
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_GEOFENCES:
-                return mResources.getString(R.string.geofence_too_many_geofences);
+                return mResources.getString(io.okheart.android.R.string.geofence_too_many_geofences);
             case GeofenceStatusCodes.GEOFENCE_TOO_MANY_PENDING_INTENTS:
-                return mResources.getString(R.string.geofence_too_many_pending_intents);
+                return mResources.getString(io.okheart.android.R.string.geofence_too_many_pending_intents);
             default:
-                return mResources.getString(R.string.unknown_geofence_error);
+                return mResources.getString(io.okheart.android.R.string.unknown_geofence_error);
         }
     }
 }

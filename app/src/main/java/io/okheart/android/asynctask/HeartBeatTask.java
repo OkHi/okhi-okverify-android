@@ -8,7 +8,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import io.okheart.android.callback.HeartBeatCallBack;
 import okhttp3.FormBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -24,10 +23,10 @@ public class HeartBeatTask extends AsyncTask<Void, Void, Boolean> {
     private static final String TAG = "HeartBeatTask";
     private HashMap<String, String> postDataParams = new HashMap<>();
     private int responseCode;
-    private HeartBeatCallBack heartBeatCallBack;
+    private io.okheart.android.callback.HeartBeatCallBack heartBeatCallBack;
     private String message;
 
-    public HeartBeatTask(HeartBeatCallBack heartBeatCallBack1) {
+    public HeartBeatTask(io.okheart.android.callback.HeartBeatCallBack heartBeatCallBack1) {
         heartBeatCallBack = heartBeatCallBack1;
     }
 

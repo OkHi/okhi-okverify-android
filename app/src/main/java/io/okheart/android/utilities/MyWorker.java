@@ -12,7 +12,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.Data;
@@ -39,8 +38,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-
-import io.okheart.android.asynctask.GeofenceTask;
 
 import static android.content.Context.BATTERY_SERVICE;
 
@@ -76,7 +73,7 @@ public class MyWorker extends Worker {
         environment = dataProvider.getPropertyValue("environment");
         phonenumber = dataProvider.getPropertyValue("phonenumber");
 
-        GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
+        io.okheart.android.asynctask.GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
         geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         if (environment != null) {
@@ -1219,6 +1216,6 @@ public class MyWorker extends Worker {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

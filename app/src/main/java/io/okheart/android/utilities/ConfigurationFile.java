@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
@@ -31,11 +30,6 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
-
-import io.okheart.android.BuildConfig;
-import io.okheart.android.asynctask.GeofenceTask;
-import io.okheart.android.asynctask.GetAddressTask;
-import io.okheart.android.callback.GetAddressCallBack;
 
 public class ConfigurationFile {
 
@@ -437,7 +431,7 @@ public class ConfigurationFile {
 
 
     private void decideWhatToStart() {
-        GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
+        io.okheart.android.asynctask.GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
         geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
@@ -676,7 +670,7 @@ public class ConfigurationFile {
             trackjson.put("action", action);
             trackjson.put("actionSubtype", actionSubtype);
             trackjson.put("clientProduct", "okHeartAndroidSDK");
-            trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
+            trackjson.put("clientProductVersion", io.okheart.android.BuildConfig.VERSION_NAME);
             trackjson.put("clientKey", applicationKey);
             trackjson.put("appLayer", "client");
             trackjson.put("onObject", "sdk");
@@ -740,7 +734,7 @@ public class ConfigurationFile {
             if (tempPhonenumber != null) {
                 if (tempVerify) {
 
-                    GetAddressCallBack getAddressCallBack = new GetAddressCallBack() {
+                    io.okheart.android.callback.GetAddressCallBack getAddressCallBack = new io.okheart.android.callback.GetAddressCallBack() {
                         @Override
                         public void querycomplete(String response, boolean me) {
                             if (me) {
@@ -799,7 +793,7 @@ public class ConfigurationFile {
                             }
                         }
                     };
-                    GetAddressTask getAddressTask = new GetAddressTask(context, getAddressCallBack);
+                    io.okheart.android.asynctask.GetAddressTask getAddressTask = new io.okheart.android.asynctask.GetAddressTask(context, getAddressCallBack);
                     getAddressTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 }
             }
@@ -844,7 +838,7 @@ public class ConfigurationFile {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
 }

@@ -28,12 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import io.okheart.android.R;
-import io.okheart.android.activity.SettingsActivity;
-import io.okheart.android.asynctask.GeofenceTask;
-import io.okheart.android.datamodel.AddressItem;
-import io.okheart.android.utilities.MyWorker;
-
 public class LocationService extends Service {
     public static final String TAG = "LocationService";
     private NotificationManager notificationManager;
@@ -98,7 +92,7 @@ public class LocationService extends Service {
         Bitmap largeIconBitmap = BitmapFactory.decodeResource(this.getResources(), io.okheart.android.R.drawable.ic_launcher_foreground);
 
         String channelId = this.getString(io.okheart.android.R.string.default_notification_channel_id);
-        Intent playIntent = new Intent(this, SettingsActivity.class);
+        Intent playIntent = new Intent(this, io.okheart.android.activity.SettingsActivity.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, playIntent, 0);
         /*
@@ -113,7 +107,7 @@ public class LocationService extends Service {
                 new NotificationCompat.Builder(this, channelId)
                         .setSmallIcon(io.okheart.android.R.drawable.ic_stat_ic_notification)
                         .setContentTitle("OkVerify")
-                        .setColor(this.getColor(R.color.newdarkgreen))
+                        .setColor(this.getColor(io.okheart.android.R.color.newdarkgreen))
                         .setContentText("Your address is being verified")
                         .setAutoCancel(false)
                         .setOngoing(true)
@@ -207,9 +201,9 @@ public class LocationService extends Service {
     }
 
     private void decideWhatToStart() {
-        GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(this);
+        io.okheart.android.asynctask.GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(this);
         geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
 
@@ -321,7 +315,7 @@ public class LocationService extends Service {
                     .build();
 
             PeriodicWorkRequest request =
-                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                    new PeriodicWorkRequest.Builder(io.okheart.android.utilities.MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
                             .setInputData(inputData)
                             .setConstraints(constraints)
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
@@ -361,7 +355,7 @@ public class LocationService extends Service {
                     .build();
 
             PeriodicWorkRequest request =
-                    new PeriodicWorkRequest.Builder(MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
+                    new PeriodicWorkRequest.Builder(io.okheart.android.utilities.MyWorker.class, pingTime, TimeUnit.MILLISECONDS)
                             .setInputData(inputData)
                             .setConstraints(constraints)
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)

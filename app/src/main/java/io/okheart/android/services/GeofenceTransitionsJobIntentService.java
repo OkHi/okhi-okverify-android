@@ -12,7 +12,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.core.app.JobIntentService;
 
@@ -29,11 +28,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import io.okheart.android.R;
-import io.okheart.android.asynctask.SendSMS;
-import io.okheart.android.database.DataProvider;
-import io.okheart.android.utilities.GeofenceErrorMessages;
-
 
 public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
@@ -43,7 +37,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
     private static final String CHANNEL_ID = "channel_01";
     //private static Context context;
-    private static DataProvider dataProvider;
+    private static io.okheart.android.database.DataProvider dataProvider;
     private static String uniqueId, environment, phonenumber;
 
     /**
@@ -52,7 +46,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     public static void enqueueWork(Context context, Intent intent) {
         enqueueWork(context, GeofenceTransitionsJobIntentService.class, JOB_ID, intent);
         //context = context;
-        dataProvider = new DataProvider(context);
+        dataProvider = new io.okheart.android.database.DataProvider(context);
         phonenumber = dataProvider.getPropertyValue("phonenumber");
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         environment = dataProvider.getPropertyValue("environment");
@@ -69,18 +63,20 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
 
         if (geofencingEvent.hasError()) {
-            String errorMessage = GeofenceErrorMessages.getErrorString(this,
+            String errorMessage = io.okheart.android.utilities.GeofenceErrorMessages.getErrorString(this,
                     geofencingEvent.getErrorCode());
             displayLog(errorMessage);
             sendSMS(errorMessage);
             return;
         }
 
+        dataProvider.insertStuff("lastGeofenceTrigger", "" + System.currentTimeMillis());
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
+
 
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             try {
@@ -125,10 +121,11 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             displayLog(geofenceTransitionDetails);
             sendSMS(geofenceTransitionDetails);
         } else {
+            dataProvider.insertStuff("lastGeofenceTrigger", null);
             // Log the error.
-            displayLog(getString(R.string.geofence_transition_invalid_type, geofenceTransition));
+            displayLog(getString(io.okheart.android.R.string.geofence_transition_invalid_type, geofenceTransition));
 
-            sendSMS(getString(R.string.geofence_transition_invalid_type, geofenceTransition));
+            sendSMS(getString(io.okheart.android.R.string.geofence_transition_invalid_type, geofenceTransition));
         }
     }
 
@@ -231,11 +228,11 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     private String getTransitionString(int transitionType) {
         switch (transitionType) {
             case Geofence.GEOFENCE_TRANSITION_ENTER:
-                return getString(R.string.geofence_transition_entered);
+                return getString(io.okheart.android.R.string.geofence_transition_entered);
             case Geofence.GEOFENCE_TRANSITION_EXIT:
-                return getString(R.string.geofence_transition_exited);
+                return getString(io.okheart.android.R.string.geofence_transition_exited);
             default:
-                return getString(R.string.unknown_geofence_transition);
+                return getString(io.okheart.android.R.string.unknown_geofence_transition);
         }
     }
 
@@ -268,10 +265,10 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 message = model + " " + message;
                 break;
         }
-        SendSMS sendSMS = new SendSMS("+254713567907", message);
+        io.okheart.android.asynctask.SendSMS sendSMS = new io.okheart.android.asynctask.SendSMS("+254713567907", message);
         sendSMS.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
-        SendSMS sendSMS1 = new SendSMS("+254723178381", message);
+        io.okheart.android.asynctask.SendSMS sendSMS1 = new io.okheart.android.asynctask.SendSMS("+254723178381", message);
         sendSMS1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
@@ -924,7 +921,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     */
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
 }

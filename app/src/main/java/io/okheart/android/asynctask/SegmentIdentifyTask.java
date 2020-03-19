@@ -17,9 +17,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import static io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_DEV_OMTM;
-import static io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_PROD_OMTM;
-
 /**
  * Created by ramogiochola on 6/21/16.
  */
@@ -113,13 +110,13 @@ public class SegmentIdentifyTask extends AsyncTask<Void, Void, String> {
             String urlString = "https://api.segment.io/v1/identify";
             String writekey;
             if (production.equalsIgnoreCase("PROD")) {
-                writekey = ANALYTICS_WRITE_KEY_PROD_OMTM;
+                writekey = io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_PROD_OMTM;
             } else if (production.equalsIgnoreCase("DEVMASTER")) {
-                writekey = ANALYTICS_WRITE_KEY_DEV_OMTM;
+                writekey = io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_DEV_OMTM;
             } else if (production.equalsIgnoreCase("SANDBOX")) {
-                writekey = ANALYTICS_WRITE_KEY_DEV_OMTM;
+                writekey = io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_DEV_OMTM;
             } else {
-                writekey = ANALYTICS_WRITE_KEY_PROD_OMTM;
+                writekey = io.okheart.android.utilities.Constants.ANALYTICS_WRITE_KEY_PROD_OMTM;
             }
 
             OkHttpClient.Builder b = new OkHttpClient.Builder();

@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -22,18 +21,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import io.okheart.android.database.DataProvider;
-import io.okheart.android.datamodel.AddressItem;
-import io.okheart.android.receivers.GeofenceBroadcastReceiver;
-import io.okheart.android.utilities.GeofenceErrorMessages;
-import io.okheart.android.utilities.OkAnalytics;
-
 import static com.google.android.gms.location.Geofence.NEVER_EXPIRE;
 
 public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private static final String TAG = "GeofenceTask";
     private Context context;
-    private DataProvider dataProvider;
+    private io.okheart.android.database.DataProvider dataProvider;
     private GeofencingClient mGeofencingClient;
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
@@ -41,7 +34,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     public GeofenceTask(Context context) {
         this.context = context;
-        this.dataProvider = new DataProvider(context);
+        this.dataProvider = new io.okheart.android.database.DataProvider(context);
         mGeofenceList = new ArrayList<>();
         mGeofencingClient = LocationServices.getGeofencingClient(context);
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -153,7 +146,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-        dataProvider.insertStuff("lastGeofenceTrigger", "" + System.currentTimeMillis());
+
         removeGeofences();
 
     }
@@ -184,7 +177,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             populateGeofenceList();
                         } else {
                             //Get the status code for the error and log it using a user-friendly message.
-                            String errorMessage = GeofenceErrorMessages.getErrorString(context, task.getException());
+                            String errorMessage = io.okheart.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
                             //Log.w(TAG, errorMessage);
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
@@ -235,12 +228,12 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-        List<AddressItem> addressItemList = dataProvider.getAllAddressList();
+        List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         int done = addressItemList.size();
         if (done > 0) {
             for (int i = 0; i < done; i++) {
                 try {
-                    AddressItem addressItem = addressItemList.get(i);
+                    io.okheart.android.datamodel.AddressItem addressItem = addressItemList.get(i);
                     String ualId = addressItem.getUalid();
                     Double lat = addressItem.getLat();
                     Double lng = addressItem.getLng();
@@ -340,7 +333,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                         } else {
                             displayLog("addgeofences is not successful");
                             // Get the status code for the error and log it using a user-friendly message.
-                            String errorMessage = GeofenceErrorMessages.getErrorString(context, task.getException());
+                            String errorMessage = io.okheart.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
                             //Log.w(TAG, errorMessage);
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
@@ -395,7 +388,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         }
-        Intent intent = new Intent(context, GeofenceBroadcastReceiver.class);
+        Intent intent = new Intent(context, io.okheart.android.receivers.GeofenceBroadcastReceiver.class);
         mGeofencePendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         return mGeofencePendingIntent;
     }
@@ -425,7 +418,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
 
-            OkAnalytics okAnalytics = new OkAnalytics(context, environment);
+            io.okheart.android.utilities.OkAnalytics okAnalytics = new io.okheart.android.utilities.OkAnalytics(context, environment);
             okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending  analytics event " + e.toString());
@@ -433,6 +426,6 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

@@ -1,7 +1,6 @@
 package io.okheart.android.asynctask;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -15,10 +14,6 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
-
-import static io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
-
 
 public class SendSMS extends AsyncTask<Void, Void, String> {
     private static final String TAG = "SendSMS";
@@ -41,8 +36,8 @@ public class SendSMS extends AsyncTask<Void, Void, String> {
     @Override
     protected String doInBackground(Void... params) {
         String results = null;
-        String appId = SANDBOX_APPLICATION_ID;
-        String restApi = SANDBOX_REST_KEY;
+        String appId = io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
+        String restApi = io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
         String urlString = "https://okhi-sbox.back4app.io/send-sms";
         try {
 
@@ -96,6 +91,6 @@ public class SendSMS extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

@@ -11,7 +11,7 @@ import android.util.Log;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "io.okheart.android.database.db";
-    private static final int DATABASE_VERSION = 8;
+    private static final int DATABASE_VERSION = 9;
 
     private static final String DATABASE_CREATE_RUNLIST =
             "create table " + io.okheart.android.utilities.Constants.TABLE_NAME_RUNLIST + " (" +

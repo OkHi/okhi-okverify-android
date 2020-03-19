@@ -26,9 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import io.okheart.android.OkHi;
-import io.okheart.android.database.DataProvider;
-
 
 public class OkHeartActivity extends AppCompatActivity {
 
@@ -43,7 +40,7 @@ public class OkHeartActivity extends AppCompatActivity {
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
     private static String verify;
-    private static DataProvider dataProvider;
+    private static io.okheart.android.database.DataProvider dataProvider;
     private static String environment;
 
 
@@ -149,7 +146,7 @@ public class OkHeartActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(io.okheart.android.R.layout.activity_okheart);
-        dataProvider = new DataProvider(this);
+        dataProvider = new io.okheart.android.database.DataProvider(this);
         environment = dataProvider.getPropertyValue("environment");
         displayLog("environment " + environment);
 
@@ -481,7 +478,7 @@ public class OkHeartActivity extends AppCompatActivity {
         });
 
         try {
-            okHiCallback = OkHi.getCallback();
+            okHiCallback = io.okheart.android.OkHi.getCallback();
             if (okHiCallback != null) {
                 displayLog("okheartcallback is not null");
             } else {

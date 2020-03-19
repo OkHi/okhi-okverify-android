@@ -24,23 +24,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import static io.okheart.android.utilities.Constants.DEV1_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.DEV1_REST_KEY;
-import static io.okheart.android.utilities.Constants.DEV1_USERID;
-import static io.okheart.android.utilities.Constants.DEV3_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.DEV3_REST_KEY;
-import static io.okheart.android.utilities.Constants.DEV3_USERID;
-import static io.okheart.android.utilities.Constants.DEV4_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.DEV4_REST_KEY;
-import static io.okheart.android.utilities.Constants.DEV4_USERID;
-import static io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.DEVMASTER_REST_KEY;
-import static io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.PROD_REST_KEY;
-import static io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
-import static io.okheart.android.utilities.Constants.product;
-
 /**
  * Created by ramogiochola on 6/6/16.
  */
@@ -71,7 +54,7 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
         postDataParams.put("branch", "app_interswitch");
         postDataParams.put("affiliation", "interswitch");
         try {
-            postDataParams.put("product", product);
+            postDataParams.put("product", io.okheart.android.utilities.Constants.product);
             postDataParams.put("appType", "android");
             postDataParams.put("productVersion", io.okheart.android.BuildConfig.VERSION_NAME);
         } catch (Exception e) {
@@ -89,47 +72,47 @@ public class GetAddressTask extends AsyncTask<Void, Void, String> {
                 case "prod":
                     postDataParams.put("userId", "GrlaR3LHUP");
                     postDataParams.put("sessionToken", "r:177ccbe18102a4cb078c09759a6ee421");
-                    appId = PROD_APPLICATION_ID;
-                    restApi = PROD_REST_KEY;
+                    appId = io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.PROD_REST_KEY;
                     urlString = "https://okhi.back4app.io/getAddressByPhone_forHD";
                     break;
                 case "sandbox":
                     postDataParams.put("userId", "GFoHqSI6Ox");
                     postDataParams.put("sessionToken", "r:4e66bc42f0aa3d96fc3dfd5dae088262");
-                    appId = SANDBOX_APPLICATION_ID;
-                    restApi = SANDBOX_REST_KEY;
+                    appId = io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
                     urlString = "https://okhi-sbox.back4app.io/getAddressByPhone_forHD";
                     break;
                 case "devmaster":
                     postDataParams.put("userId", "GrlaR3LHUP");
                     postDataParams.put("sessionToken", "r:51dbfa56dc9990128739ab9b24c64d67");
-                    appId = DEVMASTER_APPLICATION_ID;
-                    restApi = DEVMASTER_REST_KEY;
+                    appId = io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.DEVMASTER_REST_KEY;
                     urlString = "https://okhicore-development-master.back4app.com/getAddressByPhone_forHD";
                     break;
                 case "dev1":
-                    postDataParams.put("userId", DEV1_USERID);
-                    appId = DEV1_APPLICATION_ID;
-                    restApi = DEV1_REST_KEY;
+                    postDataParams.put("userId", io.okheart.android.utilities.Constants.DEV1_USERID);
+                    appId = io.okheart.android.utilities.Constants.DEV1_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.DEV1_REST_KEY;
                     urlString = "https://okhi-d1.back4app.io/getAddressByPhone_forHD";
                     break;
                 case "dev3":
-                    postDataParams.put("userId", DEV3_USERID);
-                    appId = DEV3_APPLICATION_ID;
-                    restApi = DEV3_REST_KEY;
+                    postDataParams.put("userId", io.okheart.android.utilities.Constants.DEV3_USERID);
+                    appId = io.okheart.android.utilities.Constants.DEV3_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.DEV3_REST_KEY;
                     urlString = "https://okhicore-development-3.back4app.com/getAddressByPhone_forHD";
                     break;
                 case "dev4":
-                    postDataParams.put("userId", DEV4_USERID);
-                    appId = DEV4_APPLICATION_ID;
-                    restApi = DEV4_REST_KEY;
+                    postDataParams.put("userId", io.okheart.android.utilities.Constants.DEV4_USERID);
+                    appId = io.okheart.android.utilities.Constants.DEV4_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.DEV4_REST_KEY;
                     urlString = "https://okhi-d4.back4app.io/getAddressByPhone_forHD";
                     break;
                 default:
                     postDataParams.put("userId", "GrlaR3LHUP");
                     postDataParams.put("sessionToken", "r:177ccbe18102a4cb078c09759a6ee421");
-                    appId = PROD_APPLICATION_ID;
-                    restApi = PROD_REST_KEY;
+                    appId = io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
+                    restApi = io.okheart.android.utilities.Constants.PROD_REST_KEY;
                     urlString = "https://okhi.back4app.io/getAddressByPhone_forHD";
                     break;
             }

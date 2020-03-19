@@ -14,25 +14,22 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.HashMap;
 
-import io.okheart.android.R;
-import io.okheart.android.database.DataProvider;
-
 public class SettingsActivity extends AppCompatActivity {
 
     static final int PICK_CONTACT_REQUEST = 1;
     private static final String TAG = "SettingsActivity";
     private Button settingsBtn, closeBtn;
-    private DataProvider dataProvider;
+    private io.okheart.android.database.DataProvider dataProvider;
     private String phonenumber, applicationKey, uniqueId, environment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settings);
+        setContentView(io.okheart.android.R.layout.activity_settings);
         dataProvider = new io.okheart.android.database.DataProvider(this);
 
-        settingsBtn = findViewById(R.id.settingsbtn);
-        closeBtn = findViewById(R.id.closebtn);
+        settingsBtn = findViewById(io.okheart.android.R.id.settingsbtn);
+        closeBtn = findViewById(io.okheart.android.R.id.closebtn);
         closeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

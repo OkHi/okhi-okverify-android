@@ -19,17 +19,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import okhttp3.ResponseBody;
 
-import static io.okheart.android.utilities.Constants.COLUMN_AFFILIATION;
-import static io.okheart.android.utilities.Constants.COLUMN_BRANCH;
-import static io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER;
-import static io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.DEVMASTER_REST_KEY;
-import static io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.PROD_REST_KEY;
-import static io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
-import static io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
-import static io.okheart.android.utilities.Constants.product;
-
 
 /**
  * Created by ramogiochola on 6/21/16.
@@ -104,15 +93,15 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
 
         try {
 
-            if (parameters.containsKey(COLUMN_PHONECUSTOMER)) {
-                postDataParams.put(COLUMN_PHONECUSTOMER, parameters.get(COLUMN_PHONECUSTOMER));
-                displayLog(COLUMN_PHONECUSTOMER + " @@@ " + parameters.get(COLUMN_PHONECUSTOMER));
+            if (parameters.containsKey(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER)) {
+                postDataParams.put(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER, parameters.get(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER));
+                displayLog(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER + " @@@ " + parameters.get(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER));
             } else {
                 displayLog("we have no phonecustomer @@@ ");
             }
 
         } catch (Exception e) {
-            displayLog(COLUMN_PHONECUSTOMER + " @@@ error " + e.toString());
+            displayLog(io.okheart.android.utilities.Constants.COLUMN_PHONECUSTOMER + " @@@ error " + e.toString());
         }
 
         try {
@@ -132,18 +121,18 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
             displayLog("sessionToken error " + e.toString());
         }
         try {
-            if (parameters.containsKey(COLUMN_AFFILIATION)) {
-                postDataParams.put(COLUMN_AFFILIATION, parameters.get(COLUMN_AFFILIATION));
-                displayLog(COLUMN_AFFILIATION + " " + parameters.get(COLUMN_AFFILIATION));
+            if (parameters.containsKey(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION)) {
+                postDataParams.put(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION, parameters.get(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION));
+                displayLog(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION + " " + parameters.get(io.okheart.android.utilities.Constants.COLUMN_AFFILIATION));
             }
         } catch (Exception e) {
             displayLog("affiliation error " + e.toString());
         }
         try {
 
-            if (parameters.containsKey(COLUMN_BRANCH)) {
-                postDataParams.put(COLUMN_BRANCH, parameters.get(COLUMN_BRANCH));
-                displayLog(COLUMN_BRANCH + " " + parameters.get(COLUMN_BRANCH));
+            if (parameters.containsKey(io.okheart.android.utilities.Constants.COLUMN_BRANCH)) {
+                postDataParams.put(io.okheart.android.utilities.Constants.COLUMN_BRANCH, parameters.get(io.okheart.android.utilities.Constants.COLUMN_BRANCH));
+                displayLog(io.okheart.android.utilities.Constants.COLUMN_BRANCH + " " + parameters.get(io.okheart.android.utilities.Constants.COLUMN_BRANCH));
             }
 
         } catch (Exception e) {
@@ -228,7 +217,7 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
         }
         try {
             postDataParams.put("productVersion", BuildConfig.VERSION_NAME);
-            postDataParams.put("product", product);
+            postDataParams.put("product", io.okheart.android.utilities.Constants.product);
             postDataParams.put("appType", "android");
         } catch (Exception e) {
             displayLog("error adding three params " + e.toString());
@@ -244,20 +233,20 @@ public class SendCustomLinkSmsTask extends AsyncTask<Void, Void, String> {
             String appId, restApi, urlString;
 
             if (environment.equalsIgnoreCase("PROD")) {
-                appId = PROD_APPLICATION_ID;
-                restApi = PROD_REST_KEY;
+                appId = io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
+                restApi = io.okheart.android.utilities.Constants.PROD_REST_KEY;
                 urlString = "https://okhi.back4app.io/send-sms";
             } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-                appId = DEVMASTER_APPLICATION_ID;
-                restApi = DEVMASTER_REST_KEY;
+                appId = io.okheart.android.utilities.Constants.DEVMASTER_APPLICATION_ID;
+                restApi = io.okheart.android.utilities.Constants.DEVMASTER_REST_KEY;
                 urlString = "https://okhicore-development-master.back4app.com/send-sms";
             } else if (environment.equalsIgnoreCase("SANDBOX")) {
-                appId = SANDBOX_APPLICATION_ID;
-                restApi = SANDBOX_REST_KEY;
+                appId = io.okheart.android.utilities.Constants.SANDBOX_APPLICATION_ID;
+                restApi = io.okheart.android.utilities.Constants.SANDBOX_REST_KEY;
                 urlString = "https://okhi-sbox.back4app.io/send-sms";
             } else {
-                appId = PROD_APPLICATION_ID;
-                restApi = PROD_REST_KEY;
+                appId = io.okheart.android.utilities.Constants.PROD_APPLICATION_ID;
+                restApi = io.okheart.android.utilities.Constants.PROD_REST_KEY;
                 urlString = "https://okhi.back4app.io/send-sms";
             }
 
