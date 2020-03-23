@@ -9,7 +9,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
@@ -116,6 +115,7 @@ public class LocationService extends Service {
                         .setCategory(NotificationCompat.CATEGORY_MESSAGE)
                         .setWhen(System.currentTimeMillis())
                         //.setSound(defaultSoundUri)
+
                         .addAction(android.R.drawable.ic_menu_view, "HIDE", pendingIntent)
                         .setFullScreenIntent(pendingIntent, true)
                         //.setStyle(bigTextStyle)
@@ -202,7 +202,7 @@ public class LocationService extends Service {
 
     private void decideWhatToStart() {
         io.okheart.android.asynctask.GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(this);
-        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        geofenceTask.execute();
         List<io.okheart.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {

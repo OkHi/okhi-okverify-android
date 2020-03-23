@@ -146,13 +146,12 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
-
         removeGeofences();
-
     }
 
     private void removeGeofences() {
         displayLog("removeGeofences");
+
         mGeofencingClient.removeGeofences(getGeofencePendingIntent())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -214,6 +213,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     private void populateGeofenceList() {
         displayLog("populateGeofenceList");
+
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -259,6 +259,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
                             // Create the geofence.
                             .build());
+                    /*
                     try {
                         HashMap<String, String> loans = new HashMap<>();
                         loans.put("uniqueId", uniqueId);
@@ -274,6 +275,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                     } catch (Exception e1) {
                         displayLog("error attaching afl to ual " + e1.toString());
                     }
+                    */
                 } catch (Exception e) {
                     displayLog("populateGeofenceList for loop error " + e.toString());
                 }

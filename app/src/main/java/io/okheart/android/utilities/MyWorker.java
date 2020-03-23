@@ -7,7 +7,6 @@ import android.location.Location;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
@@ -73,8 +72,8 @@ public class MyWorker extends Worker {
         environment = dataProvider.getPropertyValue("environment");
         phonenumber = dataProvider.getPropertyValue("phonenumber");
 
-        io.okheart.android.asynctask.GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
-        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+
+        //geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
 
         if (environment != null) {
             if (environment.length() > 0) {
@@ -294,6 +293,8 @@ public class MyWorker extends Worker {
 
 
     private void updateDatabase(final Double lat, final Double lng, final Float acc) {
+        io.okheart.android.asynctask.GeofenceTask geofenceTask = new io.okheart.android.asynctask.GeofenceTask(context);
+        geofenceTask.execute();
         try {
             stopLocationUpdates();
         } catch (Exception e) {
