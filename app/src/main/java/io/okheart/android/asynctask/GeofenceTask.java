@@ -244,9 +244,9 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             // Set the request ID of the geofence. This is a string to identify this
                             // geofence.
                             .setRequestId(ualId)
-                            .setNotificationResponsiveness(30000)
+                            .setNotificationResponsiveness(120000)
                             // Set the circular region of this geofence.
-                            .setCircularRegion(lat, lng, 150)
+                            .setCircularRegion(lat, lng, 500)
 
                             // Set the expiration duration of the geofence. This geofence gets automatically
                             // removed after this period of time.

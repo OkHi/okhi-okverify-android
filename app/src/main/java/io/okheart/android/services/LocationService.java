@@ -35,7 +35,7 @@ public class LocationService extends Service {
     private String uniqueId, phonenumber;
 
     private static void displayLog(String log) {
-        // Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
     @Override

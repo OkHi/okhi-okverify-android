@@ -76,11 +76,11 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
-
+            Location locationA = geofencingEvent.getTriggeringLocation();
 
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             try {
-                Location locationA = geofencingEvent.getTriggeringLocation();
+
 
                 updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit");
             } catch (Exception e) {
@@ -93,16 +93,22 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             // Get the transition details as a String.
             String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition, triggeringGeofences);
 
-            // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
-            displayLog(geofenceTransitionDetails);
-            sendSMS(geofenceTransitionDetails);
+
+            if (locationA.getAccuracy() > 100) {
+                sendNotification("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                displayLog("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                sendSMS("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+            } else {
+                sendNotification(geofenceTransitionDetails);
+                displayLog(geofenceTransitionDetails);
+                sendSMS(geofenceTransitionDetails);
+            }
 
 
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
-
+            Location locationA = geofencingEvent.getTriggeringLocation();
             try {
-                Location locationA = geofencingEvent.getTriggeringLocation();
+
 
                 updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter");
             } catch (Exception e) {
@@ -117,9 +123,15 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     triggeringGeofences);
 
             // Send notification and log the transition details.
-            sendNotification(geofenceTransitionDetails);
-            displayLog(geofenceTransitionDetails);
-            sendSMS(geofenceTransitionDetails);
+            if (locationA.getAccuracy() > 100) {
+                sendNotification("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                displayLog("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                sendSMS("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+            } else {
+                sendNotification(geofenceTransitionDetails);
+                displayLog(geofenceTransitionDetails);
+                sendSMS(geofenceTransitionDetails);
+            }
         } else {
             dataProvider.insertStuff("lastGeofenceTrigger", null);
             // Log the error.
