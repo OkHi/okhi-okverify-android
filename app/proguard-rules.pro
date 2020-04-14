@@ -28,7 +28,7 @@
 # If your project uses WebView with JS, uncomment the following
 # and specify the fully qualified class name to the JavaScript interface
 # class:
--keepclassmembers class io.okheart.android.activity.WebAppInterface {
+-keepclassmembers class okverify.android.activity.WebAppInterface {
   public *;
 }
 
@@ -49,6 +49,6 @@
 
 -dontwarn okhttp3.**
 
--keep class io.okheart.android.datamodel.** { *; }
+-keep class okverify.android.datamodel.** { *; }
 
 

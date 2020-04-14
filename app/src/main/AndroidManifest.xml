@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="io.okheart.android">
+    package="io.okverify.android">
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
@@ -21,47 +21,51 @@
         android:supportsRtl="true">
 
         <activity
-            android:name=".activity.TestActivity"
+            android:name="io.okverify.android.activity.TestActivity"
             android:theme="@style/AppTheme">
-            <!--
+<!--
                         <intent-filter>
                             <action android:name="android.intent.action.MAIN" />
 
                             <category android:name="android.intent.category.LAUNCHER" />
                         </intent-filter>
-            -->
+-->
+
         </activity>
         <activity
-            android:name="io.okheart.android.activity.OkHeartActivity"
+            android:name="io.okverify.android.activity.OkHeartActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
         <activity
-            android:name="io.okheart.android.activity.SettingsActivity"
+            android:name="io.okverify.android.activity.SettingsActivity"
             android:exported="true"
             android:theme="@style/AppTheme" />
 
         <provider
-            android:name="io.okheart.android.OkHi"
+            android:name="io.okverify.android.OkHi"
             android:authorities="${applicationId}.OkHeart"
             android:enabled="true"
             android:exported="true" />
 
 
+        <!--
         <service
-            android:name="io.okheart.android.services.LocationService"
+            android:name="io.okverify.android.services.LocationService"
             android:enabled="true"
             android:exported="true"
             android:foregroundServiceType="location" />
+        -->
 
-        <receiver
-            android:name="io.okheart.android.receivers.GeofenceBroadcastReceiver"
-            android:enabled="true"
-            android:exported="true" />
+                <receiver
+                    android:name="io.okverify.android.receivers.GeofenceBroadcastReceiver"
+                    android:enabled="true"
+                    android:exported="true" />
 
-        <service
-            android:name="io.okheart.android.services.GeofenceTransitionsJobIntentService"
-            android:exported="true"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
-    </application>
+                <service
+                    android:name="io.okverify.android.services.GeofenceTransitionsJobIntentService"
+                    android:exported="true"
+                    android:permission="android.permission.BIND_JOB_SERVICE" />
 
-</manifest>
+            </application>
+
+        </manifest>
