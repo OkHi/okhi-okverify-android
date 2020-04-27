@@ -1,5 +1,5 @@
-//apply plugin: 'com.android.library'
-apply plugin: 'com.android.application'
+apply plugin: 'com.android.library'
+//apply plugin: 'com.android.application'
 apply plugin: 'com.github.dcendents.android-maven'
 group = 'com.github.okhi-okverify-android'
 
@@ -21,11 +21,11 @@ android {
 
     compileSdkVersion 29
     defaultConfig {
-        applicationId "io.okverify.android"
+        //applicationId "io.okverify.android"
         minSdkVersion 23
         targetSdkVersion 29
         versionCode 10
-        versionName "2.0.0"
+        versionName "2.0.1"
         signingConfig signingConfigs.config
     }
     buildTypes {
