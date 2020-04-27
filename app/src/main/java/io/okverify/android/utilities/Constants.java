@@ -43,8 +43,8 @@ public class Constants {
     public static final String DEVMASTER_APPLICATION_ID = "39qx0cn6q1IZM7XCA0H2uYstqwLazABGupEUTMg0";
     public static final String DEVMASTER_CLIENT_ID = "2s23x3Bsqhattvq2VzPNJwnNCbpoja2DkoN2v4OR";
     public static final String DEVMASTER_REST_KEY = "RZPpMBEsL9S6rfcTAyXEp623AxZwXxQeHXFAJT4R";
-    public static final String ANALYTICS_WRITE_KEY = "1WVXBz8WdoFA29enq6zH0dQ33c3rxzPQ";
-
+    //public static final String ANALYTICS_WRITE_KEY = "1WVXBz8WdoFA29enq6zH0dQ33c3rxzPQ";
+    public static final String ANALYTICS_WRITE_KEY = "SrRLiR4iET0xaGbXcqmIethL3u52ipf3";
 
     public static final String ANALYTICS_WRITE_KEY_PROD_OMTM = "peBXJt77v4yE3eI23IKFIMUAw6paI6UH";
     public static final String ANALYTICS_WRITE_KEY_DEV_OMTM = "peBXJt77v4yE3eI23IKFIMUAw6paI6UH";

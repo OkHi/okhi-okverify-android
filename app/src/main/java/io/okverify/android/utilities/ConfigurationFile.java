@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
@@ -89,10 +90,13 @@ public class ConfigurationFile {
             } catch (Exception e4) {
                 displayLog("parse initialize error " + e4.toString());
             }
-            fetchAddresses("true", "false", phonenumber);
+            //fetchAddresses("true", "false", phonenumber);
         }
-
+        decideWhatToStart();
+/*
         try {
+            /*
+
             displayLog("custom start");
             ParseQuery<ParseObject> query = ParseQuery.getQuery("ConfigurationFile");
             query.whereEqualTo("name", "verifyconfigs");
@@ -216,7 +220,7 @@ public class ConfigurationFile {
                                                                                 context.startService(new Intent(context, io.okverify.android.services.LocationService.class));
                                                                             }
                                                                             */
-
+/*
                                                                         } catch (Exception jse) {
                                                                             displayLog("jsonexception jse " + jse.toString());
                                                                         }
@@ -247,7 +251,7 @@ public class ConfigurationFile {
                                                                             context.startService(new Intent(context, io.okverify.android.services.LocationService.class));
                                                                         }
                                                                         */
-
+/*
                                                                     } catch (Exception jse) {
                                                                         displayLog("jsonexception jse " + jse.toString());
                                                                     }
@@ -277,7 +281,7 @@ public class ConfigurationFile {
                                                                         context.startService(new Intent(context, io.okverify.android.services.LocationService.class));
                                                                     }
                                                                     */
-
+/*
                                                                 } catch (Exception jse) {
                                                                     displayLog("jsonexception jse " + jse.toString());
                                                                 }
@@ -296,105 +300,6 @@ public class ConfigurationFile {
                                         }
 
 
-                                        /*
-                                        if (applicationKey != null) {
-                                            if (applicationKey.length() > 0) {
-                                                try {
-                                                    JSONObject api_keys = jsonObject.optJSONObject("api_keys");
-                                                    String environment = api_keys.optString(applicationKey);
-                                                    displayLog("environment " + environment);
-                                                    Parse.destroy();
-                                                    dataProvider.insertStuff("environment", "" + environment);
-
-
-                                                    if (environment != null) {
-                                                        if (environment.length() > 0) {
-                                                            if (environment.equalsIgnoreCase("PROD")) {
-                                                                try {
-                                                                    Parse.initialize(new Parse.Configuration.Builder(context)
-                                                                            .applicationId(io.okverify.android.utilities.Constants.PROD_APPLICATION_ID)
-                                                                            .clientKey(Constants.PROD_CLIENT_ID)
-                                                                            .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-
-                                                                } catch (Exception e4) {
-                                                                    displayLog("parse initialize error " + e4.toString());
-                                                                }
-
-                                                            } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-                                                                try {
-                                                                    Parse.initialize(new Parse.Configuration.Builder(context)
-                                                                            .applicationId(io.okverify.android.utilities.Constants.DEVMASTER_APPLICATION_ID)
-                                                                            .clientKey(io.okverify.android.utilities.Constants.DEVMASTER_CLIENT_ID)
-                                                                            .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-
-                                                                } catch (Exception e4) {
-                                                                    displayLog("parse initialize error " + e4.toString());
-                                                                }
-                                                            } else if (environment.equalsIgnoreCase("SANDBOX")) {
-                                                                try {
-                                                                    Parse.initialize(new Parse.Configuration.Builder(context)
-                                                                            .applicationId(io.okverify.android.utilities.Constants.SANDBOX_APPLICATION_ID)
-                                                                            .clientKey(Constants.SANDBOX_CLIENT_ID)
-                                                                            .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-                                                                    //OneTimeWorkRequest request1 = new OneTimeWorkRequest.Builder(MyWorker.class).build();
-                                                                    //WorkManager.getInstance().enqueue(request1);
-
-                                                                } catch (Exception e4) {
-                                                                    displayLog("parse initialize error " + e4.toString());
-                                                                }
-                                                            } else {
-                                                                try {
-                                                                    Parse.initialize(new Parse.Configuration.Builder(context)
-                                                                            .applicationId(io.okverify.android.utilities.Constants.PROD_APPLICATION_ID)
-                                                                            .clientKey(Constants.PROD_CLIENT_ID)
-                                                                            .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-
-                                                                } catch (Exception e4) {
-                                                                    displayLog("parse initialize error " + e4.toString());
-                                                                }
-                                                            }
-                                                        } else {
-                                                            try {
-                                                                Parse.initialize(new Parse.Configuration.Builder(context)
-                                                                        .applicationId(io.okverify.android.utilities.Constants.PROD_APPLICATION_ID)
-                                                                        .clientKey(Constants.PROD_CLIENT_ID)
-                                                                        .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-
-                                                            } catch (Exception e4) {
-                                                                displayLog("parse initialize error " + e4.toString());
-                                                            }
-                                                        }
-                                                    } else {
-                                                        try {
-                                                            Parse.initialize(new Parse.Configuration.Builder(context)
-                                                                    .applicationId(io.okverify.android.utilities.Constants.PROD_APPLICATION_ID)
-                                                                    .clientKey(Constants.PROD_CLIENT_ID)
-                                                                    .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
-
-                                                        } catch (Exception e4) {
-                                                            displayLog("parse initialize error " + e4.toString());
-                                                        }
-                                                    }
-
-                                                    fetchAddresses(verify, noForeground, phonenumber);
-
-                                                } catch (Exception e1) {
-
-                                                }
-
-                                                JSONArray killArray = jsonObject.optJSONArray("kill_switch");
-                                                for (int i = 0; i < killArray.length(); i++) {
-                                                    String affiliation = killArray.getString(i);
-                                                    //displayLog("affiliation "+affiliation+" applicationKey "+applicationKey);
-                                                    if (affiliation.equalsIgnoreCase(applicationKey)) {
-                                                        displayLog("we are killing shit");
-                                                        kill_switch = true;
-                                                    }
-                                                }
-                                            }
-
-                                        }
-                                        */
                                         dataProvider.insertStuff("noforeground", "" + noForeground);
                                         dataProvider.insertStuff("resume_ping_frequency", "" + resume_ping_frequency);
                                         dataProvider.insertStuff("ping_frequency", "" + ping_frequency);
@@ -417,7 +322,7 @@ public class ConfigurationFile {
                                         OkHi.setSms_template(sms_template);
                                         OkHi.setKill_switch(kill_switch);
                                         */
-
+/*
                                     } catch (Exception e1) {
                                         displayLog("error getting json object results " + e1.toString());
                                     }
@@ -439,7 +344,7 @@ public class ConfigurationFile {
         } catch (Exception e) {
             displayLog("parse query configuration file error " + e.toString());
         }
-
+*/
         /*
         try {
             String environment = dataProvider.getPropertyValue("environment");
@@ -477,6 +382,7 @@ public class ConfigurationFile {
 
 
     private void decideWhatToStart() {
+        displayLog("decideWhatToStart");
         io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(context, false);
         geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
         List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
@@ -872,7 +778,7 @@ public class ConfigurationFile {
                                 }
                                 Long i = dataProvider.insertStuff("phonenumber", tempPhonenumber);
 
-                                fetchAddresses(verify, noForeground, tempPhonenumber);
+                                //fetchAddresses(verify, noForeground, tempPhonenumber);
 
                             }
                         }
@@ -886,7 +792,7 @@ public class ConfigurationFile {
     }
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
 }

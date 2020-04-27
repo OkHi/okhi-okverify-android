@@ -13,6 +13,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -63,7 +64,7 @@ public final class OkHi extends ContentProvider {
 
         displayLog("initialize");
         //dataProvider.insertStuff("enableverify", ""+verify);
-        io.okverify.android.utilities.ConfigurationFile configurationFile = new io.okverify.android.utilities.ConfigurationFile(mContext, environment);
+
         startInitialization(applicationKey, branchid, environment, true);
         /*
         if (applicationKey != null) {
@@ -83,7 +84,7 @@ public final class OkHi extends ContentProvider {
         */
 
     }
-
+/*
     public static void displayClient(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
 
         displayLog("display client " + jsonObject.toString());
@@ -147,7 +148,7 @@ public final class OkHi extends ContentProvider {
 
 
     }
-
+*/
     private static void startInitialization(final String applicationKey, final String branchid, final String environment, final Boolean verify) {
         displayLog("workmanager startInitialization " + verify);
         try {
@@ -167,19 +168,9 @@ public final class OkHi extends ContentProvider {
             displayLog("error attaching afl to ual " + e1.toString());
         }
         try {
-
-            /*
-            String environment;
-            if (applicationKey.equalsIgnoreCase("r:6d828427b625cda9bf9013dd80a93f97")) {
-                environment = "DEVMASTER";
-            } else if (applicationKey.equalsIgnoreCase("r:83e4f2bc497097b549e61595ef0b166c")) {
-                environment = "DEVMASTER";
-            } else if (applicationKey.equalsIgnoreCase("r:ee30a6552f7e5dfab48f4234bd1ffc1b")) {
-                environment = "SANDBOX";
-            } else {
-                environment = "PROD";
-            }
-            */
+            dataProvider.insertStuff("verify", "" + verify);
+            appkey = applicationKey;
+            dataProvider.insertStuff("applicationKey", applicationKey);
             dataProvider.insertStuff("branchid", branchid);
             dataProvider.insertStuff("environment", environment);
         } catch (Exception io) {
@@ -194,62 +185,10 @@ public final class OkHi extends ContentProvider {
         } finally {
 
         }
-        dataProvider.insertStuff("verify", "" + verify);
-        try {
-            if (verify != null) {
-                String tempVerify = "" + verify;
-                if (tempVerify.length() > 0) {
-                    if ((tempVerify.equalsIgnoreCase("false")) || ((tempVerify.equalsIgnoreCase("true")))) {
-                        writeToFileVerify(tempVerify, "six");
-                        if (verify) {
-                            displayLog("decideWhatToStart");
-                            //decideWhatToStart();
-                        } else {
-                            displayLog("stopPeriodicPing");
-                            //stopPeriodicPing();
-                        }
 
-
-                    } else {
-                        writeToFileVerify("false", "five");
-                        //stopPeriodicPing();
-                    }
-
-                } else {
-                    writeToFileVerify("false", "four");
-                    //stopPeriodicPing();
-                }
-
-            } else {
-                writeToFileVerify("false", "three");
-                //stopPeriodicPing();
-            }
-        } catch (Exception io) {
-            writeToFileVerify("false", "two");
-            //stopPeriodicPing();
-        } finally {
-            // writeToFileVerify("false", "one");
-        }
-
-        appkey = applicationKey;
-        dataProvider.insertStuff("applicationKey", applicationKey);
 
 
         try {
-            /*
-            Boolean production = false;
-            if (applicationKey != null) {
-                if (applicationKey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
-
-                } else {
-                    production = true;
-                }
-            } else {
-                production = true;
-            }
-
-            final Boolean productionVersion = production;
-            */
 
             JSONObject identifyjson = new JSONObject();
             //final String environment = dataProvider.getPropertyValue("environment");
@@ -277,86 +216,17 @@ public final class OkHi extends ContentProvider {
                                 eventjson.put("event", "SDK Initialization");
 
                                 JSONObject trackjson = new JSONObject();
-
-                                if (environment != null) {
-                                    if (environment.length() > 0) {
-                                        if (environment.equalsIgnoreCase("PROD")) {
-                                            trackjson.put("environment", "PROD");
-                                        } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-                                            trackjson.put("environment", "DEVMASTER");
-                                        } else if (environment.equalsIgnoreCase("SANDBOX")) {
-                                            trackjson.put("environment", "SANDBOX");
-                                        } else {
-                                            trackjson.put("environment", "PROD");
-                                        }
-                                    } else {
-                                        trackjson.put("environment", "PROD");
-                                    }
-                                } else {
-                                    trackjson.put("environment", "PROD");
-                                }
-
+                                trackjson.put("environment", environment);
                                 trackjson.put("event", "SDK Initialization");
-
                                 trackjson.put("action", "initialization");
                                 trackjson.put("actionSubtype", "initialization");
                                 trackjson.put("clientProduct", "okHeartAndroidSDK");
                                 trackjson.put("clientProductVersion", BuildConfig.VERSION_NAME);
                                 trackjson.put("clientKey", applicationKey);
                                 trackjson.put("uniqueId", uniqueId);
-                                //trackjson.put("actionSubtype", "directionsUpdated/okhiGatePhotoUpdated/mapPinUpdated/customNameUpdated/locationInformationUpdated/");
-                                //trackjson.put("crudOp", "create/update");
-                                //trackjson.put("action", "viewUserAddres/updateUserAddress");
-                                //trackjson.put("userId", userId);
-                                //trackjson.put("phone", phoneNumber);
-                                //trackjson.put("addressType", "G");
-                                //trackjson.put("previousAddressType", "T");
-
-                                /*
-                                trackjson.put("hasCustomLink", "");
-                                trackjson.put("hasGatePhoto", false);
-                                trackjson.put("hasGPS", false);
-                                trackjson.put("hasStruturedAddress", true);
-                                trackjson.put("hasDescription",true);
-                                trackjson.put("hasBreadcrumbs", "");
-                                trackjson.put("addressDesignation", addressType);
-                                trackjson.put("streetName", street_name2);
-                                trackjson.put("propertyName",location_name2);
-                                trackjson.put("propertyNumber", location_number2);
-                                trackjson.put("unit", unit2);
-                                trackjson.put("floor", floor2);
-                                trackjson.put("businessName", businessnamestring2);
-                                trackjson.put("neighbourhood", "");
-                                trackjson.put("aflId", "");
-                                trackjson.put("ualId", claimUalId);
-                                trackjson.put("optedIn", "");
-                                trackjson.put("addressSourceAffiliation","");
-                                trackjson.put("addressSourceBrand", "");
-                                trackjson.put("addressSourceBranch", "");
-                                trackjson.put("activeAffiliation", loginaffiliation);
-                                trackjson.put("activeBrand", branch);
-                                trackjson.put("activeBranch", branch);
-                                trackjson.put("photoSource", "");
-                                trackjson.put("cookieToken", OkDriverApplication.getDeviceid());
-                                trackjson.put("daysSinceActivation", "");
-                                trackjson.put("daysSinceActivationPlus", "");
-                                trackjson.put("gpsAccuracy", "");
-                                trackjson.put("isHistoryAddress", "");
-                                trackjson.put("customLink", "");
-                                trackjson.put("amount", "");
-                                trackjson.put("otherId", "");
-                                trackjson.put("paymentMethod", "");
-                                trackjson.put("type", "usage");
-                                trackjson.put("isNewUser", "");
-                                trackjson.put("isOkAppUser", "");
-                                trackjson.put("isOptedIn", "");
-                                trackjson.put("okAppActiveUser", "");
-                                */
                                 trackjson.put("appLayer", "client");
                                 trackjson.put("onObject", "sdk");
                                 trackjson.put("product", "okHeartAndroidSDK");
-
-
                                 eventjson.put("properties", trackjson);
                                 io.okverify.android.asynctask.SegmentTrackTask segmentTrackTask = new io.okverify.android.asynctask.SegmentTrackTask(segmentTrackCallBack, eventjson, environment);
                                 segmentTrackTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -378,15 +248,7 @@ public final class OkHi extends ContentProvider {
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
-
-        //notificationManager = (NotificationManager) mContext.getSystemService(Context.NOTIFICATION_SERVICE);
-        //startForegroundNotification();
-
-        try {
-            //restrictBackgroundData(false, THREAD_WAIT_TIMEOUT_IN_MS);
-        } catch (Exception jse) {
-            displayLog("jsonexception jse " + jse.toString());
-        }
+        io.okverify.android.utilities.ConfigurationFile configurationFile = new io.okverify.android.utilities.ConfigurationFile(mContext, environment);
 
     }
 
@@ -486,6 +348,8 @@ public final class OkHi extends ContentProvider {
 
                 JSONObject trackjson = new JSONObject();
                 String environment = dataProvider.getPropertyValue("environment");
+                trackjson.put("environment", environment);
+                /*
                 if (environment != null) {
                     if (environment.length() > 0) {
                         if (environment.equalsIgnoreCase("PROD")) {
@@ -503,6 +367,7 @@ public final class OkHi extends ContentProvider {
                 } else {
                     trackjson.put("environment", "PROD");
                 }
+                */
                 /*
                 if(productionVersion){
                     trackjson.put("environment", "PROD");
@@ -590,7 +455,7 @@ public final class OkHi extends ContentProvider {
         firstname = jsonObject.optString("firstName");
         lastname = jsonObject.optString("lastName");
         phonenumber = jsonObject.optString("phone");
-        requestSource = jsonObject.optString("phone");
+        requestSource = jsonObject.optString("requestSource");
 
         try {
             HashMap<String, String> loans = new HashMap<>();
@@ -631,7 +496,7 @@ public final class OkHi extends ContentProvider {
     private static String checkPermissionCause() {
 
         String environment = dataProvider.getPropertyValue("environment");
-
+/*
         if (environment != null) {
             if (environment.length() > 0) {
                 if (environment.equalsIgnoreCase("PROD")) {
@@ -650,7 +515,7 @@ public final class OkHi extends ContentProvider {
             environment = "PROD";
         }
 
-
+*/
         String permission;
 
         boolean permissionAccessFineLocationApproved =
@@ -833,55 +698,70 @@ public final class OkHi extends ContentProvider {
         }
         return permission;
     }
+    /*
+        public static void manualPing(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) {
 
-    public static void manualPing(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) {
-
-        displayLog("display client " + jsonObject.toString());
+            displayLog("display client " + jsonObject.toString());
 
 
-        callback = okHiCallback;
-        firstname = jsonObject.optString("firstName");
-        lastname = jsonObject.optString("lastName");
-        phonenumber = jsonObject.optString("phone");
+            callback = okHiCallback;
+            firstname = jsonObject.optString("firstName");
+            lastname = jsonObject.optString("lastName");
+            phonenumber = jsonObject.optString("phone");
 
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("phonenumber", phonenumber);
-            loans.put("firstname", firstname);
-            loans.put("lastname", lastname);
-            loans.put("uniqueId", uniqueId);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Android SDK");
-            parameters.put("type", "initialize");
-            parameters.put("subtype", "manualPing");
-            parameters.put("onObject", "okHeartAndroidSDK");
-            parameters.put("view", "app");
-            parameters.put("appKey", "" + appkey);
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
+            try {
+                HashMap<String, String> loans = new HashMap<>();
+                loans.put("phonenumber", phonenumber);
+                loans.put("firstname", firstname);
+                loans.put("lastname", lastname);
+                loans.put("uniqueId", uniqueId);
+                HashMap<String, String> parameters = new HashMap<>();
+                parameters.put("eventName", "Android SDK");
+                parameters.put("type", "initialize");
+                parameters.put("subtype", "manualPing");
+                parameters.put("onObject", "okHeartAndroidSDK");
+                parameters.put("view", "app");
+                parameters.put("appKey", "" + appkey);
+                sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
 
-        String tempPhonenumber = null;
-        if (phonenumber != null) {
-            if (phonenumber.length() > 0) {
-                if (phonenumber.startsWith("0")) {
-                    tempPhonenumber = "+254" + phonenumber.substring(1);
-                } else {
-                    tempPhonenumber = phonenumber;
-                }
-                List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
-                String environment = dataProvider.getPropertyValue("environment");
-                if (addressItemList.size() > 0) {
-                    sendPingSMS(okHiCallback, tempPhonenumber, environment);
+            String tempPhonenumber = null;
+            if (phonenumber != null) {
+                if (phonenumber.length() > 0) {
+                    if (phonenumber.startsWith("0")) {
+                        tempPhonenumber = "+254" + phonenumber.substring(1);
+                    } else {
+                        tempPhonenumber = phonenumber;
+                    }
+                    List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
+                    String environment = dataProvider.getPropertyValue("environment");
+                    if (addressItemList.size() > 0) {
+                        sendPingSMS(okHiCallback, tempPhonenumber, environment);
+                    } else {
+                        try {
+                            JSONObject responseJson = new JSONObject();
+                            responseJson.put("message", "sms_failure");
+                            JSONObject payloadJson = new JSONObject();
+                            payloadJson.put("errorCode", -1);
+                            payloadJson.put("error", "Missing addresses");
+                            payloadJson.put("message", "Please create at least one address");
+                            responseJson.put("payload", payloadJson);
+                            displayLog(responseJson.toString());
+                            okHiCallback.querycomplete(responseJson);
+                        } catch (JSONException jse) {
+
+                        }
+                    }
                 } else {
                     try {
                         JSONObject responseJson = new JSONObject();
-                        responseJson.put("message", "sms_failure");
+                        responseJson.put("message", "fatal_exit");
                         JSONObject payloadJson = new JSONObject();
                         payloadJson.put("errorCode", -1);
-                        payloadJson.put("error", "Missing addresses");
-                        payloadJson.put("message", "Please create at least one address");
+                        payloadJson.put("error", "Missing parameter");
+                        payloadJson.put("message", "Phone number cannot be an empty string");
                         responseJson.put("payload", payloadJson);
                         displayLog(responseJson.toString());
                         okHiCallback.querycomplete(responseJson);
@@ -896,7 +776,7 @@ public final class OkHi extends ContentProvider {
                     JSONObject payloadJson = new JSONObject();
                     payloadJson.put("errorCode", -1);
                     payloadJson.put("error", "Missing parameter");
-                    payloadJson.put("message", "Phone number cannot be an empty string");
+                    payloadJson.put("message", "Phone number cannot be null");
                     responseJson.put("payload", payloadJson);
                     displayLog(responseJson.toString());
                     okHiCallback.querycomplete(responseJson);
@@ -904,82 +784,67 @@ public final class OkHi extends ContentProvider {
 
                 }
             }
-        } else {
-            try {
-                JSONObject responseJson = new JSONObject();
-                responseJson.put("message", "fatal_exit");
-                JSONObject payloadJson = new JSONObject();
-                payloadJson.put("errorCode", -1);
-                payloadJson.put("error", "Missing parameter");
-                payloadJson.put("message", "Phone number cannot be null");
-                responseJson.put("payload", payloadJson);
-                displayLog(responseJson.toString());
-                okHiCallback.querycomplete(responseJson);
-            } catch (JSONException jse) {
-
-            }
         }
-    }
 
-    private static void sendPingSMS(final io.okverify.android.callback.OkHiCallback okHiCallback, String phonenumber, String environment) {
-        try {
-            String remoteSmsTemplate = dataProvider.getPropertyValue("sms_template");
-            String message = remoteSmsTemplate + uniqueId;
-            final HashMap<String, String> jsonObject = new HashMap<>();
-            jsonObject.put("userId", "GrlaR3LHUP");
-            jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
-            jsonObject.put("customName", "test");
-            //jsonObject.put("ualId", verifyDataItem.getUalId());
+        private static void sendPingSMS(final io.okverify.android.callback.OkHiCallback okHiCallback, String phonenumber, String environment) {
+            try {
+                String remoteSmsTemplate = dataProvider.getPropertyValue("sms_template");
+                String message = remoteSmsTemplate + uniqueId;
+                final HashMap<String, String> jsonObject = new HashMap<>();
+                jsonObject.put("userId", "GrlaR3LHUP");
+                jsonObject.put("sessionToken", "r:3af107bf99e4c6f2a91e6fec046f5fc7");
+                jsonObject.put("customName", "test");
+                //jsonObject.put("ualId", verifyDataItem.getUalId());
 
-            jsonObject.put("phoneNumber", phonenumber);
-            jsonObject.put("phone", phonenumber);
-            jsonObject.put("message", message);
-            jsonObject.put("uniqueId", uniqueId);
-            io.okverify.android.callback.SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new io.okverify.android.callback.SendCustomLinkSmsCallBack() {
-                @Override
-                public void querycomplete(String response, boolean status) {
-                    if (status) {
-                        //displayLog("send sms success " + response);
-                        try {
-                            JSONObject responseJson = new JSONObject();
-                            responseJson.put("message", "sendSMS");
-                            JSONObject payloadJson = new JSONObject();
-                            payloadJson.put("errorCode", 0);
-                            payloadJson.put("error", "SMS sent");
-                            payloadJson.put("message", "SMS sent");
-                            responseJson.put("payload", payloadJson);
-                            displayLog(responseJson.toString());
-                            okHiCallback.querycomplete(responseJson);
-                        } catch (JSONException jse) {
+                jsonObject.put("phoneNumber", phonenumber);
+                jsonObject.put("phone", phonenumber);
+                jsonObject.put("message", message);
+                jsonObject.put("uniqueId", uniqueId);
+                io.okverify.android.callback.SendCustomLinkSmsCallBack sendCustomLinkSmsCallBack = new io.okverify.android.callback.SendCustomLinkSmsCallBack() {
+                    @Override
+                    public void querycomplete(String response, boolean status) {
+                        if (status) {
+                            //displayLog("send sms success " + response);
+                            try {
+                                JSONObject responseJson = new JSONObject();
+                                responseJson.put("message", "sendSMS");
+                                JSONObject payloadJson = new JSONObject();
+                                payloadJson.put("errorCode", 0);
+                                payloadJson.put("error", "SMS sent");
+                                payloadJson.put("message", "SMS sent");
+                                responseJson.put("payload", payloadJson);
+                                displayLog(responseJson.toString());
+                                okHiCallback.querycomplete(responseJson);
+                            } catch (JSONException jse) {
 
-                        }
-                    } else {
-                        displayLog("Error! " + response);
-                        try {
-                            JSONObject responseJson = new JSONObject();
-                            responseJson.put("message", "sendSMS");
-                            JSONObject payloadJson = new JSONObject();
-                            payloadJson.put("errorCode", 0);
-                            payloadJson.put("error", "SMS not sent");
-                            payloadJson.put("message", response);
-                            responseJson.put("payload", payloadJson);
-                            displayLog(responseJson.toString());
-                            okHiCallback.querycomplete(responseJson);
-                        } catch (JSONException jse) {
+                            }
+                        } else {
+                            displayLog("Error! " + response);
+                            try {
+                                JSONObject responseJson = new JSONObject();
+                                responseJson.put("message", "sendSMS");
+                                JSONObject payloadJson = new JSONObject();
+                                payloadJson.put("errorCode", 0);
+                                payloadJson.put("error", "SMS not sent");
+                                payloadJson.put("message", response);
+                                responseJson.put("payload", payloadJson);
+                                displayLog(responseJson.toString());
+                                okHiCallback.querycomplete(responseJson);
+                            } catch (JSONException jse) {
 
+                            }
                         }
                     }
-                }
-            };
-            io.okverify.android.asynctask.SendCustomLinkSmsTask sendCustomLinkSmsTask = new io.okverify.android.asynctask.SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject, environment);
-            sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-        } catch (Exception jse) {
-            displayLog("jsonexception " + jse.toString());
+                };
+                io.okverify.android.asynctask.SendCustomLinkSmsTask sendCustomLinkSmsTask = new io.okverify.android.asynctask.SendCustomLinkSmsTask(mContext, sendCustomLinkSmsCallBack, jsonObject, environment);
+                sendCustomLinkSmsTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            } catch (Exception jse) {
+                displayLog("jsonexception " + jse.toString());
+            }
         }
-    }
-
+    */
     private static void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
     private static void writeToFile(String customString) {

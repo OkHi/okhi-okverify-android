@@ -18,16 +18,21 @@ import androidx.core.app.JobIntentService;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
-import com.parse.ParseException;
 import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
-import com.parse.SaveCallback;
+
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import io.okverify.android.asynctask.AnonymoussigninTask;
+import io.okverify.android.asynctask.TransitsTask;
+import io.okverify.android.callback.AuthtokenCallback;
+import io.okverify.android.callback.TransitsCallBack;
 
 
 public class GeofenceTransitionsJobIntentService extends JobIntentService {
@@ -400,7 +405,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 parameters.put("isPlugged", "" + isPlugged);
                 parseObject.put("isPlugged", isPlugged);
 
-                // Are we charging / charged?
+                //Are we charging / charged?
                 int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
                 boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
                         status == BatteryManager.BATTERY_STATUS_FULL;
@@ -682,6 +687,49 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
         displayLog(" parse object save ");
 
+        AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
+            @Override
+            public void querycomplete(String response, boolean success) {
+                if(success){
+                    displayLog("success response "+response);
+                    try{
+                        JSONObject jsonObject = new JSONObject(response);
+                        String token = jsonObject.optString("authorization_token");
+                        displayLog("token "+token);
+
+                        TransitsCallBack transitsCallBack = new TransitsCallBack() {
+                            @Override
+                            public void querycomplete(String response, boolean status) {
+                                if(status){
+                                    displayLog("transit success "+response);
+                                }
+                                else{
+                                    displayLog("transit error "+response);
+                                }
+                            }
+                        };
+
+                        TransitsTask transitsTask = new TransitsTask(transitsCallBack, parseObject, "devmaster", token);
+                        transitsTask.execute();
+
+                    }
+                    catch (Exception e){
+                        displayLog("error "+e.toString());
+                    }
+                }
+                else{
+                    displayLog("failed response "+response);
+                }
+            }
+        };
+
+        //"i3c5W92cB8"
+
+        AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,
+                "xuAGglxifQ", "ba31a15f-d817-4cd4-bc50-e469de0d396a" , "verify","+254713567907");
+        anonymoussigninTask.execute();
+
+        /*
         try {
             parseObject.save();
             try {
@@ -789,6 +837,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 }
             });
         }
+        */
     }
 
     private String getDeviceModelAndBrand() {
@@ -938,7 +987,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     */
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
 }

@@ -15,7 +15,11 @@ import org.json.JSONObject;
 
 import io.okverify.android.OkHi;
 import io.okverify.android.R;
+import io.okverify.android.asynctask.AnonymoussigninTask;
+import io.okverify.android.asynctask.VerificationTokenTask;
+import io.okverify.android.callback.AuthtokenCallback;
 import io.okverify.android.callback.OkHiCallback;
+import io.okverify.android.callback.VerificationCallBack;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -28,12 +32,57 @@ public class TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
 
+        AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
+            @Override
+            public void querycomplete(String response, boolean success) {
+                if(success){
+                    displayLog("success response "+response);
+                    try{
+                        JSONObject jsonObject = new JSONObject(response);
+                        String token = jsonObject.optString("authorization_token");
+                        displayLog("token "+token);
 
-        OkHi.initialize("r:4e66bc42f0aa3d96fc3dfd5dae088262", "branchid", "sandbox");
-        OkHi.customize("rgb(255,227,237)", "okhi", "https://cdn.okhi.co/icon.png", "rgb(255,227,237)", true, true);
+                        OkHi.initialize(token, "branchid", "devmaster");
+                        OkHi.customize("#ba0c2f", "okhi",
+                                "https://cdn.okhi.co/icon.png","#ba0c2f",
+                                true, true);
+
+                    }
+                    catch (Exception e){
+                        displayLog("error "+e.toString());
+                    }
+                }
+                else{
+                    displayLog("failed response "+response);
+                }
+            }
+        };
+
+        //"i3c5W92cB8"
+
+        AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,
+                "xuAGglxifQ", "ba31a15f-d817-4cd4-bc50-e469de0d396a" , "verify","+254713567907");
+        anonymoussigninTask.execute();
+        //OkHi.initialize("r:4e66bc42f0aa3d96fc3dfd5dae088262", "branchid", "sandbox");
+        //OkHi.customize("rgb(255,227,237)", "okhi", "https://cdn.okhi.co/icon.png", "rgb(255,227,237)", true, true);
         //OkHi.customize("rgb(0, 1, 13)", "okhi", "https://lh3.ggpht.com/GE2EnJs1M1Al9_Ol2Q1AV0VdSsvjR2dsVWO_2ARuaGVS-CJUhJGbEt_OMHlvR2b8zg=s180", "rgb(255, 0, 0)", true, true);
 
         //
+
+        /*
+        VerificationCallBack verificationCallBack = new VerificationCallBack() {
+            @Override
+            public void querycomplete(String response, boolean status) {
+                displayLog("status "+status);
+                displayLog("response "+response);
+
+            }
+        };
+        VerificationTokenTask verificationTokenTask = new VerificationTokenTask(this,
+                verificationCallBack,"r:4e66bc42f0aa3d96fc3dfd5dae088262",
+                "xuAGglxifQ", "sandbox");
+        verificationTokenTask.execute();
+        */
 
         firstnameedt = findViewById(R.id.firstname);
         lastnameedt = findViewById(R.id.lastname);
@@ -46,6 +95,7 @@ public class TestActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                /*
                 if (OkHi.checkPermission()) {
                     String firstname = firstnameedt.getText().toString();
                     String lastname = lastnameedt.getText().toString();
@@ -77,13 +127,14 @@ public class TestActivity extends AppCompatActivity {
                     OkHi.requestPermission(TestActivity.this, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
                 }
 
+                */
             }
         });
 
         pingbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+/*
 
                 OkHiCallback okHiCallback = new OkHiCallback() {
                     @Override
@@ -114,7 +165,7 @@ public class TestActivity extends AppCompatActivity {
                 } catch (JSONException e) {
                     displayLog("json exception error " + e.toString());
                 }
-
+*/
 
             }
         });

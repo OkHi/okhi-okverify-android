@@ -35,6 +35,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private Boolean skiptimercheck;
 
     public GeofenceTask(Context context, Boolean skipTimerCheck) {
+        displayLog("GeofenceTask called");
         this.context = context;
         this.dataProvider = new io.okverify.android.database.DataProvider(context);
         this.skiptimercheck = skipTimerCheck;
@@ -62,6 +63,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected String doInBackground(Void... params) {
+        displayLog("doInBackground");
         String result = null;
         try {
             HashMap<String, String> loans = new HashMap<>();
@@ -89,12 +91,14 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     @Override
     protected void onPostExecute(String result) {
-
+        displayLog("onPostExecute");
     }
 
 
     private void decideToStartGeofence() {
-
+        displayLog("decideToStartGeofence");
+        startGeofence();
+        /*
         String lastGeofence = dataProvider.getPropertyValue("lastGeofenceTrigger");
         displayLog("lastGeofence " + lastGeofence);
         if (lastGeofence != null) {
@@ -136,6 +140,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
             displayLog("3 implement geofence and save the new time");
             startGeofence();
         }
+        */
     }
 
     private void startGeofence() {
@@ -252,7 +257,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             // Set the request ID of the geofence. This is a string to identify this
                             // geofence.
                             .setRequestId(ualId)
-                            .setNotificationResponsiveness(120000)
+                            .setNotificationResponsiveness(12000)
                             // Set the circular region of this geofence.
                             .setCircularRegion(lat, lng, 500)
 
@@ -436,6 +441,6 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 }
