@@ -1,7 +1,7 @@
 //apply plugin: 'com.android.library'
 apply plugin: 'com.android.application'
 apply plugin: 'com.github.dcendents.android-maven'
-group = 'com.github.okhi-okverify-sdk'
+group = 'com.github.okhi-okverify-android'
 
 
 def keystorePropertiesFile = rootProject.file("keystore.properties")
