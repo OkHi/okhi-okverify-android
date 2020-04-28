@@ -84,6 +84,71 @@ public final class OkHi extends ContentProvider {
         */
 
     }
+
+
+    public static void displayClient(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
+
+        displayLog("display client " + jsonObject.toString());
+
+        if (jsonObject != null) {
+            if (jsonObject.length() > 0) {
+                if (okHiCallback != null) {
+
+                    if (checkPermission()) {
+                        startActivity(okHiCallback, jsonObject);
+                    } else {
+                        String cause = checkPermissionCause();
+                        if ((cause.equalsIgnoreCase("Manifest.permission.ACCESS_FINE_LOCATION granted")) ||
+                                (cause.equalsIgnoreCase("Manifest.permission.ACCESS_BACKGROUND_LOCATION granted"))) {
+                            startActivity(okHiCallback, jsonObject);
+                        } else {
+                            String verify = "false";
+                            File filesDir = new File(mContext.getFilesDir() + "/verify.txt");
+                            if (filesDir.exists()) {
+                                displayLog("filesdir exists");
+                                try {
+                                    verify = getStringFromFile(filesDir.getAbsolutePath());
+                                    displayLog("verify " + verify);
+                                } catch (Exception e) {
+                                    // Hmm, the applicationId file was malformed or something. Assume it
+                                    // doesn't match.
+                                    displayLog("error " + e.toString());
+                                }
+                            } else {
+                                displayLog("filesdir does not exist");
+                            }
+                            if (verify.equalsIgnoreCase("true")) {
+                                try {
+                                    JSONObject responseJson = new JSONObject();
+                                    responseJson.put("message", "fatal_exit");
+                                    JSONObject payloadJson = new JSONObject();
+                                    payloadJson.put("errorCode", -1);
+                                    payloadJson.put("error", "Location permission not granted");
+                                    payloadJson.put("message", cause);
+                                    responseJson.put("payload", payloadJson);
+                                    displayLog(responseJson.toString());
+                                    okHiCallback.querycomplete(responseJson);
+                                } catch (JSONException jse) {
+
+                                }
+                            } else {
+                                startActivity(okHiCallback, jsonObject);
+                            }
+                        }
+                    }
+                } else {
+                    throw new RuntimeException("DisplayClient error", new Throwable("Confirm OkHiCallback is not null"));
+                }
+            } else {
+                throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
+            }
+        } else {
+            throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
+        }
+        //fetchAddresses(jsonObject);
+
+
+    }
 /*
     public static void displayClient(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
 
