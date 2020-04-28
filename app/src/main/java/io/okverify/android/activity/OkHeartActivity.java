@@ -25,6 +25,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
+import io.okverify.android.OkVerify;
+import io.okverify.android.callback.OkVerifyCallback;
+
 
 public class OkHeartActivity extends AppCompatActivity {
 
@@ -35,7 +38,7 @@ public class OkHeartActivity extends AppCompatActivity {
     private static Float acc;
     private static String firstname, lastname, phonenumber, apiKey, color, name, logo, appbarcolor;
     private static Boolean appbarvisible, enablestreetview;
-    private static io.okverify.android.callback.OkHiCallback okHiCallback;
+    private static OkVerifyCallback okVerifyCallback;
     private static boolean completedWell, isWebInterface;
     private static String uniqueId;
     private static String verify;
@@ -172,8 +175,8 @@ public class OkHeartActivity extends AppCompatActivity {
         logo = null;
         verify = "false";
 
-        //OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true, false);
-        //OkHi.customize("rgb(0,179,255)", "Mula", "https://cdn.okhi.co/okhi-logo-white.svg");
+        //OkVerify.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true, false);
+        //OkVerify.customize("rgb(0,179,255)", "Mula", "https://cdn.okhi.co/okhi-logo-white.svg");
 
         try {
             Bundle bundle = getIntent().getExtras();
@@ -297,7 +300,7 @@ public class OkHeartActivity extends AppCompatActivity {
             jsonObject.put("firstName", firstname);
             jsonObject.put("lastName", lastname);
             jsonObject.put("phone", phonenumber);
-            OkHi.displayClient(okHiCallback, jsonObject);
+            OkVerify.displayClient(okVerifyCallback, jsonObject);
         } catch (JSONException e) {
             displayLog("json exception error " + e.toString());
         }
@@ -477,8 +480,8 @@ public class OkHeartActivity extends AppCompatActivity {
         });
 
         try {
-            okHiCallback = io.okverify.android.OkHi.getCallback();
-            if (okHiCallback != null) {
+            okVerifyCallback = OkVerify.getCallback();
+            if (okVerifyCallback != null) {
                 displayLog("okheartcallback is not null");
             } else {
                 displayLog("okheartcallback is null");
@@ -701,7 +704,7 @@ public class OkHeartActivity extends AppCompatActivity {
                 payload1.put("Response","Address creation completed successfully");
                 jsonObject1.put("payload",payload1);
                 displayLog(jsonObject.toString());
-                okHiCallback.querycomplete(jsonObject1);
+                okVerifyCallback.querycomplete(jsonObject1);
                 */
             } else {
                 if (isWebInterface) {
@@ -713,7 +716,7 @@ public class OkHeartActivity extends AppCompatActivity {
                     payload1.put("Error", "Address creation did not complete");
                     jsonObject1.put("payload", payload1);
                     displayLog(jsonObject.toString());
-                    okHiCallback.querycomplete(jsonObject1);
+                    okVerifyCallback.querycomplete(jsonObject1);
                 }
 
             }

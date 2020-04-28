@@ -10,16 +10,12 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import io.okverify.android.OkHi;
+import io.okverify.android.OkVerify;
 import io.okverify.android.R;
 import io.okverify.android.asynctask.AnonymoussigninTask;
-import io.okverify.android.asynctask.VerificationTokenTask;
 import io.okverify.android.callback.AuthtokenCallback;
-import io.okverify.android.callback.OkHiCallback;
-import io.okverify.android.callback.VerificationCallBack;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -42,8 +38,8 @@ public class TestActivity extends AppCompatActivity {
                         String token = jsonObject.optString("authorization_token");
                         displayLog("token "+token);
 
-                        OkHi.initialize(token, "branchid", "devmaster");
-                        OkHi.customize("#ba0c2f", "okhi",
+                        OkVerify.initialize(token, "branchid", "devmaster");
+                        OkVerify.customize("#ba0c2f", "okhi",
                                 "https://cdn.okhi.co/icon.png","#ba0c2f",
                                 true, true);
 
@@ -63,9 +59,9 @@ public class TestActivity extends AppCompatActivity {
         AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,
                 "xuAGglxifQ", "ba31a15f-d817-4cd4-bc50-e469de0d396a" , "verify","+254713567907");
         anonymoussigninTask.execute();
-        //OkHi.initialize("r:4e66bc42f0aa3d96fc3dfd5dae088262", "branchid", "sandbox");
-        //OkHi.customize("rgb(255,227,237)", "okhi", "https://cdn.okhi.co/icon.png", "rgb(255,227,237)", true, true);
-        //OkHi.customize("rgb(0, 1, 13)", "okhi", "https://lh3.ggpht.com/GE2EnJs1M1Al9_Ol2Q1AV0VdSsvjR2dsVWO_2ARuaGVS-CJUhJGbEt_OMHlvR2b8zg=s180", "rgb(255, 0, 0)", true, true);
+        //OkVerify.initialize("r:4e66bc42f0aa3d96fc3dfd5dae088262", "branchid", "sandbox");
+        //OkVerify.customize("rgb(255,227,237)", "okhi", "https://cdn.okhi.co/icon.png", "rgb(255,227,237)", true, true);
+        //OkVerify.customize("rgb(0, 1, 13)", "okhi", "https://lh3.ggpht.com/GE2EnJs1M1Al9_Ol2Q1AV0VdSsvjR2dsVWO_2ARuaGVS-CJUhJGbEt_OMHlvR2b8zg=s180", "rgb(255, 0, 0)", true, true);
 
         //
 
@@ -89,21 +85,21 @@ public class TestActivity extends AppCompatActivity {
         phoneedt = findViewById(R.id.phone);
         submitbtn = findViewById(R.id.submit);
         pingbtn = findViewById(R.id.ping);
-        //displayLog(""+OkHi.checkPermission());
+        //displayLog(""+OkVerify.checkPermission());
 
         submitbtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
                 /*
-                if (OkHi.checkPermission()) {
+                if (OkVerify.checkPermission()) {
                     String firstname = firstnameedt.getText().toString();
                     String lastname = lastnameedt.getText().toString();
                     String phone = phoneedt.getText().toString();
 
                     if ((firstname.length() > 0) && (lastname.length() > 0) && (phone.length() > 0)) {
 
-                        OkHiCallback okHiCallback = new OkHiCallback() {
+                        OkVerifyCallback okHiCallback = new OkVerifyCallback() {
                             @Override
                             public void querycomplete(JSONObject result) {
                                 displayLog(result.toString());
@@ -115,7 +111,7 @@ public class TestActivity extends AppCompatActivity {
                             jsonObject.put("firstName", firstname);
                             jsonObject.put("lastName", lastname);
                             jsonObject.put("phone", phone);
-                            OkHi.displayClient(okHiCallback, jsonObject);
+                            OkVerify.displayClient(okHiCallback, jsonObject);
                         } catch (JSONException e) {
                             displayLog("json exception error " + e.toString());
                         }
@@ -124,7 +120,7 @@ public class TestActivity extends AppCompatActivity {
                         Toast.makeText(TestActivity.this, "Error! Missing firstname or lastname or phonenumber", Toast.LENGTH_LONG).show();
                     }
                 } else {
-                    OkHi.requestPermission(TestActivity.this, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+                    OkVerify.requestPermission(TestActivity.this, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
                 }
 
                 */
@@ -136,7 +132,7 @@ public class TestActivity extends AppCompatActivity {
             public void onClick(View v) {
 /*
 
-                OkHiCallback okHiCallback = new OkHiCallback() {
+                OkVerifyCallback okHiCallback = new OkVerifyCallback() {
                     @Override
                     public void querycomplete(JSONObject result) {
                         displayLog(result.toString());
@@ -161,7 +157,7 @@ public class TestActivity extends AppCompatActivity {
                 try {
                     JSONObject jsonObject = new JSONObject();
                     jsonObject.put("phone", tempPhonenumber);
-                    OkHi.manualPing(okHiCallback, jsonObject);
+                    OkVerify.manualPing(okHiCallback, jsonObject);
                 } catch (JSONException e) {
                     displayLog("json exception error " + e.toString());
                 }
@@ -181,13 +177,13 @@ public class TestActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(io.okverify.android.R.layout.activity_test);
 
-        io.okverify.android.OkHi.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true);
+        io.okverify.android.OkVerify.initialize("r:b59a93ba7d80a95d89dff8e4c52e259a", true);
 
         String firstname = "Ramogi";
         String lastname = "Ochola";
         String phonenumber = "+254713567907";
 
-        io.okverify.android.callback.OkHiCallback okHiCallback = new io.okverify.android.callback.OkHiCallback() {
+        io.okverify.android.callback.OkVerifyCallback okHiCallback = new io.okverify.android.callback.OkVerifyCallback() {
             @Override
             public void querycomplete(JSONObject result) {
                 displayLog("result " + result);
@@ -201,7 +197,7 @@ public class TestActivity extends AppCompatActivity {
                     int errorCode = payload.optInt("errorCode", 0);
                     displayLog("" + errorCode);
                     if (errorCode == -1) {
-                        io.okverify.android.OkHi.requestPermission(TestActivity.this, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
+                        io.okverify.android.OkVerify.requestPermission(TestActivity.this, MY_PERMISSIONS_ACCESS_FINE_LOCATION);
                     }
 
                 }
@@ -214,7 +210,7 @@ public class TestActivity extends AppCompatActivity {
             jsonObject.put("firstName", firstname);
             jsonObject.put("lastName", lastname);
             jsonObject.put("phone", phonenumber);
-            io.okverify.android.OkHi.displayClient(okHiCallback, jsonObject);
+            io.okverify.android.OkVerify.displayClient(okHiCallback, jsonObject);
         } catch (JSONException e) {
             displayLog("json exception error " + e.toString());
         }

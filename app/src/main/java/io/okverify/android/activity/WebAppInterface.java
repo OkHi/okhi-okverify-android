@@ -1,7 +1,6 @@
 package io.okverify.android.activity;
 
 import android.content.ContentValues;
-import android.content.Intent;
 import android.location.Location;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -23,6 +22,8 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+
+import io.okverify.android.OkVerify;
 
 
 class WebAppInterface {
@@ -237,7 +238,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okverify.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkVerify.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -312,7 +313,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okverify.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkVerify.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -368,7 +369,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okverify.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkVerify.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
                         }
@@ -400,7 +401,7 @@ class WebAppInterface {
                             displayLog("error attaching afl to ual " + e1.toString());
                         }
                         try {
-                            io.okverify.android.OkHi.getCallback().querycomplete(jsonObject);
+                            OkVerify.getCallback().querycomplete(jsonObject);
                         } catch (Exception e) {
                             displayLog("error calling back " + e.toString());
 

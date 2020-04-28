@@ -315,12 +315,12 @@ public class ConfigurationFile {
                                         */
 
                                         /*
-                                        OkHi.setBackground_frequency(background_frequency);
-                                        OkHi.setGps_accuracy(gps_accuracy);
-                                        OkHi.setResume_ping_frequency(resume_ping_frequency);
-                                        OkHi.setPing_frequency(ping_frequency);
-                                        OkHi.setSms_template(sms_template);
-                                        OkHi.setKill_switch(kill_switch);
+                                        OkVerify.setBackground_frequency(background_frequency);
+                                        OkVerify.setGps_accuracy(gps_accuracy);
+                                        OkVerify.setResume_ping_frequency(resume_ping_frequency);
+                                        OkVerify.setPing_frequency(ping_frequency);
+                                        OkVerify.setSms_template(sms_template);
+                                        OkVerify.setKill_switch(kill_switch);
                                         */
 /*
                                     } catch (Exception e1) {

@@ -34,12 +34,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.HashMap;
-import java.util.List;
+
+import io.okverify.android.callback.OkVerifyCallback;
 
 
-public final class OkHi extends ContentProvider {
+public final class OkVerify extends ContentProvider {
 
-    private static final String TAG = "OkHi";
+    private static final String TAG = "OkVerify";
     private static final int THREAD_WAIT_TIMEOUT_IN_MS = 100;
     protected static Integer resume_ping_frequency = null;
     protected static Integer ping_frequency = null;
@@ -50,14 +51,14 @@ public final class OkHi extends ContentProvider {
     protected static io.okverify.android.database.DataProvider dataProvider;
     private static String firstname, lastname, phonenumber, requestSource;
     private static Context mContext;
-    private static io.okverify.android.callback.OkHiCallback callback;
+    private static OkVerifyCallback callback;
     private static String appkey;
     private static String uniqueId;
     //private static String remoteSmsTemplate;
     private static Analytics analytics;
     private static NotificationManager notificationManager;
 
-    public OkHi() {
+    public OkVerify() {
     }
 
     public static void initialize(@NonNull final String applicationKey, @NonNull String branchid, @NonNull final String environment) throws RuntimeException {
@@ -85,22 +86,22 @@ public final class OkHi extends ContentProvider {
 
     }
 
-
-    public static void displayClient(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
+/*
+    public static void displayClient(@NonNull OkVerifyCallback okVerifyCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
 
         displayLog("display client " + jsonObject.toString());
 
         if (jsonObject != null) {
             if (jsonObject.length() > 0) {
-                if (okHiCallback != null) {
+                if (okVerifyCallback != null) {
 
                     if (checkPermission()) {
-                        startActivity(okHiCallback, jsonObject);
+                        startActivity(okVerifyCallback, jsonObject);
                     } else {
                         String cause = checkPermissionCause();
                         if ((cause.equalsIgnoreCase("Manifest.permission.ACCESS_FINE_LOCATION granted")) ||
                                 (cause.equalsIgnoreCase("Manifest.permission.ACCESS_BACKGROUND_LOCATION granted"))) {
-                            startActivity(okHiCallback, jsonObject);
+                            startActivity(okVerifyCallback, jsonObject);
                         } else {
                             String verify = "false";
                             File filesDir = new File(mContext.getFilesDir() + "/verify.txt");
@@ -127,17 +128,17 @@ public final class OkHi extends ContentProvider {
                                     payloadJson.put("message", cause);
                                     responseJson.put("payload", payloadJson);
                                     displayLog(responseJson.toString());
-                                    okHiCallback.querycomplete(responseJson);
+                                    okVerifyCallback.querycomplete(responseJson);
                                 } catch (JSONException jse) {
 
                                 }
                             } else {
-                                startActivity(okHiCallback, jsonObject);
+                                startActivity(okVerifyCallback, jsonObject);
                             }
                         }
                     }
                 } else {
-                    throw new RuntimeException("DisplayClient error", new Throwable("Confirm OkHiCallback is not null"));
+                    throw new RuntimeException("DisplayClient error", new Throwable("Confirm OkVerifyCallback is not null"));
                 }
             } else {
                 throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
@@ -149,8 +150,9 @@ public final class OkHi extends ContentProvider {
 
 
     }
+    */
 /*
-    public static void displayClient(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
+    public static void displayClient(@NonNull io.okverify.android.callback.OkVerifyCallback okHiCallback, @NonNull JSONObject jsonObject) throws RuntimeException {
 
         displayLog("display client " + jsonObject.toString());
 
@@ -201,7 +203,7 @@ public final class OkHi extends ContentProvider {
                         }
                     }
                 } else {
-                    throw new RuntimeException("DisplayClient error", new Throwable("Confirm OkHiCallback is not null"));
+                    throw new RuntimeException("DisplayClient error", new Throwable("Confirm OkVerifyCallback is not null"));
                 }
             } else {
                 throw new RuntimeException("DisplayClient error", new Throwable("Confirm your JSONObject is not null"));
@@ -473,7 +475,7 @@ public final class OkHi extends ContentProvider {
     }
 
     /*
-    public static void displayClient(OkHiCallback okHiCallback, JSONObject jsonObject) {
+    public static void displayClient(OkVerifyCallback okHiCallback, JSONObject jsonObject) {
 
         displayLog("display client " + jsonObject.toString());
 
@@ -515,8 +517,8 @@ public final class OkHi extends ContentProvider {
     }
 */
 
-    private static void startActivity(io.okverify.android.callback.OkHiCallback okHiCallback, JSONObject jsonObject) {
-        callback = okHiCallback;
+    private static void startActivity(OkVerifyCallback okVerifyCallback, JSONObject jsonObject) {
+        callback = okVerifyCallback;
         firstname = jsonObject.optString("firstName");
         lastname = jsonObject.optString("lastName");
         phonenumber = jsonObject.optString("phone");
@@ -764,7 +766,7 @@ public final class OkHi extends ContentProvider {
         return permission;
     }
     /*
-        public static void manualPing(@NonNull io.okverify.android.callback.OkHiCallback okHiCallback, @NonNull JSONObject jsonObject) {
+        public static void manualPing(@NonNull io.okverify.android.callback.OkVerifyCallback okHiCallback, @NonNull JSONObject jsonObject) {
 
             displayLog("display client " + jsonObject.toString());
 
@@ -851,7 +853,7 @@ public final class OkHi extends ContentProvider {
             }
         }
 
-        private static void sendPingSMS(final io.okverify.android.callback.OkHiCallback okHiCallback, String phonenumber, String environment) {
+        private static void sendPingSMS(final io.okverify.android.callback.OkVerifyCallback okHiCallback, String phonenumber, String environment) {
             try {
                 String remoteSmsTemplate = dataProvider.getPropertyValue("sms_template");
                 String message = remoteSmsTemplate + uniqueId;
@@ -1017,12 +1019,12 @@ public final class OkHi extends ContentProvider {
 
     }
 
-    public static io.okverify.android.callback.OkHiCallback getCallback() {
+    public static OkVerifyCallback getCallback() {
         return callback;
     }
 
-    public static void setCallback(io.okverify.android.callback.OkHiCallback callback) {
-        OkHi.callback = callback;
+    public static void setCallback(OkVerifyCallback callback) {
+        OkVerify.callback = callback;
     }
 
     public static void requestPermission(@NonNull Activity activity, @NonNull int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
@@ -1293,7 +1295,7 @@ public final class OkHi extends ContentProvider {
             parameters.put("subtype", "stopPeriodicPing");
             parameters.put("type", "doWork");
             parameters.put("onObject", "app");
-            parameters.put("view", "OkHi");
+            parameters.put("view", "OkVerify");
             sendEvent(parameters, loans);
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
@@ -1314,7 +1316,7 @@ public final class OkHi extends ContentProvider {
                 parameters.put("subtype", "startKeepPeriodicPing");
                 parameters.put("type", "doWork");
                 parameters.put("onObject", "app");
-                parameters.put("view", "OkHi");
+                parameters.put("view", "OkVerify");
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
@@ -1353,7 +1355,7 @@ public final class OkHi extends ContentProvider {
                 parameters.put("subtype", "startReplacePeriodicPing");
                 parameters.put("type", "doWork");
                 parameters.put("onObject", "app");
-                parameters.put("view", "OkHi");
+                parameters.put("view", "OkVerify");
                 sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
@@ -1761,7 +1763,7 @@ public final class OkHi extends ContentProvider {
 
 
     public static void setResume_ping_frequency(Integer resume_ping_frequency) {
-        OkHi.resume_ping_frequency = resume_ping_frequency;
+        OkVerify.resume_ping_frequency = resume_ping_frequency;
     }
 
     public static Integer getPing_frequency() {
@@ -1769,7 +1771,7 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void setPing_frequency(Integer ping_frequency) {
-        OkHi.ping_frequency = ping_frequency;
+        OkVerify.ping_frequency = ping_frequency;
     }
 
     public static Integer getBackground_frequency() {
@@ -1777,7 +1779,7 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void setBackground_frequency(Integer background_frequency) {
-        OkHi.background_frequency = background_frequency;
+        OkVerify.background_frequency = background_frequency;
     }
 
     public static String getSms_template() {
@@ -1785,7 +1787,7 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void setSms_template(String sms_template) {
-        OkHi.sms_template = sms_template;
+        OkVerify.sms_template = sms_template;
     }
 
     public static Double getGps_accuracy() {
@@ -1793,7 +1795,7 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void setGps_accuracy(Double gps_accuracy) {
-        OkHi.gps_accuracy = gps_accuracy;
+        OkVerify.gps_accuracy = gps_accuracy;
     }
 
     public static Boolean getKill_switch() {
@@ -1801,7 +1803,7 @@ public final class OkHi extends ContentProvider {
     }
 
     public static void setKill_switch(Boolean kill_switch) {
-        OkHi.kill_switch = kill_switch;
+        OkVerify.kill_switch = kill_switch;
     }
 
     */
