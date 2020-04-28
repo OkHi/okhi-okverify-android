@@ -39,6 +39,7 @@ import io.okverify.android.callback.OkVerifyCallback;
 import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
 import static io.okverify.android.utilities.Constants.COLUMN_LAT;
 import static io.okverify.android.utilities.Constants.COLUMN_LNG;
+import static io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER;
 
 
 public final class OkVerify extends ContentProvider {
@@ -327,11 +328,14 @@ public final class OkVerify extends ContentProvider {
 
     }
 
-    public static void verify(@NonNull String addressId, @NonNull Double latitude, @NonNull Double longitude){
+    public static void verify(@NonNull String phonenumber, @NonNull String addressId, @NonNull Double latitude, @NonNull Double longitude){
+        dataProvider.insertStuff("phonenumber", phonenumber);
         ContentValues contentValues = new ContentValues();
         contentValues.put(COLUMN_LAT, latitude);
         contentValues.put(COLUMN_LNG, longitude);
         contentValues.put(COLUMN_CLAIMUALID, addressId);
+        contentValues.put(COLUMN_PHONECUSTOMER, phonenumber);
+
         Long i = dataProvider.insertAddressList(contentValues);
         displayLog("insert address "+i);
         io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true);

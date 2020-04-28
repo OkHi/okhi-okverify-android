@@ -726,9 +726,11 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         };
 
         //"i3c5W92cB8"
-
-        AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,
-                "xuAGglxifQ", "ba31a15f-d817-4cd4-bc50-e469de0d396a" , "verify","+254713567907");
+        String clientkey = dataProvider.getPropertyValue("applicationKey");
+        String branchid = dataProvider.getPropertyValue("branchId");
+        String phonenumber = dataProvider.getPropertyValue("phonenumber");
+        AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,branchid,clientkey,
+                "verify",phonenumber);
         anonymoussigninTask.execute();
 
         /*
