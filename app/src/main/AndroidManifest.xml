@@ -23,14 +23,13 @@
         <activity
             android:name="io.okverify.android.activity.TestActivity"
             android:theme="@style/AppTheme">
-
-<!--
+            <!--
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
--->
+            -->
 
         </activity>
         <activity
@@ -44,7 +43,7 @@
 
         <provider
             android:name="io.okverify.android.OkVerify"
-            android:authorities="${applicationId}.OkHeart"
+            android:authorities="${applicationId}.OkVerify"
             android:enabled="true"
             android:exported="true" />
 

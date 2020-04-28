@@ -65,7 +65,7 @@ public final class OkVerify extends ContentProvider {
     }
 
     public static void initialize(@NonNull final String applicationKey, @NonNull String branchid,
-                                  @NonNull final String environment) throws RuntimeException {
+                                  @NonNull final String environment) {
 
         displayLog("initialize");
         //dataProvider.insertStuff("enableverify", ""+verify);

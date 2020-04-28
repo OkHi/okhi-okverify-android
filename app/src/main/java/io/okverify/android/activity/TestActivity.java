@@ -12,6 +12,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import org.json.JSONObject;
 
+import io.okverify.android.OkVerify;
 import io.okverify.android.R;
 import io.okverify.android.asynctask.AnonymoussigninTask;
 import io.okverify.android.callback.AuthtokenCallback;
@@ -37,7 +38,7 @@ public class TestActivity extends AppCompatActivity {
                         String token = jsonObject.optString("authorization_token");
                         displayLog("token "+token);
 
-                        //OkVerify.initialize(token, "branchid", "devmaster");
+                        OkVerify.initialize(token, "branchid", "devmaster");
                         //OkVerify.customize("#ba0c2f", "okhi", "https://cdn.okhi.co/icon.png","#ba0c2f", true, true);
 
                     }

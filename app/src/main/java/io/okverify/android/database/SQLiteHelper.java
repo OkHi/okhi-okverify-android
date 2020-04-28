@@ -11,7 +11,7 @@ import android.util.Log;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "io.okverify.android.sdk.database.db";
-    private static final int DATABASE_VERSION = 12;
+    private static final int DATABASE_VERSION = 13;
 
     private static final String DATABASE_CREATE_RUNLIST =
             "create table " + io.okverify.android.utilities.Constants.TABLE_NAME_RUNLIST + " (" +
