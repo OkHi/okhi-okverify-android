@@ -84,11 +84,12 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Location locationA = geofencingEvent.getTriggeringLocation();
 
+
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             try {
 
 
-                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit");
+                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit", locationA.getProvider());
             } catch (Exception e) {
                 displayLog("error updating database " + e.toString());
             }
@@ -116,7 +117,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             try {
 
 
-                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter");
+                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter",locationA.getProvider());
             } catch (Exception e) {
                 displayLog("error updating database " + e.toString());
             }
@@ -295,7 +296,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     }
 
 
-    private void updateDatabase(final Double lat, final Double lng, final Float acc, String transition) {
+    private void updateDatabase(final Double lat, final Double lng, final Float acc, String transition, String provider) {
 
         List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
 
@@ -309,7 +310,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             final Long timemilliseconds = System.currentTimeMillis();
 
             final ParseObject parseObject = new ParseObject("UserVerificationData");
-
+            parseObject.put("provider", provider);
+            parseObject.put("platform", "Android");
             parseObject.put("transition", transition);
             parseObject.put("latitude", lat);
             parseObject.put("longitude", lng);

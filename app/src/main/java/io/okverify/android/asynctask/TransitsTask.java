@@ -1,6 +1,5 @@
 package io.okverify.android.asynctask;
 
-import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -12,14 +11,9 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import io.okverify.android.BuildConfig;
-import io.okverify.android.callback.SendCustomLinkSmsCallBack;
 import io.okverify.android.callback.TransitsCallBack;
-import io.okverify.android.database.DataProvider;
-import io.okverify.android.utilities.OkAnalytics;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -67,6 +61,8 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             JSONArray idsArray = new JSONArray();
             idsArray.put(parseObject.get("ualId"));
             jsonObject.put("ids", idsArray);
+            jsonObject.put("platform", parseObject.get("platform"));
+            jsonObject.put("geopoint_provider", parseObject.get("provider"));
             jsonObject.put("transition_date", System.currentTimeMillis());
             jsonObject.put("transition_event", parseObject.get("transition"));
             jsonObject.put("device_os_name", parseObject.get("OSName"));

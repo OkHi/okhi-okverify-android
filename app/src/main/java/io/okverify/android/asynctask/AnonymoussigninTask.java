@@ -28,6 +28,7 @@ public class AnonymoussigninTask extends AsyncTask<Void, Void, String> {
         this.clientKey = clientKey;
         this.scope = scope;
         this.userid = userid;
+        displayLog("clientkey "+clientKey+" branchid "+branchId);
     }
     @Override
     protected String doInBackground(Void... params) {
