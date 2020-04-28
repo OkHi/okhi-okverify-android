@@ -727,7 +727,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
         //"i3c5W92cB8"
         String clientkey = dataProvider.getPropertyValue("applicationKey");
-        String branchid = dataProvider.getPropertyValue("branchId");
+        String branchid = dataProvider.getPropertyValue("branchid");
         String phonenumber = dataProvider.getPropertyValue("phonenumber");
         AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,branchid,clientkey,
                 "verify",phonenumber);
