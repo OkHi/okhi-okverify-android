@@ -6,7 +6,6 @@ import android.app.NotificationManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
-import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -37,6 +36,10 @@ import java.util.HashMap;
 
 import io.okverify.android.callback.OkVerifyCallback;
 
+import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
+import static io.okverify.android.utilities.Constants.COLUMN_LAT;
+import static io.okverify.android.utilities.Constants.COLUMN_LNG;
+
 
 public final class OkVerify extends ContentProvider {
 
@@ -61,7 +64,8 @@ public final class OkVerify extends ContentProvider {
     public OkVerify() {
     }
 
-    public static void initialize(@NonNull final String applicationKey, @NonNull String branchid, @NonNull final String environment) throws RuntimeException {
+    public static void initialize(@NonNull final String applicationKey, @NonNull String branchid,
+                                  @NonNull final String environment) throws RuntimeException {
 
         displayLog("initialize");
         //dataProvider.insertStuff("enableverify", ""+verify);
@@ -216,7 +220,9 @@ public final class OkVerify extends ContentProvider {
 
     }
 */
-    private static void startInitialization(final String applicationKey, final String branchid, final String environment, final Boolean verify) {
+
+    private static void startInitialization(final String applicationKey, final String branchid,
+                                            final String environment, final Boolean verify) {
         displayLog("workmanager startInitialization " + verify);
         try {
             HashMap<String, String> loans = new HashMap<>();
@@ -240,6 +246,8 @@ public final class OkVerify extends ContentProvider {
             dataProvider.insertStuff("applicationKey", applicationKey);
             dataProvider.insertStuff("branchid", branchid);
             dataProvider.insertStuff("environment", environment);
+
+
         } catch (Exception io) {
 
         } finally {
@@ -319,6 +327,18 @@ public final class OkVerify extends ContentProvider {
 
     }
 
+    public static void verify(@NonNull String addressId, @NonNull Double latitude, @NonNull Double longitude){
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(COLUMN_LAT, latitude);
+        contentValues.put(COLUMN_LNG, longitude);
+        contentValues.put(COLUMN_CLAIMUALID, addressId);
+        Long i = dataProvider.insertAddressList(contentValues);
+        displayLog("insert address "+i);
+        io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true);
+        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+    }
+
+    /*
     public static void customize(@NonNull String appColorTheme, @NonNull String appName, @NonNull String appLogo,
                                  @NonNull String appBarColor, @NonNull Boolean appBarVisibility,
                                  @NonNull Boolean enableStreetView) {
@@ -382,22 +402,7 @@ public final class OkVerify extends ContentProvider {
 
 
         try {
-            /*
-            Boolean production = false;
-            if (appkey != null) {
-                if (appkey.equalsIgnoreCase("r:b59a93ba7d80a95d89dff8e4c52e259a")) {
 
-                } else {
-                    production = true;
-                }
-            } else {
-                production = true;
-            }
-
-            final Boolean productionVersion = production;
-            displayLog("things went ok with send to omtm identify");
-
-            */
             try {
                 io.okverify.android.callback.SegmentTrackCallBack segmentTrackCallBack = new io.okverify.android.callback.SegmentTrackCallBack() {
                     @Override
@@ -416,38 +421,7 @@ public final class OkVerify extends ContentProvider {
                 JSONObject trackjson = new JSONObject();
                 String environment = dataProvider.getPropertyValue("environment");
                 trackjson.put("environment", environment);
-                /*
-                if (environment != null) {
-                    if (environment.length() > 0) {
-                        if (environment.equalsIgnoreCase("PROD")) {
-                            trackjson.put("environment", "PROD");
-                        } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-                            trackjson.put("environment", "DEVMASTER");
-                        } else if (environment.equalsIgnoreCase("SANDBOX")) {
-                            trackjson.put("environment", "SANDBOX");
-                        } else {
-                            trackjson.put("environment", "PROD");
-                        }
-                    } else {
-                        trackjson.put("environment", "PROD");
-                    }
-                } else {
-                    trackjson.put("environment", "PROD");
-                }
-                */
-                /*
-                if(productionVersion){
-                    trackjson.put("environment", "PROD");
-                }
-                else if(DEVMASTER){
-                    trackjson.put("environment", "DEVMASTER");
-                }else if(SANDBOX){
-                    trackjson.put("environment", "SANDBOX");
-                }
-                else{
-                    trackjson.put("environment", "PROD");
-                }
-                */
+
                 trackjson.put("event", "SDK Customize");
 
                 trackjson.put("action", "customization");
@@ -473,6 +447,7 @@ public final class OkVerify extends ContentProvider {
 
 
     }
+    */
 
     /*
     public static void displayClient(OkVerifyCallback okHiCallback, JSONObject jsonObject) {
@@ -517,6 +492,7 @@ public final class OkVerify extends ContentProvider {
     }
 */
 
+    /*
     private static void startActivity(OkVerifyCallback okVerifyCallback, JSONObject jsonObject) {
         callback = okVerifyCallback;
         firstname = jsonObject.optString("firstName");
@@ -559,6 +535,7 @@ public final class OkVerify extends ContentProvider {
         }
 
     }
+    */
 
     private static String checkPermissionCause() {
 

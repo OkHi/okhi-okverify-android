@@ -11,12 +11,16 @@ import android.util.Log;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "io.okverify.android.sdk.database.db";
-    private static final int DATABASE_VERSION = 11;
+    private static final int DATABASE_VERSION = 12;
 
     private static final String DATABASE_CREATE_RUNLIST =
             "create table " + io.okverify.android.utilities.Constants.TABLE_NAME_RUNLIST + " (" +
 
                     io.okverify.android.utilities.Constants.COLUMN_ID + " integer primary key autoincrement, " +
+                    io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_LAT + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_LNG + " REAL, " +
+                    /*
                     io.okverify.android.utilities.Constants.COLUMN_CUSTOMERNAME + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_AFFILIATION + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER + " VARCHAR, " +
@@ -61,6 +65,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     io.okverify.android.utilities.Constants.COLUMN_LASTUSED + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_LOCATIONNAME + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_UNIQUEID + " VARCHAR, " +
+                    */
                     " UNIQUE(" + io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + ") ON CONFLICT REPLACE);";
 
     private static final String DATABASE_CREATE_STUFF =

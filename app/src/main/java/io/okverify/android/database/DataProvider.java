@@ -64,7 +64,11 @@ public class DataProvider {
     private io.okverify.android.datamodel.AddressItem cursorToAddressListItem(Cursor cursor) {
 
         io.okverify.android.datamodel.AddressItem addressItem = new io.okverify.android.datamodel.AddressItem();
+        addressItem.setUalid(cursor.getString(1));
+        addressItem.setLat(cursor.getDouble(2));
 
+        addressItem.setLng(cursor.getDouble(3));
+        /*
         addressItem.setCustomername(cursor.getString(1));
         addressItem.setAffiliation(cursor.getString(2));
         addressItem.setPhonecustomer(cursor.getString(3));
@@ -109,6 +113,8 @@ public class DataProvider {
         addressItem.setLastused(cursor.getString(35));
         addressItem.setLocationName(cursor.getString(35));
         addressItem.setUniqueId(cursor.getString(36));
+        */
+
 
         //displayLog("floor "+addressItem.getFloor());
         //displayLog("unit "+addressItem.getUnit());
