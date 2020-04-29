@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -260,7 +259,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             .setNotificationResponsiveness(12000)
                             // Set the circular region of this geofence.
                             .setCircularRegion(lat, lng, 500)
-
+                            .setLoiteringDelay(30000)
                             // Set the expiration duration of the geofence. This geofence gets automatically
                             // removed after this period of time.
                             .setExpirationDuration(NEVER_EXPIRE)
@@ -268,7 +267,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             // Set the transition types of interest. Alerts are only generated for these
                             // transition. We track entry and exit transitions in this sample.
                             .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                                    Geofence.GEOFENCE_TRANSITION_EXIT)
+                                    Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
 
                             // Create the geofence.
                             .build());
@@ -346,7 +345,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                                 displayLog("error attaching afl to ual " + e1.toString());
                             }
                         } else {
-                            displayLog("addgeofences is not successful");
+                            displayLog("addgeofences is not successful ");
                             // Get the status code for the error and log it using a user-friendly message.
                             String errorMessage = io.okverify.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
                             //Log.w(TAG, errorMessage);
@@ -372,6 +371,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
+                displayLog("add geofence failure "+e.toString());
 
             }
         }).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -441,6 +441,6 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

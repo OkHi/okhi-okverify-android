@@ -1,5 +1,6 @@
 package io.okverify.android.services;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -12,7 +13,6 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.core.app.JobIntentService;
 
@@ -33,6 +33,13 @@ import io.okverify.android.asynctask.AnonymoussigninTask;
 import io.okverify.android.asynctask.TransitsTask;
 import io.okverify.android.callback.AuthtokenCallback;
 import io.okverify.android.callback.TransitsCallBack;
+import io.okverify.android.datamodel.OrderItem;
+
+import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
+import static io.okverify.android.utilities.Constants.COLUMN_EVENTTIME;
+import static io.okverify.android.utilities.Constants.COLUMN_LAT;
+import static io.okverify.android.utilities.Constants.COLUMN_LNG;
+import static io.okverify.android.utilities.Constants.COLUMN_TRANSIT;
 
 
 public class GeofenceTransitionsJobIntentService extends JobIntentService {
@@ -139,7 +146,34 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog(geofenceTransitionDetails);
                 sendSMS(geofenceTransitionDetails);
             }
-        } else {
+        } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
+            Location locationA = geofencingEvent.getTriggeringLocation();
+            try {
+
+
+                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "dwell",locationA.getProvider());
+            } catch (Exception e) {
+                displayLog("error updating database " + e.toString());
+            }
+
+            // Get the geofences that were triggered. A single event can trigger multiple geofences.
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+
+            // Get the transition details as a String.
+            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
+                    triggeringGeofences);
+
+            // Send notification and log the transition details.
+            if (locationA.getAccuracy() > 100) {
+                sendNotification("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                displayLog("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                sendSMS("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+            } else {
+                sendNotification(geofenceTransitionDetails);
+                displayLog(geofenceTransitionDetails);
+                sendSMS(geofenceTransitionDetails);
+            }
+        }else {
             dataProvider.insertStuff("lastGeofenceTrigger", null);
             // Log the error.
             displayLog(getString(io.okverify.android.R.string.geofence_transition_invalid_type, geofenceTransition));
@@ -250,6 +284,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 return getString(io.okverify.android.R.string.geofence_transition_entered);
             case Geofence.GEOFENCE_TRANSITION_EXIT:
                 return getString(io.okverify.android.R.string.geofence_transition_exited);
+            case Geofence.GEOFENCE_TRANSITION_DWELL:
+                return "Dwell";
             default:
                 return getString(io.okverify.android.R.string.unknown_geofence_transition);
         }
@@ -689,6 +725,53 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
         displayLog(" parse object save ");
 
+        List<OrderItem> orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
+        displayLog("orderitems "+orderItems.size());
+        if(orderItems != null){
+            displayLog("five");
+            if(orderItems.size() > 0){
+                displayLog("six");
+                String previousevent = orderItems.get(0).getState();
+                displayLog(previousevent);
+                if(previousevent.equalsIgnoreCase(parseObject.getString("transition"))){
+                    displayLog(previousevent+" previous event equals current event "+parseObject.getString("transition"));
+                    Long eventtime = orderItems.get(0).getCreatedat();
+                    displayLog(""+eventtime);
+                    Long duration = System.currentTimeMillis() - eventtime;
+                    displayLog(""+duration);
+                    if(duration <= 1800000){
+                        displayLog("duration is less than 30mins");
+
+                    }
+                    else{
+                        displayLog("one");
+                        sendTransit(parseObject,lat,lng);
+                    }
+                }
+                else {
+                    displayLog("two");
+                    sendTransit(parseObject,lat,lng);
+                }
+            }
+            else{
+                displayLog("three");
+                sendTransit(parseObject,lat,lng);
+            }
+        }
+        else{
+            displayLog("four");
+            sendTransit(parseObject,lat,lng);
+        }
+
+
+
+
+
+    }
+
+    private void sendTransit(final ParseObject parseObject, final double lat, final double lng){
+        displayLog("sendTransit called");
+
         AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
             @Override
             public void querycomplete(String response, boolean success) {
@@ -704,6 +787,15 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                             public void querycomplete(String response, boolean status) {
                                 if(status){
                                     displayLog("transit success "+response);
+                                    ContentValues contentValues = new ContentValues();
+                                    contentValues.put(COLUMN_LAT, lat);
+                                    contentValues.put(COLUMN_LNG, lng);
+                                    contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
+                                    contentValues.put(COLUMN_EVENTTIME, ""+System.currentTimeMillis());
+                                    contentValues.put(COLUMN_TRANSIT, parseObject.getString("transition"));
+
+                                    Long i = dataProvider.insertOrderList(contentValues);
+                                    displayLog("new event time inserted successfully "+i);
                                 }
                                 else{
                                     displayLog("transit error "+response);
@@ -725,123 +817,12 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             }
         };
 
-        //"i3c5W92cB8"
         String clientkey = dataProvider.getPropertyValue("applicationKey");
         String branchid = dataProvider.getPropertyValue("branchid");
         String phonenumber = dataProvider.getPropertyValue("phonenumber");
         AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,branchid,clientkey,
                 "verify",phonenumber);
         anonymoussigninTask.execute();
-
-        /*
-        try {
-            parseObject.save();
-            try {
-                HashMap<String, String> loans = new HashMap<>();
-                loans.put("uniqueId", uniqueId);
-                loans.put("phonenumber", phonenumber);
-                HashMap<String, String> parameters = new HashMap<>();
-                parameters.put("eventName", "Data Collection Service");
-                parameters.put("subtype", "saveData");
-                parameters.put("type", "parse");
-                parameters.put("onObject", "success");
-                parameters.put("view", "worker");
-
-                try {
-                    parameters.put("ualId", parseObject.getString("ualId"));
-                    parameters.put("address", parseObject.getString("address"));
-                    parameters.put("latitude", "" + parseObject.getDouble("latitude"));
-                    parameters.put("longitude", "" + parseObject.getDouble("longitude"));
-                    parameters.put("gpsAccuracy", "" + parseObject.getDouble("gpsAccuracy"));
-                    Location location2 = new Location("geohash");
-                    location2.setLatitude(lat);
-                    location2.setLongitude(lng);
-
-                    io.okverify.android.utilities.geohash.GeoHash hash = io.okverify.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
-                    parameters.put("location", hash.toString());
-                } catch (Exception e) {
-                    displayLog("geomap error " + e.toString());
-                }
-
-                sendEvent(parameters, loans, "3");
-            } catch (Exception e1) {
-                displayLog("error attaching afl to ual " + e1.toString());
-            }
-            displayLog(" parse object saved successfully ");
-        } catch (ParseException e) {
-            displayLog("error saving parse object " + e.toString());
-            parseObject.saveEventually(new SaveCallback() {
-                @Override
-                public void done(ParseException e) {
-                    if (e == null) {
-                        displayLog(parseObject.getObjectId() + " save parseobject success " + parseObject.getString("ualId"));
-                        try {
-                            HashMap<String, String> loans = new HashMap<>();
-                            loans.put("uniqueId", uniqueId);
-                            loans.put("phonenumber", phonenumber);
-                            HashMap<String, String> parameters = new HashMap<>();
-                            parameters.put("eventName", "Data Collection Service");
-                            parameters.put("subtype", "saveData");
-                            parameters.put("type", "parse");
-                            parameters.put("onObject", "success");
-                            parameters.put("view", "worker");
-                            try {
-                                parameters.put("ualId", parseObject.getString("ualId"));
-                                parameters.put("address", parseObject.getString("address"));
-                                parameters.put("latitude", "" + parseObject.getDouble("latitude"));
-                                parameters.put("longitude", "" + parseObject.getDouble("longitude"));
-                                parameters.put("gpsAccuracy", "" + parseObject.getDouble("gpsAccuracy"));
-                                Location location2 = new Location("geohash");
-                                location2.setLatitude(lat);
-                                location2.setLongitude(lng);
-
-                                io.okverify.android.utilities.geohash.GeoHash hash = io.okverify.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
-                                parameters.put("location", hash.toString());
-                            } catch (Exception e2) {
-                                displayLog("geomap error " + e2.toString());
-                            }
-                            sendEvent(parameters, loans, "4");
-                        } catch (Exception e1) {
-                            displayLog("error attaching afl to ual " + e1.toString());
-                        }
-
-                    } else {
-                        try {
-                            HashMap<String, String> loans = new HashMap<>();
-                            loans.put("uniqueId", uniqueId);
-                            loans.put("phonenumber", phonenumber);
-                            HashMap<String, String> parameters = new HashMap<>();
-                            parameters.put("eventName", "Data Collection Service");
-                            parameters.put("subtype", "saveData");
-                            parameters.put("type", "parse");
-                            parameters.put("onObject", "failure");
-                            parameters.put("view", "worker");
-                            try {
-                                parameters.put("ualId", parseObject.getString("ualId"));
-                                parameters.put("address", parseObject.getString("address"));
-                                parameters.put("latitude", "" + parseObject.getDouble("latitude"));
-                                parameters.put("longitude", "" + parseObject.getDouble("longitude"));
-                                parameters.put("gpsAccuracy", "" + parseObject.getDouble("gpsAccuracy"));
-                                Location location2 = new Location("geohash");
-                                location2.setLatitude(lat);
-                                location2.setLongitude(lng);
-
-                                io.okverify.android.utilities.geohash.GeoHash hash = io.okverify.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
-                                parameters.put("location", hash.toString());
-                            } catch (Exception e2) {
-                                displayLog("geomap error " + e2.toString());
-                            }
-                            parameters.put("error", e.toString());
-                            sendEvent(parameters, loans, "5");
-                        } catch (Exception e1) {
-                            displayLog("error attaching afl to ual " + e1.toString());
-                        }
-                        displayLog("save parseobject error " + e.toString());
-                    }
-                }
-            });
-        }
-        */
     }
 
     private String getDeviceModelAndBrand() {
@@ -991,7 +972,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     */
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
 }

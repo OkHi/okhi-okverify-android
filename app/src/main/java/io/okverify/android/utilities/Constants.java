@@ -102,9 +102,12 @@ public class Constants {
     public static final String COLUMN_CREATEDON = "createdon";
     public static final String COLUMN_LASTUSED = "lastused";
     public static final String COLUMN_UNIQUEID = "uniqueId";
+    public static final String COLUMN_TRANSIT = "transit";
+    public static final String COLUMN_EVENTTIME = "eventtime";
 
-    public static final String TABLE_NAME_RUNLIST = "artcafferunlist";
-    public static final String TABLE_NAME_STUFF = "artcaffestuff";
+    public static final String TABLE_NAME_RUNLIST = "runlist";
+    public static final String TABLE_NAME_STUFF = "stuff";
+    public static final String TABLE_NAME_TRANSITS = "transits";
 
     public static final String appLayer = "client";
     public static final String product = "okHeartAndroidSDK";

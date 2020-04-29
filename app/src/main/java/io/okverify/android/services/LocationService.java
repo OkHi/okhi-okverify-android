@@ -1,24 +1,17 @@
 package io.okverify.android.services;
 
-import android.app.Notification;
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.IBinder;
 import android.provider.Settings;
 
 import androidx.annotation.Nullable;
-import androidx.core.app.NotificationCompat;
 import androidx.work.BackoffPolicy;
 import androidx.work.Constraints;
 import androidx.work.Data;
-import androidx.work.ExistingPeriodicWorkPolicy;
 import androidx.work.NetworkType;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
@@ -87,18 +80,14 @@ public class LocationService extends Service {
     }
 
     private void startNotification() {
-
+/*
         Bitmap largeIconBitmap = BitmapFactory.decodeResource(this.getResources(), io.okverify.android.R.drawable.ic_launcher_foreground);
 
         String channelId = this.getString(io.okverify.android.R.string.default_notification_channel_id);
-        Intent playIntent = new Intent(this, io.okverify.android.activity.SettingsActivity.class);
+        Intent playIntent = new Intent(this, io.okverify.android.activity.M.class);
 
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, playIntent, 0);
-        /*
-        NotificationCompat.Action playAction = new NotificationCompat.Action(android.R.drawable.ic_media_play,
-                HtmlCompat.fromHtml("<font color=\"" + ContextCompat.getColor(this, R.color.newdarkgreen) +
-                        "\">HIDE</font>", HtmlCompat.FROM_HTML_MODE_LEGACY), pendingIntent);
-        */
+
 
 
         //Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
@@ -136,6 +125,7 @@ public class LocationService extends Service {
 
         startForeground(32, notification);
         startLoop();
+        */
 
 
     }
@@ -201,8 +191,8 @@ public class LocationService extends Service {
     }
 
     private void decideWhatToStart() {
-        io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(this, false);
-        geofenceTask.execute();
+        //io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(this, false);
+        //geofenceTask.execute();
         List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         displayLog("addressItemList " + addressItemList.size());
         if (addressItemList.size() > 0) {
@@ -321,7 +311,7 @@ public class LocationService extends Service {
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
                             .build();
 
-            WorkManager.getInstance().enqueueUniquePeriodicWork(uniqueId, ExistingPeriodicWorkPolicy.KEEP, request);
+            //WorkManager.getInstance().enqueueUniquePeriodicWork(uniqueId, ExistingPeriodicWorkPolicy.KEEP, request);
 
         } catch (Exception e) {
             displayLog("my worker error " + e.toString());
@@ -361,7 +351,7 @@ public class LocationService extends Service {
                             .setBackoffCriteria(BackoffPolicy.LINEAR, 30, TimeUnit.SECONDS)
                             .build();
 
-            WorkManager.getInstance().enqueueUniquePeriodicWork(uniqueId, ExistingPeriodicWorkPolicy.REPLACE, request);
+            //WorkManager.getInstance().enqueueUniquePeriodicWork(uniqueId, ExistingPeriodicWorkPolicy.REPLACE, request);
 
 
         } catch (Exception e) {

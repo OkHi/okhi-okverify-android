@@ -9,6 +9,8 @@ import android.database.sqlite.SQLiteDatabase;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.okverify.android.utilities.Constants;
+
 
 /**
  * Created by ramogiochola on 6/18/16.
@@ -59,6 +61,50 @@ public class DataProvider {
             close();
         }
         return insertId;
+    }
+
+
+    public long insertOrderList(ContentValues values) {
+        displayLog(" insertOrderList  with values method called");
+
+        long insertId = 0;
+
+        try {
+            try {
+                openWrite();
+            } catch (Exception e) {
+                displayLog("insertOrderList openWrite error " + e.toString());
+            }
+            displayLog("after write before insert");
+            insertId = database.insert(Constants.TABLE_NAME_TRANSITS, null, values);
+            displayLog("insertOrderList method executed " + insertId);
+
+
+        } catch (SQLException sqle) {
+            displayLog(" insertOrderList error " + sqle.toString());
+        } finally {
+            close();
+        }
+        return insertId;
+    }
+
+
+    private io.okverify.android.datamodel.OrderItem cursorToOrderListItem(Cursor cursor) {
+
+        /*
+             io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_LAT + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_LNG + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_TRANSIT + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_EVENTTIME + " REAL, " +
+         */
+
+        io.okverify.android.datamodel.OrderItem addressItem = new io.okverify.android.datamodel.OrderItem();
+        addressItem.setClaimualid(cursor.getString(1));
+        addressItem.setState(cursor.getString(5));
+        addressItem.setCreatedat(cursor.getLong(6));
+        return addressItem;
     }
 
     private io.okverify.android.datamodel.AddressItem cursorToAddressListItem(Cursor cursor) {
@@ -258,6 +304,42 @@ public class DataProvider {
             close();
         }
     }
+
+    public List<io.okverify.android.datamodel.OrderItem> getOrderListItem(String deliveryId) {
+        displayLog("List<OrderItem> getOrderListItem(" + deliveryId + ") method called");
+
+        List<io.okverify.android.datamodel.OrderItem> ArtcaffeRunList = new ArrayList<io.okverify.android.datamodel.OrderItem>();
+
+        String selection = io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
+        String[] selectionArgs = {"" + deliveryId};
+
+        try {
+
+            try {
+                openRead();
+            } catch (Exception e) {
+                displayLog("getOrderListItem openRead error " + e.toString());
+            }
+
+            Cursor cursor = database.query(Constants.TABLE_NAME_TRANSITS, null, selection, selectionArgs, null, null, null);
+            displayLog("getOrderListItem method executed");
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                io.okverify.android.datamodel.OrderItem AddressItem = cursorToOrderListItem(cursor);
+                ArtcaffeRunList.add(AddressItem);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        } catch (SQLException sqle) {
+            displayLog("getOrderListItem error " + sqle.toString());
+
+        } finally {
+            close();
+        }
+        return ArtcaffeRunList;
+
+    }
+
 
     public List<io.okverify.android.datamodel.AddressItem> getAddressListItem(String deliveryId) {
         displayLog("List<AddressItem> getAddressListItem(" + deliveryId + ") method called");

@@ -3,7 +3,6 @@ package io.okverify.android.asynctask;
 import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Base64;
-import android.util.Log;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -86,6 +85,6 @@ public class AnonymoussigninTask extends AsyncTask<Void, Void, String> {
 
     }
     private void displayLog(String log){
-        Log.i("AnonymoussigninTask", log);
+        //Log.i("AnonymoussigninTask", log);
     }
 }

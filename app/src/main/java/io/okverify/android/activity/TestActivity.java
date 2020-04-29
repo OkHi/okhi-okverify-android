@@ -2,7 +2,6 @@ package io.okverify.android.activity;
 
 import android.content.pm.PackageManager;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,12 +9,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import org.json.JSONObject;
-
 import io.okverify.android.OkVerify;
 import io.okverify.android.R;
-import io.okverify.android.asynctask.AnonymoussigninTask;
-import io.okverify.android.callback.AuthtokenCallback;
+import io.okverify.android.callback.OkVerifyCallback;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -27,7 +23,16 @@ public class TestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        OkVerify.initialize("4d380065-71e5-48b8-8fb3-29fe61299c4b", "yhCvQnGG1z", "devmaster");
+        OkVerifyCallback okVerifyCallback = new OkVerifyCallback() {
+            @Override
+            public void querycomplete(String result) {
+                displayLog(result);
+            }
+        };
+        OkVerify.verify(okVerifyCallback,"+254713567907","Vt85Vc2KAd",-1.258389,36.7991747);
 
+        /*
         AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
             @Override
             public void querycomplete(String response, boolean success) {
@@ -57,6 +62,7 @@ public class TestActivity extends AppCompatActivity {
         AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,
                 "xuAGglxifQ", "ba31a15f-d817-4cd4-bc50-e469de0d396a" , "verify","+254713567907");
         anonymoussigninTask.execute();
+        */
         //OkVerify.initialize("r:4e66bc42f0aa3d96fc3dfd5dae088262", "branchid", "sandbox");
         //OkVerify.customize("rgb(255,227,237)", "okhi", "https://cdn.okhi.co/icon.png", "rgb(255,227,237)", true, true);
         //OkVerify.customize("rgb(0, 1, 13)", "okhi", "https://lh3.ggpht.com/GE2EnJs1M1Al9_Ol2Q1AV0VdSsvjR2dsVWO_2ARuaGVS-CJUhJGbEt_OMHlvR2b8zg=s180", "rgb(255, 0, 0)", true, true);
@@ -244,7 +250,7 @@ public class TestActivity extends AppCompatActivity {
 
 
     private void displayLog(String log) {
-        Log.i("TestActivity", log);
+        //Log.i("TestActivity", log);
     }
 
 }

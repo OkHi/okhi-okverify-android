@@ -1,7 +1,6 @@
 package io.okverify.android;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.ContentProvider;
 import android.content.ContentValues;
@@ -12,7 +11,6 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -32,7 +30,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashMap;
 
 import io.okverify.android.callback.OkVerifyCallback;
 
@@ -225,22 +222,7 @@ public final class OkVerify extends ContentProvider {
     private static void startInitialization(final String applicationKey, final String branchid,
                                             final String environment, final Boolean verify) {
         displayLog("workmanager startInitialization " + verify);
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Android SDK");
-            parameters.put("type", "initialize");
-            parameters.put("subtype", "initialize");
-            parameters.put("onObject", "okHeartAndroidSDK");
-            parameters.put("view", "app");
-            parameters.put("appKey", "" + applicationKey);
-            parameters.put("branchid", branchid);
-            parameters.put("environment", environment);
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
+
         try {
             dataProvider.insertStuff("verify", "" + verify);
             appkey = applicationKey;
@@ -324,22 +306,30 @@ public final class OkVerify extends ContentProvider {
         } catch (Exception jse) {
             displayLog("jsonexception jse " + jse.toString());
         }
-        io.okverify.android.utilities.ConfigurationFile configurationFile = new io.okverify.android.utilities.ConfigurationFile(mContext, environment);
+        //io.okverify.android.utilities.ConfigurationFile configurationFile = new io.okverify.android.utilities.ConfigurationFile(mContext, environment);
 
     }
 
-    public static void verify(@NonNull String phonenumber, @NonNull String addressId, @NonNull Double latitude, @NonNull Double longitude){
-        dataProvider.insertStuff("phonenumber", phonenumber);
-        ContentValues contentValues = new ContentValues();
-        contentValues.put(COLUMN_LAT, latitude);
-        contentValues.put(COLUMN_LNG, longitude);
-        contentValues.put(COLUMN_CLAIMUALID, addressId);
-        contentValues.put(COLUMN_PHONECUSTOMER, phonenumber);
+    public static void verify(@NonNull OkVerifyCallback okVerifyCallback, @NonNull String phonenumber, @NonNull String addressId, @NonNull Double latitude, @NonNull Double longitude){
+        if(checkPermission()){
+            dataProvider.insertStuff("phonenumber", phonenumber);
+            ContentValues contentValues = new ContentValues();
+            contentValues.put(COLUMN_LAT, latitude);
+            contentValues.put(COLUMN_LNG, longitude);
+            contentValues.put(COLUMN_CLAIMUALID, addressId);
+            contentValues.put(COLUMN_PHONECUSTOMER, phonenumber);
 
-        Long i = dataProvider.insertAddressList(contentValues);
-        displayLog("insert address "+i);
-        io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true);
-        geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            Long i = dataProvider.insertAddressList(contentValues);
+            displayLog("insert address "+i);
+            io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true);
+            geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            okVerifyCallback.querycomplete("Verification in progress");
+        }
+        else{
+            String error = checkPermissionCause();
+            okVerifyCallback.querycomplete(error);
+        }
+
     }
 
     /*
@@ -543,27 +533,8 @@ public final class OkVerify extends ContentProvider {
 
     private static String checkPermissionCause() {
 
-        String environment = dataProvider.getPropertyValue("environment");
-/*
-        if (environment != null) {
-            if (environment.length() > 0) {
-                if (environment.equalsIgnoreCase("PROD")) {
+        //String environment = dataProvider.getPropertyValue("environment");
 
-                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-
-                } else if (environment.equalsIgnoreCase("SANDBOX")) {
-
-                } else {
-
-                }
-            } else {
-                environment = "PROD";
-            }
-        } else {
-            environment = "PROD";
-        }
-
-*/
         String permission;
 
         boolean permissionAccessFineLocationApproved =
@@ -571,17 +542,7 @@ public final class OkVerify extends ContentProvider {
                         == PackageManager.PERMISSION_GRANTED;
 
         if (permissionAccessFineLocationApproved) {
-            try {
-                io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
-                HashMap<String, String> loans = new HashMap<>();
-                loans.put("uniqueId", uniqueId);
-                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
-                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
-                        "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("app_interswitch", null, null, "interswitch", environment);
-            } catch (Exception e) {
-                displayLog("event.submit okanalytics error " + e.toString());
-            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 boolean backgroundLocationPermissionApproved =
                         ActivityCompat.checkSelfPermission(mContext,
@@ -592,17 +553,7 @@ public final class OkVerify extends ContentProvider {
                     // App can access location both in the foreground and in the background.
                     // Start your service that doesn't have a foreground service type
                     // defined.
-                    try {
-                        io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
-                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionApproved",
-                                "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("app_interswitch", null, null, "interswitch", environment);
-                    } catch (Exception e) {
-                        displayLog("event.submit okanalytics error " + e.toString());
-                    }
+
                     permission = "Manifest.permission.ACCESS_BACKGROUND_LOCATION granted";
 
                 } else {
@@ -610,17 +561,7 @@ public final class OkVerify extends ContentProvider {
                     // warning the user that your app must have all-the-time access to
                     // location in order to function properly. Then, request background
                     // location.
-                    try {
-                        io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("type", " Manifest.permission.ACCESS_BACKGROUND_LOCATION");
-                        okAnalytics.initializeDynamicParameters("app", "backgroundLocationPermissionNotApproved",
-                                "permission", "mainActivityView", null, loans);
-                        okAnalytics.sendToAnalytics("app_interswitch", null, null, "interswitch", environment);
-                    } catch (Exception e) {
-                        displayLog("event.submit okanalytics error " + e.toString());
-                    }
+
                     permission = "Manifest.permission.ACCESS_BACKGROUND_LOCATION not granted";
                 }
             } else {
@@ -629,42 +570,14 @@ public final class OkVerify extends ContentProvider {
         } else {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
-            try {
-                io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
-                HashMap<String, String> loans = new HashMap<>();
-                loans.put("uniqueId", uniqueId);
-                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
-                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationNotApproved",
-                        "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("app_interswitch", null, null, "interswitch", environment);
-            } catch (Exception e) {
-                displayLog("event.submit okanalytics error " + e.toString());
-            }
+
             permission = "Manifest.permission.ACCESS_FINE_LOCATION not granted";
         }
         return permission;
     }
 
     public static boolean checkPermission() {
-        String environment = dataProvider.getPropertyValue("environment");
-
-        if (environment != null) {
-            if (environment.length() > 0) {
-                if (environment.equalsIgnoreCase("PROD")) {
-
-                } else if (environment.equalsIgnoreCase("DEVMASTER")) {
-
-                } else if (environment.equalsIgnoreCase("SANDBOX")) {
-
-                } else {
-
-                }
-            } else {
-                environment = "PROD";
-            }
-        } else {
-            environment = "PROD";
-        }
+        //String environment = dataProvider.getPropertyValue("environment");
 
         Boolean permission;
 
@@ -673,17 +586,7 @@ public final class OkVerify extends ContentProvider {
                         == PackageManager.PERMISSION_GRANTED;
 
         if (permissionAccessFineLocationApproved) {
-            try {
-                io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
-                HashMap<String, String> loans = new HashMap<>();
-                loans.put("uniqueId", uniqueId);
-                loans.put("type", "Manifest.permission.ACCESS_FINE_LOCATION");
-                okAnalytics.initializeDynamicParameters("app", "permissionAccessFineLocationApproved",
-                        "permission", "mainActivityView", null, loans);
-                okAnalytics.sendToAnalytics("app_interswitch", null, null, "interswitch", environment);
-            } catch (Exception e) {
-                displayLog("event.submit okanalytics error " + e.toString());
-            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 boolean backgroundLocationPermissionApproved =
                         ActivityCompat.checkSelfPermission(mContext,
@@ -694,6 +597,7 @@ public final class OkVerify extends ContentProvider {
                     // App can access location both in the foreground and in the background.
                     // Start your service that doesn't have a foreground service type
                     // defined.
+                    /*
                     try {
                         io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
@@ -705,6 +609,7 @@ public final class OkVerify extends ContentProvider {
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
+                    */
                     permission = true;
 
                 } else {
@@ -712,6 +617,7 @@ public final class OkVerify extends ContentProvider {
                     // warning the user that your app must have all-the-time access to
                     // location in order to function properly. Then, request background
                     // location.
+                    /*
                     try {
                         io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
                         HashMap<String, String> loans = new HashMap<>();
@@ -723,6 +629,7 @@ public final class OkVerify extends ContentProvider {
                     } catch (Exception e) {
                         displayLog("event.submit okanalytics error " + e.toString());
                     }
+                    */
                     permission = false;
                 }
             } else {
@@ -731,6 +638,7 @@ public final class OkVerify extends ContentProvider {
         } else {
             // App doesn't have access to the device's location at all. Make full request
             // for permission.
+            /*
             try {
                 io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(mContext, environment);
                 HashMap<String, String> loans = new HashMap<>();
@@ -742,6 +650,7 @@ public final class OkVerify extends ContentProvider {
             } catch (Exception e) {
                 displayLog("event.submit okanalytics error " + e.toString());
             }
+            */
             permission = false;
         }
         return permission;
@@ -892,7 +801,7 @@ public final class OkVerify extends ContentProvider {
         }
     */
     private static void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
     private static void writeToFile(String customString) {
@@ -1007,7 +916,7 @@ public final class OkVerify extends ContentProvider {
     public static void setCallback(OkVerifyCallback callback) {
         OkVerify.callback = callback;
     }
-
+/*
     public static void requestPermission(@NonNull Activity activity, @NonNull int MY_PERMISSIONS_ACCESS_FINE_LOCATION) {
         String environment = dataProvider.getPropertyValue("environment");
         if (environment != null) {
@@ -1151,6 +1060,7 @@ public final class OkVerify extends ContentProvider {
             displayLog("error sending photoexpanded analytics event " + e.toString());
         }
     }
+    */
     /*
 
     private static void decideWhatToStart() {

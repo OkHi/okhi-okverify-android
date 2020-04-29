@@ -5,13 +5,28 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
+import io.okverify.android.utilities.Constants;
+
 /**
  * Created by ramogiochola on 6/18/16.
  */
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "io.okverify.android.sdk.database.db";
-    private static final int DATABASE_VERSION = 13;
+    private static final int DATABASE_VERSION = 17;
+
+
+    private static final String DATABASE_CREATE_TRANSITS =
+            "create table " + Constants.TABLE_NAME_TRANSITS + " (" +
+
+                    io.okverify.android.utilities.Constants.COLUMN_ID + " integer primary key autoincrement, " +
+                    io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_LAT + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_LNG + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_TRANSIT + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_EVENTTIME + " REAL, " +
+                    " UNIQUE(" + io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + ") ON CONFLICT REPLACE);";
 
     private static final String DATABASE_CREATE_RUNLIST =
             "create table " + io.okverify.android.utilities.Constants.TABLE_NAME_RUNLIST + " (" +
@@ -20,6 +35,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_LAT + " REAL, " +
                     io.okverify.android.utilities.Constants.COLUMN_LNG + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER + " VARCHAR, " +
                     /*
                     io.okverify.android.utilities.Constants.COLUMN_CUSTOMERNAME + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_AFFILIATION + " VARCHAR, " +
@@ -83,6 +99,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase database) {
         database.execSQL(DATABASE_CREATE_RUNLIST);
         database.execSQL(DATABASE_CREATE_STUFF);
+        database.execSQL(DATABASE_CREATE_TRANSITS);
     }
 
     @Override
@@ -92,6 +109,7 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                         + newVersion + ", which will destroy all old data");
         db.execSQL("DROP TABLE IF EXISTS " + io.okverify.android.utilities.Constants.TABLE_NAME_RUNLIST);
         db.execSQL("DROP TABLE IF EXISTS " + io.okverify.android.utilities.Constants.TABLE_NAME_STUFF);
+        db.execSQL("DROP TABLE IF EXISTS " + io.okverify.android.utilities.Constants.TABLE_NAME_TRANSITS);
         onCreate(db);
     }
 }

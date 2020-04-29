@@ -1,7 +1,6 @@
 package io.okverify.android.asynctask;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.parse.ParseObject;
 
@@ -71,7 +70,7 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             jsonObject.put("device_model", parseObject.get("model"));
             jsonObject.put("geo_point_source", parseObject.get("geofence"));
             //actualObject.put("geopoint_provider", parseObject.get("geopoint_provider"));
-            jsonObject.put("accuracy", parseObject.get("gpsAccuracy"));
+            jsonObject.put("gps_accuracy", parseObject.get("gpsAccuracy"));
             jsonObject.put("geo_point", geoPoint);
 
             transitsArray.put(jsonObject);
@@ -91,7 +90,10 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
         String results = "";
 
         try {
-            String appId, restApi, urlString;
+
+            //check the previous event, if its same otherwise call transit
+            //check the duration if its less than an hour dont proceed, if its more go ahead
+            String urlString;
 
             if (environment.equalsIgnoreCase("PROD")) {
                 urlString = "https://okhi.back4app.io/send-sms";
@@ -210,6 +212,6 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

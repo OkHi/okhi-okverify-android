@@ -1,13 +1,7 @@
 package io.okverify.android.utilities;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
 import android.location.Location;
-import android.net.wifi.WifiConfiguration;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
-import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Looper;
 import android.provider.Settings;
@@ -21,24 +15,16 @@ import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
-import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.LocationSettingsRequest;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.parse.ParseException;
-import com.parse.ParseGeoPoint;
 import com.parse.ParseObject;
 import com.parse.SaveCallback;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import static android.content.Context.BATTERY_SERVICE;
 
 public class MyWorker extends Worker {
 
@@ -69,8 +55,13 @@ public class MyWorker extends Worker {
 
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         dataProvider = new io.okverify.android.database.DataProvider(context);
-        environment = dataProvider.getPropertyValue("environment");
-        phonenumber = dataProvider.getPropertyValue("phonenumber");
+        try {
+            environment = dataProvider.getPropertyValue("environment");
+            phonenumber = dataProvider.getPropertyValue("phonenumber");
+        }
+        catch (Exception e){
+            displayLog("environment error "+e.toString());
+        }
 
 
         //geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
