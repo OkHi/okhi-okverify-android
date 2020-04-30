@@ -13,6 +13,7 @@ import android.os.BatteryManager;
 import android.os.Build;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.core.app.JobIntentService;
 
@@ -51,7 +52,9 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     private static final String CHANNEL_ID = "channel_01";
     //private static Context context;
     private static io.okverify.android.database.DataProvider dataProvider;
-    private static String uniqueId, environment, phonenumber;
+    private static String uniqueId;
+    //private static String environment;
+    //private static String phonenumber;
 
     /**
      * Convenience method for enqueuing work in to this service.
@@ -60,9 +63,9 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         enqueueWork(context, GeofenceTransitionsJobIntentService.class, JOB_ID, intent);
         //context = context;
         dataProvider = new io.okverify.android.database.DataProvider(context);
-        phonenumber = dataProvider.getPropertyValue("phonenumber");
+        //phonenumber = dataProvider.getPropertyValue("phonenumber");
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        environment = dataProvider.getPropertyValue("environment");
+       // environment = dataProvider.getPropertyValue("environment");
     }
 
     /**
@@ -339,7 +342,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         if (addressItemList.size() > 0) {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("transition", transition);
 
@@ -414,6 +417,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog(" error getting wifi info " + e.toString());
             }
 
+            /*
             try {
 
                 if (phonenumber != null) {
@@ -425,6 +429,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             } catch (Exception e) {
                 displayLog("error getting phonenumber " + e.toString());
             }
+            */
 
 
             try {
@@ -505,7 +510,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 parameters.put("appVersionCode", "" + io.okverify.android.BuildConfig.VERSION_CODE);
                 parameters.put("appVersionName", "" + io.okverify.android.BuildConfig.VERSION_NAME);
                 loans.put("uniqueId", uniqueId);
-                loans.put("phonenumber", phonenumber);
+                //loans.put("phonenumber", phonenumber);
                 //sendEvent(parameters, loans);
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
@@ -559,8 +564,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                         parameters.put("address", nestedData.toString());
                         parameters.put("ualId", addressItem.getUalid());
                         loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        sendEvent(parameters, loans, "1");
+                        //loans.put("phonenumber", phonenumber);
+                        //sendEvent(parameters, loans, "1");
                     } catch (Exception e) {
                         displayLog("OkAnalytics error " + e.toString());
                     }
@@ -577,7 +582,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("transition", transition);
             final Long timemilliseconds = System.currentTimeMillis();
@@ -630,6 +635,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog(" error getting wifi info " + e.toString());
             }
 
+            /*
             try {
 
                 if (phonenumber != null) {
@@ -640,6 +646,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             } catch (Exception e) {
                 displayLog("error getting phonenumber " + e.toString());
             }
+            */
             try {
                 boolean isPlugged = false;
                 BatteryManager bm = (BatteryManager) this.getSystemService(BATTERY_SERVICE);
@@ -711,8 +718,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 parameters.put("appVersionCode", "" + io.okverify.android.BuildConfig.VERSION_CODE);
                 parameters.put("appVersionName", "" + io.okverify.android.BuildConfig.VERSION_NAME);
                 loans.put("uniqueId", uniqueId);
-                loans.put("phonenumber", phonenumber);
-                sendEvent(parameters, loans, "2");
+                //loans.put("phonenumber", phonenumber);
+                //sendEvent(parameters, loans, "2");
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
@@ -937,8 +944,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         displayLog("titletext " + titleText.get("header") + " " + titleText.get("text"));
         return titleText;
     }
-
-
+    /*
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans, String one) {
         displayLog("environment " + environment);
         try {
@@ -948,6 +954,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             displayLog(one + " error sending photoexpanded analytics event " + e.toString());
         }
     }
+    */
 
     /*
     private String getDistance(Location locationA) {
@@ -972,7 +979,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     */
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
 }

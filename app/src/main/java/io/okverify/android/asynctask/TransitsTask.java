@@ -1,6 +1,7 @@
 package io.okverify.android.asynctask;
 
 import android.os.AsyncTask;
+import android.util.Log;
 
 import com.parse.ParseObject;
 
@@ -212,6 +213,6 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 }
