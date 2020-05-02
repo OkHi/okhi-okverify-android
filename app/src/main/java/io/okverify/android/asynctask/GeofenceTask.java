@@ -20,6 +20,7 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import static com.google.android.gms.location.Geofence.NEVER_EXPIRE;
 
@@ -169,50 +170,19 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     private void removeGeofences() {
         displayLog("removeGeofences");
-        populateGeofenceList();
-        /*
-        mGeofencingClient.removeGeofences(getGeofencePendingIntent())
+        List<String> geofenceList = new ArrayList<>();
+        geofenceList.add(ualId);
+
+        mGeofencingClient.removeGeofences(geofenceList)
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            //int messageId = getGeofencesAdded() ? R.string.geofences_added : R.string.geofences_removed;
-                            //Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
-                            try {
-                                HashMap<String, String> loans = new HashMap<>();
-                                loans.put("uniqueId", uniqueId);
-                                //loans.put("phonenumber", phonenumber);
-                                HashMap<String, String> parameters = new HashMap<>();
-                                parameters.put("eventName", "Data Collection Service");
-                                parameters.put("subtype", "removeGeofences");
-                                parameters.put("type", "success");
-                                parameters.put("onObject", "app");
-                                parameters.put("view", "geofenceAsyncTask");
-                                sendEvent(parameters, loans);
-                            } catch (Exception e1) {
-                                displayLog("error attaching afl to ual " + e1.toString());
-                            }
+                            displayLog("geofence removed successfully "+ualId);
                             populateGeofenceList();
                         } else {
-                            //Get the status code for the error and log it using a user-friendly message.
                             String errorMessage = io.okverify.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
-                            //Log.w(TAG, errorMessage);
-                            try {
-                                HashMap<String, String> loans = new HashMap<>();
-                                loans.put("uniqueId", uniqueId);
-                                //loans.put("phonenumber", phonenumber);
-                                loans.put("error", "" + errorMessage);
-                                HashMap<String, String> parameters = new HashMap<>();
-                                parameters.put("eventName", "Data Collection Service");
-                                parameters.put("subtype", "removeGeofences");
-                                parameters.put("type", "failure");
-                                parameters.put("onObject", "app");
-                                parameters.put("view", "geofenceAsyncTask");
-                                parameters.put("error", "" + errorMessage);
-                                sendEvent(parameters, loans);
-                            } catch (Exception e1) {
-                                displayLog("error attaching afl to ual " + e1.toString());
-                            }
+                            displayLog(ualId+" error removing geofence "+errorMessage);
                             populateGeofenceList();
                         }
 
@@ -220,7 +190,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                 }).addOnFailureListener(new OnFailureListener() {
             @Override
             public void onFailure(@NonNull Exception e) {
-
+                displayLog("error removing geofence "+e.toString());
             }
         }).addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
@@ -228,7 +198,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
             }
         });
-        */
+
     }
 
     private void populateGeofenceList() {
