@@ -321,7 +321,7 @@ public final class OkVerify extends ContentProvider {
 
             Long i = dataProvider.insertAddressList(contentValues);
             displayLog("insert address "+i);
-            io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true);
+            io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true, addressId, latitude, longitude);
             geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             okVerifyCallback.querycomplete("Verification in progress");
         }

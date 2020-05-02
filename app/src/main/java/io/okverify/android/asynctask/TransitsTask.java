@@ -72,6 +72,7 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             jsonObject.put("geo_point_source", parseObject.get("geofence"));
             //actualObject.put("geopoint_provider", parseObject.get("geopoint_provider"));
             jsonObject.put("gps_accuracy", parseObject.get("gpsAccuracy"));
+            jsonObject.put("accuracy", parseObject.get("gpsAccuracy"));
             jsonObject.put("geo_point", geoPoint);
 
             transitsArray.put(jsonObject);

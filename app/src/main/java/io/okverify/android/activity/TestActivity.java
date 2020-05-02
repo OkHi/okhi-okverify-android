@@ -24,6 +24,7 @@ public class TestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+
         OkVerify.initialize("4d380065-71e5-48b8-8fb3-29fe61299c4b", "yhCvQnGG1z", "devmaster");
         OkVerifyCallback okVerifyCallback = new OkVerifyCallback() {
             @Override
@@ -32,6 +33,19 @@ public class TestActivity extends AppCompatActivity {
             }
         };
         OkVerify.verify(okVerifyCallback,"+254713567907","Vt85Vc2KAd",-1.258389,36.7991747);
+
+
+/*
+        Location locationA = new Location("A");
+        locationA.setLatitude(50.97744956109898);
+        locationA.setLongitude(-0.6717689753974376);
+
+        Location locationB = new Location("B");
+        locationB.setLatitude(50.9782717);
+        locationB.setLongitude(0.6719783);
+
+        displayLog("distance "+locationA.distanceTo(locationB));
+        */
 
         /*
         AuthtokenCallback authtokenCallback = new AuthtokenCallback() {

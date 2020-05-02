@@ -26,9 +26,7 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import io.okverify.android.asynctask.AnonymoussigninTask;
 import io.okverify.android.asynctask.TransitsTask;
@@ -94,17 +92,25 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
             Location locationA = geofencingEvent.getTriggeringLocation();
 
+            try {
+                for(Geofence geofence :    geofencingEvent.getTriggeringGeofences()){
+                    updateDatabase(geofence.getRequestId(), locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit",locationA.getProvider());
+                    sendSMS("GPS accuracy " + locationA.getAccuracy() + " exit " + geofence.getRequestId());
+                }
 
+            } catch (Exception e) {
+                displayLog("error updating database " + e.toString());
+            }
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             try {
 
 
-                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit", locationA.getProvider());
+                //updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit", locationA.getProvider());
             } catch (Exception e) {
                 displayLog("error updating database " + e.toString());
             }
 
-
+/*
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
             // Get the transition details as a String.
@@ -120,45 +126,59 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog(geofenceTransitionDetails);
                 sendSMS(geofenceTransitionDetails);
             }
+            */
 
 
         } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_ENTER) {
             Location locationA = geofencingEvent.getTriggeringLocation();
             try {
+                for(Geofence geofence :    geofencingEvent.getTriggeringGeofences()){
+                    updateDatabase(geofence.getRequestId(), locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter",locationA.getProvider());
+                    sendSMS("GPS accuracy " + locationA.getAccuracy() + " enter " + geofence.getRequestId());
+                }
 
-
-                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter",locationA.getProvider());
             } catch (Exception e) {
                 displayLog("error updating database " + e.toString());
             }
-
-            // Get the geofences that were triggered. A single event can trigger multiple geofences.
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
-
-            // Get the transition details as a String.
-            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
-                    triggeringGeofences);
-
-            // Send notification and log the transition details.
-            if (locationA.getAccuracy() > 100) {
-                sendNotification("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
-                displayLog("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
-                sendSMS("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
-            } else {
-                sendNotification(geofenceTransitionDetails);
-                displayLog(geofenceTransitionDetails);
-                sendSMS(geofenceTransitionDetails);
-            }
-        } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
-            Location locationA = geofencingEvent.getTriggeringLocation();
             try {
 
 
-                updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "dwell",locationA.getProvider());
+                //updateDatabase(locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter",locationA.getProvider());
             } catch (Exception e) {
                 displayLog("error updating database " + e.toString());
             }
 
+            // Get the geofences that were triggered. A single event can trigger multiple geofences.
+            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+
+            // Get the transition details as a String.
+            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
+                    triggeringGeofences);
+
+            // Send notification and log the transition details.
+            /*
+            if (locationA.getAccuracy() > 100) {
+                sendNotification("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                displayLog("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+                sendSMS("GPS accuracy " + locationA.getAccuracy() + " " + geofenceTransitionDetails);
+            } else {
+                sendNotification(geofenceTransitionDetails);
+                displayLog(geofenceTransitionDetails);
+                sendSMS(geofenceTransitionDetails);
+            }
+            */
+        } else if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_DWELL) {
+            Location locationA = geofencingEvent.getTriggeringLocation();
+            try {
+                for(Geofence geofence :    geofencingEvent.getTriggeringGeofences()){
+                    updateDatabase(geofence.getRequestId(), locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "dwell",locationA.getProvider());
+                    sendSMS("GPS accuracy " + locationA.getAccuracy() + " dwell " + geofence.getRequestId());
+                }
+
+            } catch (Exception e) {
+                displayLog("error updating database " + e.toString());
+            }
+/*
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
             List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
@@ -176,6 +196,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog(geofenceTransitionDetails);
                 sendSMS(geofenceTransitionDetails);
             }
+            */
         }else {
             dataProvider.insertStuff("lastGeofenceTrigger", null);
             // Log the error.
@@ -335,6 +356,253 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     }
 
 
+    private void updateDatabase(final String ualId, final Double lat, final Double lng, final Float acc, String transition, String provider) {
+
+
+            HashMap<String, String> loans = new HashMap<>();
+            loans.put("uniqueId", uniqueId);
+            //loans.put("phonenumber", phonenumber);
+            HashMap<String, String> parameters = new HashMap<>();
+            parameters.put("transition", transition);
+
+            final Long timemilliseconds = System.currentTimeMillis();
+
+            final ParseObject parseObject = new ParseObject("UserVerificationData");
+            parseObject.put("provider", provider);
+            parseObject.put("platform", "Android");
+            parseObject.put("transition", transition);
+            parseObject.put("latitude", lat);
+            parseObject.put("longitude", lng);
+            parseObject.put("gpsAccuracy", acc);
+            ParseGeoPoint parseGeoPoint = new ParseGeoPoint(lat, lng);
+            parseObject.put("geoPoint", parseGeoPoint);
+            parseObject.put("geoPointSource", "geofence");
+            parseObject.put("timemilliseconds", timemilliseconds);
+            parseObject.put("device", getDeviceModelAndBrand());
+            parseObject.put("model", Build.MODEL);
+            parseObject.put("brand", Build.MANUFACTURER);
+            parseObject.put("OSVersion", Build.VERSION.SDK_INT);
+            parseObject.put("OSName", "Android");
+        parseObject.put("ualId", ualId);
+            parseObject.put("appVersionCode", io.okverify.android.BuildConfig.VERSION_CODE);
+            parseObject.put("appVersionName", io.okverify.android.BuildConfig.VERSION_NAME);
+
+            try {
+                WifiManager wifiManager = (WifiManager) this.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                WifiInfo info = wifiManager.getConnectionInfo();
+                String ssid = info.getSSID();
+                displayLog("ssid " + ssid);
+                if (ssid.contains("unknown")) {
+
+                } else {
+                    if (ssid.length() > 0) {
+                        displayLog("ssid " + ssid.substring(1, ssid.length() - 1));
+                        parameters.put("ssid", ssid);
+                        parseObject.put("ssid", ssid);
+                    } else {
+
+                    }
+                }
+
+
+                try {
+                    List<String> configuredSSIDList = new ArrayList<>();
+                    //List<String> scannedSSIDList = new ArrayList<>();
+                    List<WifiConfiguration> configuredList = wifiManager.getConfiguredNetworks();
+                    //List<ScanResult> scanResultList = wifiManager.getScanResults();
+                    //displayLog("configured list size "+configuredList.size());
+                    //displayLog("scanned list size "+scanResultList.size());
+                    for (WifiConfiguration config : configuredList) {
+                        //displayLog("configured list "+config.SSID);
+                        configuredSSIDList.add(config.SSID);
+                    }
+                    if (configuredSSIDList != null) {
+                        if (configuredSSIDList.size() > 0) {
+                            parameters.put("configuredSSIDs", configuredSSIDList.toString());
+                        }
+                    }
+                    parseObject.put("configuredSSIDs", configuredSSIDList);
+                /*
+                for(ScanResult config : scanResultList) {
+                    displayLog("scanned list "+config.SSID);
+                    scannedSSIDList.add(config.SSID);
+                }
+                */
+                } catch (Exception e) {
+                    displayLog("error gettign scanned list " + e.toString());
+                }
+
+
+            } catch (Exception e) {
+                displayLog(" error getting wifi info " + e.toString());
+            }
+
+            /*
+            try {
+
+                if (phonenumber != null) {
+                    if (phonenumber.length() > 0) {
+                        parseObject.put("phonenumber", phonenumber);
+                        loans.put("phonenumber", phonenumber);
+                    }
+                }
+            } catch (Exception e) {
+                displayLog("error getting phonenumber " + e.toString());
+            }
+            */
+
+
+            try {
+                boolean isPlugged = false;
+                BatteryManager bm = (BatteryManager) this.getSystemService(BATTERY_SERVICE);
+                int batLevel = bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CAPACITY);
+                parameters.put("batteryLevel", "" + batLevel);
+                parseObject.put("batteryLevel", batLevel);
+
+                Intent intent = this.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+                int plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                isPlugged = plugged == BatteryManager.BATTERY_PLUGGED_AC || plugged == BatteryManager.BATTERY_PLUGGED_USB;
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+                    isPlugged = isPlugged || plugged == BatteryManager.BATTERY_PLUGGED_WIRELESS;
+                }
+                parameters.put("isPlugged", "" + isPlugged);
+                parseObject.put("isPlugged", isPlugged);
+
+                //Are we charging / charged?
+                int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
+                boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
+                        status == BatteryManager.BATTERY_STATUS_FULL;
+                parameters.put("isCharging", "" + isCharging);
+                parseObject.put("isCharging", isCharging);
+
+                // How are we charging?
+                int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
+                boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
+                parameters.put("usbCharge", "" + usbCharge);
+                parseObject.put("usbCharge", usbCharge);
+                boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
+                parameters.put("acCharge", "" + acCharge);
+                parseObject.put("acCharge", acCharge);
+
+                displayLog("usbCharge " + usbCharge + " acCharge " + acCharge + " isCharging " +
+                        isCharging + " batteryLevel " + batLevel + " isPlugged " + isPlugged);
+            } catch (Exception e) {
+                displayLog(" error getting battery status " + e.toString());
+            }
+
+            parseObject.put("uniqueId", uniqueId);
+            parameters.put("uniqueId", uniqueId);
+
+            try {
+
+                parameters.put("uniqueId", uniqueId);
+                parameters.put("cookieToken", uniqueId);
+                parameters.put("eventName", "Data collection Service");
+                parameters.put("subtype", "saveBackgroundData");
+                parameters.put("type", "saveData");
+                parameters.put("onObject", "geofence");
+                parameters.put("view", "geofence");
+                parameters.put("branch", "app_interswitch");
+                //parameters.put("deliveryId", null);
+                //parameters.put("ualId", addressParseObject.getClaimUalId());
+                parameters.put("userAffiliation", "interswitch");
+
+                parameters.put("latitude", "" + lat);
+                parameters.put("longitude", "" + lng);
+                parameters.put("gpsAccuracy", "" + acc);
+                try {
+                    Location location2 = new Location("geohash");
+                    location2.setLatitude(lat);
+                    location2.setLongitude(lng);
+
+                    io.okverify.android.utilities.geohash.GeoHash hash = io.okverify.android.utilities.geohash.GeoHash.fromLocation(location2, 12);
+                    parameters.put("location", hash.toString());
+                } catch (Exception e) {
+                    displayLog("geomap error " + e.toString());
+                }
+                parameters.put("geoPointSource", "geofence");
+                parameters.put("timemilliseconds", "" + timemilliseconds);
+                parameters.put("device", getDeviceModelAndBrand());
+                parameters.put("model", Build.MODEL);
+                parameters.put("brand", Build.MANUFACTURER);
+                parameters.put("OSVersion", "" + Build.VERSION.SDK_INT);
+                parameters.put("OSName", "Android");
+                parameters.put("appVersionCode", "" + io.okverify.android.BuildConfig.VERSION_CODE);
+                parameters.put("appVersionName", "" + io.okverify.android.BuildConfig.VERSION_NAME);
+                loans.put("uniqueId", uniqueId);
+                //loans.put("phonenumber", phonenumber);
+                //sendEvent(parameters, loans);
+            } catch (Exception e1) {
+                displayLog("error attaching afl to ual " + e1.toString());
+            }
+            saveData(parseObject, lat, lng);
+
+            /*
+            List<ParseObject> parseObjectList = new ArrayList<>();
+
+            for (int i = 0; i < addressItemList.size(); i++) {
+                try {
+                    io.okverify.android.datamodel.AddressItem addressItem = addressItemList.get(i);
+                    Float distance = getDistance(lat, lng, addressItem.getLat(), addressItem.getLng());
+                    Map<String, Object> nestedData = new HashMap<>();
+                    nestedData.put("ualId", addressItem.getUalid());
+                    nestedData.put("latitude", addressItem.getLat());
+                    nestedData.put("longitude", addressItem.getLng());
+                    if (distance < 100.0) {
+                        nestedData.put("verified", true);
+                    } else {
+                        nestedData.put("verified", false);
+                    }
+
+                    nestedData.put("distance", distance);
+                    HashMap<String, String> paramText = getTitleText(addressItem);
+                    nestedData.put("title", paramText.get("header"));
+                    nestedData.put("text", paramText.get("text"));
+                    //addresses.add(nestedData);
+                    parseObject.put("address", nestedData.toString());
+                    parseObject.put("ualId", addressItem.getUalid());
+                    parseObjectList.add(parseObject);
+
+                    ParseObject targetObject = new ParseObject("UserVerificationData");
+                    for (Iterator it = parseObject.keySet().iterator(); it.hasNext(); ) {
+                        Object key = it.next();
+                        targetObject.put(key.toString(), parseObject.get(key.toString()));
+                    }
+                    saveData(targetObject, lat, lng);
+
+                    try {
+                        parameters.put("latitudeAddress", "" + addressItem.getLat());
+                        parameters.put("longitudeAddress", "" + addressItem.getLng());
+                        if (distance < 100.0) {
+                            parameters.put("verified", "" + true);
+                        } else {
+                            parameters.put("verified", "" + false);
+                        }
+
+                        parameters.put("distance", "" + distance);
+                        parameters.put("title", paramText.get("header"));
+                        parameters.put("text", paramText.get("text"));
+                        //addresses.add(nestedData);
+                        parameters.put("address", nestedData.toString());
+                        parameters.put("ualId", addressItem.getUalid());
+                        loans.put("uniqueId", uniqueId);
+                        //loans.put("phonenumber", phonenumber);
+                        //sendEvent(parameters, loans, "1");
+                    } catch (Exception e) {
+                        displayLog("OkAnalytics error " + e.toString());
+                    }
+                } catch (Exception e) {
+
+                }
+            }
+            */
+            //saveData(parseObjectList);
+
+
+
+    }
+
+/*
     private void updateDatabase(final Double lat, final Double lng, final Float acc, String transition, String provider) {
 
         List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
@@ -408,6 +676,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     scannedSSIDList.add(config.SSID);
                 }
                 */
+
+/*
                 } catch (Exception e) {
                     displayLog("error gettign scanned list " + e.toString());
                 }
@@ -431,7 +701,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             }
             */
 
-
+/*
             try {
                 boolean isPlugged = false;
                 BatteryManager bm = (BatteryManager) this.getSystemService(BATTERY_SERVICE);
@@ -626,6 +896,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     scannedSSIDList.add(config.SSID);
                 }
                 */
+
+/*
                 } catch (Exception e) {
                     displayLog("error gettign scanned list " + e.toString());
                 }
@@ -647,6 +919,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog("error getting phonenumber " + e.toString());
             }
             */
+
+/*
             try {
                 boolean isPlugged = false;
                 BatteryManager bm = (BatteryManager) this.getSystemService(BATTERY_SERVICE);
@@ -727,6 +1001,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         }
 
     }
+    */
 
     private void saveData(final ParseObject parseObject, final double lat, final double lng) {
 
@@ -748,7 +1023,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     displayLog(""+duration);
                     if(duration <= 1800000){
                         displayLog("duration is less than 30mins");
-
+                        //sendTransit(parseObject,lat,lng);
                     }
                     else{
                         displayLog("one");

@@ -144,8 +144,8 @@ public class MyWorker extends Worker {
     }
 
     private void runGeofence(){
-        io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(context, false);
-        geofenceTask.execute();
+        //io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(context, false);
+        //geofenceTask.execute();
     }
 
 
@@ -292,8 +292,8 @@ public class MyWorker extends Worker {
 
 
     private void updateDatabase(final Double lat, final Double lng, final Float acc) {
-        io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(context, false);
-        geofenceTask.execute();
+        //io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(context, false);
+        //geofenceTask.execute();
         /*
         try {
             stopLocationUpdates();

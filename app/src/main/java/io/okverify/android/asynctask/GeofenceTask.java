@@ -20,7 +20,6 @@ import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 import static com.google.android.gms.location.Geofence.NEVER_EXPIRE;
 
@@ -31,24 +30,28 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private GeofencingClient mGeofencingClient;
     private ArrayList<Geofence> mGeofenceList;
     private PendingIntent mGeofencePendingIntent;
-    private String uniqueId, environment, phonenumber;
+    private String uniqueId, environment, phonenumber, ualId;
     private Boolean skiptimercheck;
+    private Double lat, lng;
 
-    public GeofenceTask(Context context, Boolean skipTimerCheck) {
+    public GeofenceTask(Context context, Boolean skipTimerCheck, String ualId, Double lat, Double lng) {
         displayLog("GeofenceTask called");
         this.context = context;
         this.dataProvider = new io.okverify.android.database.DataProvider(context);
         this.skiptimercheck = skipTimerCheck;
+        this.lat = lat;
+        this.lng = lng;
+        this.ualId = ualId;
         mGeofenceList = new ArrayList<>();
         mGeofencingClient = LocationServices.getGeofencingClient(context);
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
-        environment = dataProvider.getPropertyValue("environment");
-        phonenumber = dataProvider.getPropertyValue("phonenumber");
+        //environment = dataProvider.getPropertyValue("environment");
+        //phonenumber = dataProvider.getPropertyValue("phonenumber");
 
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -68,7 +71,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "create");
@@ -113,7 +116,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                         try {
                             HashMap<String, String> loans = new HashMap<>();
                             loans.put("uniqueId", uniqueId);
-                            loans.put("phonenumber", phonenumber);
+                            //loans.put("phonenumber", phonenumber);
                             HashMap<String, String> parameters = new HashMap<>();
                             parameters.put("eventName", "Data Collection Service");
                             parameters.put("subtype", "startGeofence");
@@ -145,10 +148,11 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     private void startGeofence() {
         displayLog("startGeofence");
+        /*
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "removeGeofences");
@@ -159,12 +163,14 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
+        */
         removeGeofences();
     }
 
     private void removeGeofences() {
         displayLog("removeGeofences");
-
+        populateGeofenceList();
+        /*
         mGeofencingClient.removeGeofences(getGeofencePendingIntent())
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -175,7 +181,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
                                 loans.put("uniqueId", uniqueId);
-                                loans.put("phonenumber", phonenumber);
+                                //loans.put("phonenumber", phonenumber);
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Data Collection Service");
                                 parameters.put("subtype", "removeGeofences");
@@ -194,7 +200,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
                                 loans.put("uniqueId", uniqueId);
-                                loans.put("phonenumber", phonenumber);
+                                //loans.put("phonenumber", phonenumber);
                                 loans.put("error", "" + errorMessage);
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Data Collection Service");
@@ -222,15 +228,16 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
             }
         });
+        */
     }
 
     private void populateGeofenceList() {
         displayLog("populateGeofenceList");
-
+/*
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "populateGeofenceList");
@@ -241,6 +248,28 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
+*/
+        mGeofenceList.add(new Geofence.Builder()
+                // Set the request ID of the geofence. This is a string to identify this
+                // geofence.
+                .setRequestId(ualId)
+                .setNotificationResponsiveness(12000)
+                // Set the circular region of this geofence.
+                .setCircularRegion(lat, lng, 500)
+                .setLoiteringDelay(30000)
+                // Set the expiration duration of the geofence. This geofence gets automatically
+                // removed after this period of time.
+                .setExpirationDuration(NEVER_EXPIRE)
+
+                // Set the transition types of interest. Alerts are only generated for these
+                // transition. We track entry and exit transitions in this sample.
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
+                        Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
+
+                // Create the geofence.
+                .build());
+        addGeofences();
+        /*
         List<io.okverify.android.datamodel.AddressItem> addressItemList = dataProvider.getAllAddressList();
         int done = addressItemList.size();
         if (done > 0) {
@@ -272,23 +301,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
                             // Create the geofence.
                             .build());
-                    /*
-                    try {
-                        HashMap<String, String> loans = new HashMap<>();
-                        loans.put("uniqueId", uniqueId);
-                        loans.put("phonenumber", phonenumber);
-                        HashMap<String, String> parameters = new HashMap<>();
-                        parameters.put("eventName", "Data Collection Service");
-                        parameters.put("subtype", "populateGeofenceList");
-                        parameters.put("type", "geofence");
-                        parameters.put("onObject", "app");
-                        parameters.put("view", "geofenceAsyncTask");
-                        parameters.put("ualId", addressItem.getUalid());
-                        sendEvent(parameters, loans);
-                    } catch (Exception e1) {
-                        displayLog("error attaching afl to ual " + e1.toString());
-                    }
-                    */
+
                 } catch (Exception e) {
                     displayLog("populateGeofenceList for loop error " + e.toString());
                 }
@@ -299,14 +312,16 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                     displayLog(done + " not yet done with populateGeofenceList() " + i);
                 }
             }
+            *
 
         } else {
             //add event to mark we got no address
             displayLog("populateGeofenceList no address");
+
             try {
                 HashMap<String, String> loans = new HashMap<>();
                 loans.put("uniqueId", uniqueId);
-                loans.put("phonenumber", phonenumber);
+                //loans.put("phonenumber", phonenumber);
                 HashMap<String, String> parameters = new HashMap<>();
                 parameters.put("eventName", "Data Collection Service");
                 parameters.put("subtype", "populateGeofenceList");
@@ -317,7 +332,9 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
             } catch (Exception e1) {
                 displayLog("error attaching afl to ual " + e1.toString());
             }
+
         }
+        */
     }
 
 
@@ -328,13 +345,14 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (task.isSuccessful()) {
-                            displayLog("addgeofences is successful");
+                            displayLog("addgeofences is successful "+ualId);
                             //int messageId = getGeofencesAdded() ? R.string.geofences_added : R.string.geofences_removed;
                             //Toast.makeText(this, getString(messageId), Toast.LENGTH_SHORT).show();
+                            /*
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
                                 loans.put("uniqueId", uniqueId);
-                                loans.put("phonenumber", phonenumber);
+                                //loans.put("phonenumber", phonenumber);
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Data Collection Service");
                                 parameters.put("subtype", "addGeofences");
@@ -345,15 +363,18 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             } catch (Exception e1) {
                                 displayLog("error attaching afl to ual " + e1.toString());
                             }
+                            */
                         } else {
-                            displayLog("addgeofences is not successful ");
+                            //displayLog("addgeofences is not successful ");
                             // Get the status code for the error and log it using a user-friendly message.
                             String errorMessage = io.okverify.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
                             //Log.w(TAG, errorMessage);
+                            displayLog("addgeofence error "+errorMessage);
+                            /*
                             try {
                                 HashMap<String, String> loans = new HashMap<>();
                                 loans.put("uniqueId", uniqueId);
-                                loans.put("phonenumber", phonenumber);
+                                //loans.put("phonenumber", phonenumber);
                                 loans.put("error", "" + errorMessage);
                                 HashMap<String, String> parameters = new HashMap<>();
                                 parameters.put("eventName", "Data Collection Service");
@@ -366,6 +387,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             } catch (Exception e1) {
                                 displayLog("error attaching afl to ual " + e1.toString());
                             }
+                            */
                         }
 
                     }
@@ -387,10 +409,11 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private PendingIntent getGeofencePendingIntent() {
         // Reuse the PendingIntent if we already have it.
         displayLog("getGeofencePendingIntent");
+        /*
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "getGeofencePendingIntent");
@@ -401,6 +424,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
+        */
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         }
@@ -411,10 +435,11 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     private GeofencingRequest getGeofencingRequest() {
         displayLog("getGeofencingRequest");
+        /*
         try {
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
-            loans.put("phonenumber", phonenumber);
+            //loans.put("phonenumber", phonenumber);
             HashMap<String, String> parameters = new HashMap<>();
             parameters.put("eventName", "Data Collection Service");
             parameters.put("subtype", "getGeofencingRequest");
@@ -425,6 +450,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         } catch (Exception e1) {
             displayLog("error attaching afl to ual " + e1.toString());
         }
+        */
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofences(mGeofenceList);
@@ -434,8 +460,8 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
 
-            io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(context, environment);
-            okAnalytics.sendToAnalytics(parameters, loans, environment);
+            //io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(context, environment);
+           // okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending  analytics event " + e.toString());
         }
