@@ -47,6 +47,11 @@
             android:foregroundServiceType="location" />
         -->
 
+        <receiver
+            android:name="io.okverify.android.receivers.ReplyBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true" />
+
                 <receiver
                     android:name="io.okverify.android.receivers.GeofenceBroadcastReceiver"
                     android:enabled="true"

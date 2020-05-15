@@ -2,11 +2,7 @@ package io.okverify.android.asynctask;
 
 import android.content.Context;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.parse.ParseObject;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -15,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-import io.okverify.android.callback.TransitsCallBack;
 import io.okverify.android.callback.VerificationCallBack;
 import io.okverify.android.database.DataProvider;
 import io.okverify.android.utilities.OkAnalytics;
@@ -407,6 +402,6 @@ public class VerificationTokenTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

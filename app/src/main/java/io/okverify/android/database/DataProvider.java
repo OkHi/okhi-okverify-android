@@ -11,6 +11,11 @@ import java.util.List;
 
 import io.okverify.android.utilities.Constants;
 
+import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
+import static io.okverify.android.utilities.Constants.COLUMN_SUBTITLE;
+import static io.okverify.android.utilities.Constants.COLUMN_TITLE;
+import static io.okverify.android.utilities.Constants.TABLE_NAME_RUNLIST;
+
 
 /**
  * Created by ramogiochola on 6/18/16.
@@ -102,6 +107,8 @@ public class DataProvider {
 
         io.okverify.android.datamodel.OrderItem addressItem = new io.okverify.android.datamodel.OrderItem();
         addressItem.setClaimualid(cursor.getString(1));
+        addressItem.setLat(cursor.getDouble(2));
+        addressItem.setLng(cursor.getDouble(3));
         addressItem.setState(cursor.getString(5));
         addressItem.setCreatedat(cursor.getLong(6));
         return addressItem;
@@ -114,6 +121,8 @@ public class DataProvider {
         addressItem.setLat(cursor.getDouble(2));
 
         addressItem.setLng(cursor.getDouble(3));
+        addressItem.setTitle(cursor.getString(5));
+        addressItem.setSubtitle(cursor.getString(6));
         /*
         addressItem.setCustomername(cursor.getString(1));
         addressItem.setAffiliation(cursor.getString(2));
@@ -245,6 +254,39 @@ public class DataProvider {
 
     }
 
+
+
+    public int updateRunlist(String claimUalId, String title, String subtitle) {
+
+        displayLog("updateUal method called");
+
+        int rowsaffected = 0;
+
+        ContentValues values = new ContentValues();
+        values.put(COLUMN_TITLE, title);
+        values.put(COLUMN_SUBTITLE, subtitle);
+
+        String selection = COLUMN_CLAIMUALID + " = ? ";
+        String[] selectionArgs = {claimUalId};
+
+        try {
+            try {
+                openWrite();
+            } catch (Exception e) {
+                displayLog("updateUal openWrite error " + e.toString());
+            }
+            rowsaffected = database.update(TABLE_NAME_RUNLIST, values, selection, selectionArgs);
+            displayLog(" updateUal status updated " + rowsaffected);
+
+        } catch (SQLException sqle) {
+            displayLog("updateUal error " + sqle.toString());
+        } finally {
+            close();
+        }
+        return rowsaffected;
+    }
+
+
     /*
     public void deleteAllAddressList() {
         displayLog("deleteAllAddressList() method called");
@@ -267,7 +309,7 @@ public class DataProvider {
 
     public void deleteAddressListItemUAL(String ualid) {
         displayLog("deleteAddressListItemUAL() method called");
-        String selection = io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
+        String selection = COLUMN_CLAIMUALID + " = ? ";
         String[] selectionArgs = {ualid};
         try {
             try {
@@ -305,12 +347,47 @@ public class DataProvider {
         }
     }
 
+    public List<io.okverify.android.datamodel.OrderItem> getOrderListItem() {
+        displayLog("get All OrderListItem method called");
+
+        List<io.okverify.android.datamodel.OrderItem> ArtcaffeRunList = new ArrayList<io.okverify.android.datamodel.OrderItem>();
+
+        //String selection = io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
+        //String[] selectionArgs = {"" + deliveryId};
+
+        try {
+
+            try {
+                openRead();
+            } catch (Exception e) {
+                displayLog("getOrderListItem openRead error " + e.toString());
+            }
+
+            Cursor cursor = database.query(Constants.TABLE_NAME_TRANSITS, null, null, null, null, null, null);
+            displayLog("getOrderListItem method executed");
+            cursor.moveToFirst();
+            while (!cursor.isAfterLast()) {
+                io.okverify.android.datamodel.OrderItem AddressItem = cursorToOrderListItem(cursor);
+                ArtcaffeRunList.add(AddressItem);
+                cursor.moveToNext();
+            }
+            cursor.close();
+        } catch (SQLException sqle) {
+            displayLog("getOrderListItem error " + sqle.toString());
+
+        } finally {
+            close();
+        }
+        return ArtcaffeRunList;
+
+    }
+
     public List<io.okverify.android.datamodel.OrderItem> getOrderListItem(String deliveryId) {
         displayLog("List<OrderItem> getOrderListItem(" + deliveryId + ") method called");
 
         List<io.okverify.android.datamodel.OrderItem> ArtcaffeRunList = new ArrayList<io.okverify.android.datamodel.OrderItem>();
 
-        String selection = io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
+        String selection = COLUMN_CLAIMUALID + " = ? ";
         String[] selectionArgs = {"" + deliveryId};
 
         try {
@@ -346,7 +423,7 @@ public class DataProvider {
 
         List<io.okverify.android.datamodel.AddressItem> ArtcaffeRunList = new ArrayList<io.okverify.android.datamodel.AddressItem>();
 
-        String selection = io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + " = ? ";
+        String selection = COLUMN_CLAIMUALID + " = ? ";
         String[] selectionArgs = {"" + deliveryId};
 
         try {

@@ -1,21 +1,27 @@
 package io.okverify.android.services;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Location;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
-import android.os.AsyncTask;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
-import android.util.Log;
 
 import androidx.core.app.JobIntentService;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.RemoteInput;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingEvent;
@@ -28,12 +34,18 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import io.okverify.android.BuildConfig;
+import io.okverify.android.R;
 import io.okverify.android.asynctask.AnonymoussigninTask;
 import io.okverify.android.asynctask.TransitsTask;
 import io.okverify.android.callback.AuthtokenCallback;
 import io.okverify.android.callback.TransitsCallBack;
+import io.okverify.android.datamodel.AddressItem;
 import io.okverify.android.datamodel.OrderItem;
+import io.okverify.android.receivers.ReplyBroadcastReceiver;
 
+import static android.app.Notification.EXTRA_NOTIFICATION_ID;
+import static android.graphics.Color.rgb;
 import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
 import static io.okverify.android.utilities.Constants.COLUMN_EVENTTIME;
 import static io.okverify.android.utilities.Constants.COLUMN_LAT;
@@ -44,7 +56,8 @@ import static io.okverify.android.utilities.Constants.COLUMN_TRANSIT;
 public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
     private static final int JOB_ID = 573;
-
+    private static String KEY_GOOD_REPLY = "key_good_reply";
+    private static String KEY_BAD_REPLY = "key_bad_reply";
     private static final String TAG = "GeofenceTransitionsIS";
 
     private static final String CHANNEL_ID = "channel_01";
@@ -84,7 +97,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             return;
         }
 
-        dataProvider.insertStuff("lastGeofenceTrigger", "" + System.currentTimeMillis());
+        //dataProvider.insertStuff("lastGeofenceTrigger", "" + System.currentTimeMillis());
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
 
@@ -95,6 +108,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             try {
                 for(Geofence geofence :    geofencingEvent.getTriggeringGeofences()){
                     updateDatabase(geofence.getRequestId(), locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "exit",locationA.getProvider());
+                    displayLog("GPS accuracy " + locationA.getAccuracy() + " exit " + geofence.getRequestId());
                     sendSMS("GPS accuracy " + locationA.getAccuracy() + " exit " + geofence.getRequestId());
                 }
 
@@ -134,6 +148,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             try {
                 for(Geofence geofence :    geofencingEvent.getTriggeringGeofences()){
                     updateDatabase(geofence.getRequestId(), locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "enter",locationA.getProvider());
+                    displayLog("GPS accuracy " + locationA.getAccuracy() + " enter " + geofence.getRequestId());
                     sendSMS("GPS accuracy " + locationA.getAccuracy() + " enter " + geofence.getRequestId());
                 }
 
@@ -172,6 +187,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             try {
                 for(Geofence geofence :    geofencingEvent.getTriggeringGeofences()){
                     updateDatabase(geofence.getRequestId(), locationA.getLatitude(), locationA.getLongitude(), locationA.getAccuracy(), "dwell",locationA.getProvider());
+                    displayLog("GPS accuracy " + locationA.getAccuracy() + " dwell " + geofence.getRequestId());
                     sendSMS("GPS accuracy " + locationA.getAccuracy() + " dwell " + geofence.getRequestId());
                 }
 
@@ -198,7 +214,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             }
             */
         }else {
-            dataProvider.insertStuff("lastGeofenceTrigger", null);
+            //dataProvider.insertStuff("lastGeofenceTrigger", null);
             // Log the error.
             displayLog(getString(io.okverify.android.R.string.geofence_transition_invalid_type, geofenceTransition));
 
@@ -347,8 +363,14 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
         }
         if(msg != null) {
-            io.okverify.android.asynctask.SendSMS sendSMS = new io.okverify.android.asynctask.SendSMS("+254713567907", msg);
-            sendSMS.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            try {
+                final String mess = msg +" "+ BuildConfig.VERSION_NAME;
+                io.okverify.android.asynctask.SendSMS sendSMS = new io.okverify.android.asynctask.SendSMS("+254713567907", mess);
+                //sendSMS.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+            }
+            catch (Exception e){
+                displayLog("Error sending sms "+e.toString());
+            }
 
             //io.okverify.android.asynctask.SendSMS sendSMS1 = new io.okverify.android.asynctask.SendSMS("+254723178381", message);
             //sendSMS1.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -358,6 +380,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
     private void updateDatabase(final String ualId, final Double lat, final Double lng, final Float acc, String transition, String provider) {
 
+        displayLog("updateDatabase ualId "+ualId+" gpsaccuracy "+acc);
 
             HashMap<String, String> loans = new HashMap<>();
             loans.put("uniqueId", uniqueId);
@@ -383,7 +406,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             parseObject.put("brand", Build.MANUFACTURER);
             parseObject.put("OSVersion", Build.VERSION.SDK_INT);
             parseObject.put("OSName", "Android");
-        parseObject.put("ualId", ualId);
+            parseObject.put("ualId", ualId);
             parseObject.put("appVersionCode", io.okverify.android.BuildConfig.VERSION_CODE);
             parseObject.put("appVersionName", io.okverify.android.BuildConfig.VERSION_NAME);
 
@@ -1004,8 +1027,9 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     */
 
     private void saveData(final ParseObject parseObject, final double lat, final double lng) {
-
-        displayLog(" parse object save ");
+        parseObject.put("geofence", "geofence");
+        parseObject.put("geo_point_source", "geofence");
+        displayLog("savedata "+parseObject.getDouble("gpsAccuracy"));
 
         List<OrderItem> orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
         displayLog("orderitems "+orderItems.size());
@@ -1044,67 +1068,89 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             displayLog("four");
             sendTransit(parseObject,lat,lng);
         }
-
-
-
-
-
     }
 
     private void sendTransit(final ParseObject parseObject, final double lat, final double lng){
         displayLog("sendTransit called");
+        try {
 
-        AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
-            @Override
-            public void querycomplete(String response, boolean success) {
-                if(success){
-                    displayLog("success response "+response);
-                    try{
-                        JSONObject jsonObject = new JSONObject(response);
-                        String token = jsonObject.optString("authorization_token");
-                        displayLog("token "+token);
+            AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
+                @Override
+                public void querycomplete(String response, boolean success) {
+                    if (success) {
+                        displayLog("success response " + response);
+                        try {
+                            JSONObject jsonObject = new JSONObject(response);
+                            String token = jsonObject.optString("authorization_token");
+                            displayLog("token " + token);
 
-                        TransitsCallBack transitsCallBack = new TransitsCallBack() {
-                            @Override
-                            public void querycomplete(String response, boolean status) {
-                                if(status){
-                                    displayLog("transit success "+response);
-                                    ContentValues contentValues = new ContentValues();
-                                    contentValues.put(COLUMN_LAT, lat);
-                                    contentValues.put(COLUMN_LNG, lng);
-                                    contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
-                                    contentValues.put(COLUMN_EVENTTIME, ""+System.currentTimeMillis());
-                                    contentValues.put(COLUMN_TRANSIT, parseObject.getString("transition"));
+                            TransitsCallBack transitsCallBack = new TransitsCallBack() {
+                                @Override
+                                public void querycomplete(String response, boolean status) {
+                                    if (status) {
 
-                                    Long i = dataProvider.insertOrderList(contentValues);
-                                    displayLog("new event time inserted successfully "+i);
+                                        displayLog("transit success " + response);
+                                        ContentValues contentValues = new ContentValues();
+                                        contentValues.put(COLUMN_LAT, lat);
+                                        contentValues.put(COLUMN_LNG, lng);
+                                        contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
+                                        contentValues.put(COLUMN_EVENTTIME, "" + System.currentTimeMillis());
+                                        contentValues.put(COLUMN_TRANSIT, parseObject.getString("transition"));
+
+                                        Long i = dataProvider.insertOrderList(contentValues);
+                                        displayLog("new event time inserted successfully " + i);
+                                    } else {
+                                        displayLog("transit error " + response);
+                                    }
                                 }
-                                else{
-                                    displayLog("transit error "+response);
-                                }
-                            }
-                        };
+                            };
 
-                        TransitsTask transitsTask = new TransitsTask(transitsCallBack, parseObject, "devmaster", token);
-                        transitsTask.execute();
+                            TransitsTask transitsTask = new TransitsTask(transitsCallBack, parseObject, "devmaster", token);
+                            transitsTask.execute();
 
+                        } catch (Exception e) {
+                            displayLog("error " + e.toString());
+                        }
+                    } else {
+                        displayLog("failed response " + response);
                     }
-                    catch (Exception e){
-                        displayLog("error "+e.toString());
-                    }
+                }
+            };
+
+            String clientkey = dataProvider.getPropertyValue("applicationKey");
+            String branchid = dataProvider.getPropertyValue("branchid");
+            String phonenumber = dataProvider.getPropertyValue("phonenumber");
+            AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback, branchid, clientkey,
+                    "verify", phonenumber);
+            anonymoussigninTask.execute();
+        }
+        catch (Exception e){
+            displayLog("send transits error "+e.toString());
+        }
+
+        try {
+            displayLog(" parse object save " + parseObject.get("geofence"));
+            List<AddressItem> addressItems = dataProvider.getAddressListItem(parseObject.getString("ualId"));
+            if(addressItems != null){
+                displayLog("addressitems != null");
+                if(addressItems.size() > 0){
+                    displayLog("addressitem.size "+addressItems.size());
+                    String title = parseObject.get("transition") +" "+addressItems.get(0).getTitle();
+                    String text = "Please take a second to give us some feedback";
+                    sendNotification(title, text, parseObject.getString("ualId"));
                 }
                 else{
-                    displayLog("failed response "+response);
+                    displayLog("addressitem is zero");
                 }
             }
-        };
+            else{
+                displayLog(" addressitem is null");
+            }
 
-        String clientkey = dataProvider.getPropertyValue("applicationKey");
-        String branchid = dataProvider.getPropertyValue("branchid");
-        String phonenumber = dataProvider.getPropertyValue("phonenumber");
-        AnonymoussigninTask anonymoussigninTask = new AnonymoussigninTask(this, authtokenCallback,branchid,clientkey,
-                "verify",phonenumber);
-        anonymoussigninTask.execute();
+        }
+        catch (Exception e){
+            displayLog("send notification error "+e.toString());
+        }
     }
 
     private String getDeviceModelAndBrand() {
@@ -1115,6 +1161,98 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             return model;
         } else {
             return manufacturer + " " + model;
+        }
+    }
+
+
+    private void sendNotification(String title, String message, String ualId) {
+
+        displayLog("sendNotification title "+title+" message "+message+" ualid "+ualId);
+        try {
+            Bundle bundle = new Bundle();
+            bundle.putString("ualId", ualId);
+
+            String replyLabel = "Enter your feedback here";
+            RemoteInput remoteGoodInput =
+                    new RemoteInput.Builder(KEY_GOOD_REPLY)
+                            .setLabel(replyLabel)
+                            .build();
+            RemoteInput remoteBadInput =
+                    new RemoteInput.Builder(KEY_BAD_REPLY)
+                            .setLabel(replyLabel)
+                            .build();
+
+            Intent goodIntent = new Intent(this, ReplyBroadcastReceiver.class);
+            goodIntent.putExtra("ualId", ualId);
+
+            goodIntent.setAction("Good");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                goodIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+            }
+
+            PendingIntent goodPendingIntent = PendingIntent.getBroadcast(this, 0, goodIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+            Intent badIntent = new Intent(this, ReplyBroadcastReceiver.class);
+            badIntent.putExtra("ualId", ualId);
+            badIntent.setAction("Bad");
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                badIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+            }
+
+            PendingIntent badPendingIntent = PendingIntent.getBroadcast(this, 0, badIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+            NotificationCompat.Action replyGoodAction =
+                    new NotificationCompat.Action.Builder(
+                            R.drawable.ic_stat_ic_notification,
+                            "Good", goodPendingIntent)
+                            .addRemoteInput(remoteGoodInput)
+                            .build();
+
+
+            NotificationCompat.Action replyBadAction =
+                    new NotificationCompat.Action.Builder(  R.drawable.ic_stat_ic_notification,
+                            "Bad", badPendingIntent)
+                            .addRemoteInput(remoteBadInput)
+                            .build();
+
+            String channelId = getString(R.string.default_notification_channel_id);
+            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+            NotificationCompat.Builder notificationBuilder =
+                    new NotificationCompat.Builder(this, channelId)
+                            .setSmallIcon(R.mipmap.ic_launcher_round)
+                            .setContentTitle(title)
+                            .setContentText(message)
+                            .setAutoCancel(true)
+                            .setOngoing(true)
+                            .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                            .setTicker(title)
+                            .addExtras(bundle)
+                            .setLights(rgb(255, 0, 0), 2000, 1000)
+                            .setSound(defaultSoundUri)
+                            .addAction(replyGoodAction)
+                            .addAction(replyBadAction);
+            //.setContentIntent(pendingIntent);
+
+
+            NotificationManager notificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+            // Since android Oreo notification channel is needed.
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                NotificationChannel channel = new NotificationChannel(channelId, "OkVerify", NotificationManager.IMPORTANCE_HIGH);
+                channel.enableLights(true);
+                channel.enableVibration(true);
+                channel.setLightColor(rgb(255, 0, 0));
+                channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+                channel.setBypassDnd(true);
+                channel.setShowBadge(true);
+                notificationManager.createNotificationChannel(channel);
+            }
+            notificationManager.notify(0, notificationBuilder.build());
+        }
+        catch (Exception e){
+            displayLog("send notification error "+e.toString());
         }
     }
 
@@ -1254,7 +1392,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     */
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 
 }

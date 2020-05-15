@@ -5,9 +5,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.Settings;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.work.BackoffPolicy;
+import androidx.work.Constraints;
+import androidx.work.ExistingPeriodicWorkPolicy;
+import androidx.work.NetworkType;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.GeofencingClient;
@@ -21,6 +26,9 @@ import com.google.android.gms.tasks.Task;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import io.okverify.android.datamodel.AddressItem;
 
 import static com.google.android.gms.location.Geofence.NEVER_EXPIRE;
 
@@ -34,6 +42,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private String uniqueId, environment, phonenumber, ualId;
     private Boolean skiptimercheck;
     private Double lat, lng;
+    private WorkManager workManager6hour, workManager30minute;
 
     public GeofenceTask(Context context, Boolean skipTimerCheck, String ualId, Double lat, Double lng) {
         displayLog("GeofenceTask called");
@@ -44,10 +53,23 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
         this.lng = lng;
         this.ualId = ualId;
         mGeofenceList = new ArrayList<>();
+        workManager30minute = WorkManager.getInstance(context);
+        workManager6hour = WorkManager.getInstance(context);
         mGeofencingClient = LocationServices.getGeofencingClient(context);
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
         //environment = dataProvider.getPropertyValue("environment");
         //phonenumber = dataProvider.getPropertyValue("phonenumber");
+
+        displayLog("ualId "+ualId);
+        List<AddressItem> addressItems = dataProvider.getAddressListItem(ualId);
+        if(addressItems != null){
+            if(addressItems.size() > 0){
+                displayLog("address item "+addressItems.size());
+                String title1 = addressItems.get(0).getTitle();
+                //String text = "Please take a second to give us some feedback";
+                displayLog("title "+title1);
+            }
+        }
 
         try {
             HashMap<String, String> loans = new HashMap<>();
@@ -233,8 +255,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
                 // Set the transition types of interest. Alerts are only generated for these
                 // transition. We track entry and exit transitions in this sample.
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER |
-                        Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
 
                 // Create the geofence.
                 .build());
@@ -340,24 +361,6 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
                             String errorMessage = io.okverify.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
                             //Log.w(TAG, errorMessage);
                             displayLog("addgeofence error "+errorMessage);
-                            /*
-                            try {
-                                HashMap<String, String> loans = new HashMap<>();
-                                loans.put("uniqueId", uniqueId);
-                                //loans.put("phonenumber", phonenumber);
-                                loans.put("error", "" + errorMessage);
-                                HashMap<String, String> parameters = new HashMap<>();
-                                parameters.put("eventName", "Data Collection Service");
-                                parameters.put("subtype", "addGeofences");
-                                parameters.put("type", "failure");
-                                parameters.put("onObject", "app");
-                                parameters.put("view", "geofenceAsyncTask");
-                                parameters.put("error", "" + errorMessage);
-                                sendEvent(parameters, loans);
-                            } catch (Exception e1) {
-                                displayLog("error attaching afl to ual " + e1.toString());
-                            }
-                            */
                         }
 
                     }
@@ -373,28 +376,19 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
             }
         });
+        try {
+            triggerThirtyMinuteWorker();
+            triggerSixHourWorker();
+        }
+        catch (Exception e){
+            displayLog("workmanager error "+e.toString());
+        }
 
     }
 
     private PendingIntent getGeofencePendingIntent() {
         // Reuse the PendingIntent if we already have it.
         displayLog("getGeofencePendingIntent");
-        /*
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            //loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "getGeofencePendingIntent");
-            parameters.put("type", "geofence");
-            parameters.put("onObject", "app");
-            parameters.put("view", "geofenceAsyncTask");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-        */
         if (mGeofencePendingIntent != null) {
             return mGeofencePendingIntent;
         }
@@ -405,27 +399,81 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
     private GeofencingRequest getGeofencingRequest() {
         displayLog("getGeofencingRequest");
-        /*
-        try {
-            HashMap<String, String> loans = new HashMap<>();
-            loans.put("uniqueId", uniqueId);
-            //loans.put("phonenumber", phonenumber);
-            HashMap<String, String> parameters = new HashMap<>();
-            parameters.put("eventName", "Data Collection Service");
-            parameters.put("subtype", "getGeofencingRequest");
-            parameters.put("type", "geofence");
-            parameters.put("onObject", "app");
-            parameters.put("view", "geofenceAsyncTask");
-            sendEvent(parameters, loans);
-        } catch (Exception e1) {
-            displayLog("error attaching afl to ual " + e1.toString());
-        }
-        */
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
         builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
         builder.addGeofences(mGeofenceList);
         return builder.build();
     }
+
+    private void triggerThirtyMinuteWorker(){
+        // Create Network constraint
+        try {
+            Constraints constraints = new Constraints.Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .build();
+
+            PeriodicWorkRequest periodicSyncDataWork =
+                    new PeriodicWorkRequest.Builder(GeofenceWorker.class, 30, TimeUnit.MINUTES)
+                            .setConstraints(constraints)
+                            .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                            .build();
+
+
+            WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                    "okverifythirtyminuteworker",
+                    ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                    periodicSyncDataWork //work request
+            );
+        }
+        catch (Exception e){
+            displayLog("triggerThirtyMinuteWorker error "+e.toString());
+        }
+    }
+
+    private void triggerSixHourWorker(){
+        try{
+        // Create Network constraint
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest periodicSyncDataWork =
+                new PeriodicWorkRequest.Builder(GeofenceWorker.class, 6, TimeUnit.HOURS)
+                        .setConstraints(constraints)
+                        .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                        .build();
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+                "okverifysixhourworker",
+                ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                periodicSyncDataWork //work request
+        );
+        }
+        catch (Exception e){
+            displayLog("triggerSixHourWorker error "+e.toString());
+        }
+    }
+
+    /*
+    private void triggerTwelveHourWorker(){
+        // Create Network constraint
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        PeriodicWorkRequest periodicSyncDataWork =
+                new PeriodicWorkRequest.Builder(GeofenceWorker.class, 12, TimeUnit.HOURS)
+                        .setConstraints(constraints)
+                        .setBackoffCriteria(BackoffPolicy.LINEAR, PeriodicWorkRequest.MIN_BACKOFF_MILLIS, TimeUnit.MILLISECONDS)
+                        .build();
+
+        workManager12hour.enqueueUniquePeriodicWork(
+                "okverifytwelvehourworker",
+                ExistingPeriodicWorkPolicy.KEEP, //Existing Periodic Work policy
+                periodicSyncDataWork //work request
+        );
+    }
+    */
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
@@ -438,6 +486,6 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }

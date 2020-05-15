@@ -17,7 +17,9 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
+import androidx.work.WorkManager;
 
+import com.parse.Parse;
 import com.segment.analytics.Analytics;
 
 import org.json.JSONException;
@@ -30,8 +32,10 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.List;
 
 import io.okverify.android.callback.OkVerifyCallback;
+import io.okverify.android.datamodel.AddressItem;
 
 import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
 import static io.okverify.android.utilities.Constants.COLUMN_LAT;
@@ -58,6 +62,7 @@ public final class OkVerify extends ContentProvider {
     //private static String remoteSmsTemplate;
     private static Analytics analytics;
     private static NotificationManager notificationManager;
+    private WorkManager workManager;
 
     public OkVerify() {
     }
@@ -67,6 +72,7 @@ public final class OkVerify extends ContentProvider {
 
         displayLog("initialize");
         //dataProvider.insertStuff("enableverify", ""+verify);
+
 
         startInitialization(applicationKey, branchid, environment, true);
         /*
@@ -321,15 +327,42 @@ public final class OkVerify extends ContentProvider {
 
             Long i = dataProvider.insertAddressList(contentValues);
             displayLog("insert address "+i);
-            io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true, addressId, latitude, longitude);
-            geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-            okVerifyCallback.querycomplete("Verification in progress");
+            try {
+                io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true, addressId, latitude, longitude);
+                geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                okVerifyCallback.querycomplete("Verification in progress");
+            }
+            catch (Exception e){
+                try {
+                    okVerifyCallback.querycomplete("Verification in progress");
+                }
+                catch (Exception e1){
+                    displayLog("error "+e1.toString());
+                }
+            }
+
         }
         else{
             String error = checkPermissionCause();
             okVerifyCallback.querycomplete(error);
         }
 
+    }
+
+    public static void addressdetails(String ualId, String title, String subtitle) {
+
+        int r = dataProvider.updateRunlist(ualId, title, subtitle);
+        displayLog("rows updated "+r);
+
+        List<AddressItem> addressItems = dataProvider.getAddressListItem(ualId);
+        if(addressItems != null){
+            if(addressItems.size() > 0){
+                displayLog("address item "+addressItems.size());
+                String title1 = addressItems.get(0).getTitle();
+                //String text = "Please take a second to give us some feedback";
+                displayLog(ualId+" GeofenceTask title "+title1);
+            }
+        }
     }
 
     /*
@@ -1171,9 +1204,6 @@ public final class OkVerify extends ContentProvider {
         return ret;
     }
 
-    private void triggerSpecial() {
-
-    }
 
   /*
     private static void stopPeriodicPing() {
@@ -1727,6 +1757,8 @@ public final class OkVerify extends ContentProvider {
         return 0;
     }
 
+
+
     @Override
     public boolean onCreate() {
         // get the context (Application context)
@@ -1741,7 +1773,6 @@ public final class OkVerify extends ContentProvider {
         }
 
         uniqueId = Settings.Secure.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID);
-
 
 
         /*
@@ -1803,6 +1834,10 @@ public final class OkVerify extends ContentProvider {
             WorkManager.getInstance().enqueueUniquePeriodicWork("ramogi", ExistingPeriodicWorkPolicy.KEEP, request);
             */
 
+            Parse.initialize(new Parse.Configuration.Builder(mContext)
+                    .applicationId("0bZFohNAksMX47xkdcKe2VzJB4KFOGR8qmcnDOrJ")
+                    .clientKey("ugVaqhu0NpwuSiuvRJ1IbCcfxLFbltUK70TEKICc")
+                    .server("https://parseapi.back4app.com/").enableLocalDataStore().build());
 
         } catch (Exception e) {
             displayLog("my worker error " + e.toString());

@@ -13,7 +13,7 @@ import io.okverify.android.utilities.Constants;
 public class SQLiteHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "io.okverify.android.sdk.database.db";
-    private static final int DATABASE_VERSION = 19;
+    private static final int DATABASE_VERSION = 22;
 
 
     private static final String DATABASE_CREATE_TRANSITS =
@@ -26,6 +26,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_TRANSIT + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_EVENTTIME + " REAL, " +
+                    io.okverify.android.utilities.Constants.COLUMN_TITLE + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_SUBTITLE + " VARCHAR, " +
                     " UNIQUE(" + io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID + ") ON CONFLICT REPLACE);";
 
     private static final String DATABASE_CREATE_RUNLIST =
@@ -36,6 +38,8 @@ public class SQLiteHelper extends SQLiteOpenHelper {
                     io.okverify.android.utilities.Constants.COLUMN_LAT + " REAL, " +
                     io.okverify.android.utilities.Constants.COLUMN_LNG + " REAL, " +
                     io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_TITLE + " VARCHAR, " +
+                    io.okverify.android.utilities.Constants.COLUMN_SUBTITLE + " VARCHAR, " +
                     /*
                     io.okverify.android.utilities.Constants.COLUMN_CUSTOMERNAME + " VARCHAR, " +
                     io.okverify.android.utilities.Constants.COLUMN_AFFILIATION + " VARCHAR, " +

@@ -12,7 +12,6 @@ import android.content.Intent;
  * that will handle the intent in the background.
  */
 public class GeofenceBroadcastReceiver extends BroadcastReceiver {
-
     /**
      * Receives incoming intents.
      *
@@ -23,7 +22,17 @@ public class GeofenceBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         // Enqueues a JobIntentService passing the context and intent as parameters
-        io.okverify.android.services.GeofenceTransitionsJobIntentService.enqueueWork(context, intent);
+        try {
+            io.okverify.android.services.GeofenceTransitionsJobIntentService.enqueueWork(context, intent);
+        }
+        catch (Exception e) {
+            displayLog("on receive error " + e.toString());
+        }
     }
+    private void displayLog(String log){
+        //Log.i("Geofencebroadcast",log);
+    }
+
+
 
 }

@@ -1,7 +1,6 @@
 package io.okverify.android.asynctask;
 
 import android.os.AsyncTask;
-import android.util.Log;
 
 import com.parse.ParseObject;
 
@@ -13,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
+import io.okverify.android.BuildConfig;
 import io.okverify.android.callback.TransitsCallBack;
 import okhttp3.FormBody;
 import okhttp3.MediaType;
@@ -62,6 +62,7 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             idsArray.put(parseObject.get("ualId"));
             jsonObject.put("ids", idsArray);
             jsonObject.put("platform", parseObject.get("platform"));
+            //jsonObject.put("geopointProvider", parseObject.get("provider"));
             jsonObject.put("geopoint_provider", parseObject.get("provider"));
             jsonObject.put("transition_date", System.currentTimeMillis());
             jsonObject.put("transition_event", parseObject.get("transition"));
@@ -70,11 +71,17 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             jsonObject.put("device_manufacturer", parseObject.get("brand"));
             jsonObject.put("device_model", parseObject.get("model"));
             jsonObject.put("geo_point_source", parseObject.get("geofence"));
-            //actualObject.put("geopoint_provider", parseObject.get("geopoint_provider"));
+            //jsonObject.put("geoPointSource", parseObject.get("geofence"));
             jsonObject.put("gps_accuracy", parseObject.get("gpsAccuracy"));
-            jsonObject.put("accuracy", parseObject.get("gpsAccuracy"));
+            //jsonObject.put("accuracy", parseObject.get("gpsAccuracy"));
+            //jsonObject.put("gpsAccuracy", parseObject.get("gpsAccuracy"));
             jsonObject.put("geo_point", geoPoint);
+            jsonObject.put("version_code", BuildConfig.VERSION_CODE);
+            jsonObject.put("version_name", BuildConfig.VERSION_NAME);
 
+            displayLog("1 "+jsonObject.getDouble("gps_accuracy"));
+            //displayLog("2 "+jsonObject.getDouble("accuracy"));
+            displayLog("3 "+jsonObject.getString("geo_point_source"));
             transitsArray.put(jsonObject);
             finalObject = new JSONObject();
             finalObject.put("transits", transitsArray);
@@ -214,6 +221,6 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        Log.i(TAG, log);
+        //Log.i(TAG, log);
     }
 }
