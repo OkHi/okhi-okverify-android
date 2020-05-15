@@ -1030,8 +1030,14 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         parseObject.put("geofence", "geofence");
         parseObject.put("geo_point_source", "geofence");
         displayLog("savedata "+parseObject.getDouble("gpsAccuracy"));
-
-        List<OrderItem> orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
+        List<OrderItem> orderItems;
+        if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
+            orderItems = dataProvider.getOrderListItem("dwell_"+parseObject.getString("ualId"));
+        }
+        else{
+            orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
+        }
+        
         displayLog("orderitems "+orderItems.size());
         if(orderItems != null){
             displayLog("five");
@@ -1045,8 +1051,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     displayLog(""+eventtime);
                     Long duration = System.currentTimeMillis() - eventtime;
                     displayLog(""+duration);
-                    if(duration <= 1800000){
-                        displayLog("duration is less than 30mins");
+                    if(duration <= 2400000){
+                        displayLog("duration is less than 40mins");
                         //sendTransit(parseObject,lat,lng);
                     }
                     else{
@@ -1097,8 +1103,12 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                                         contentValues.put(COLUMN_EVENTTIME, "" + System.currentTimeMillis());
                                         contentValues.put(COLUMN_TRANSIT, parseObject.getString("transition"));
 
+                                        if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
+                                            contentValues.put(COLUMN_CLAIMUALID, "dwell_"+parseObject.getString("ualId"));
+                                        }
                                         Long i = dataProvider.insertOrderList(contentValues);
                                         displayLog("new event time inserted successfully " + i);
+
                                     } else {
                                         displayLog("transit error " + response);
                                     }
