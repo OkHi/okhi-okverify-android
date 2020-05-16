@@ -9,7 +9,9 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import io.okverify.android.OkVerify;
 import io.okverify.android.R;
+import io.okverify.android.callback.OkVerifyCallback;
 
 public class TestActivity extends AppCompatActivity {
 
@@ -21,7 +23,7 @@ public class TestActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
-/*
+
         OkVerify.initialize("4d380065-71e5-48b8-8fb3-29fe61299c4b", "yhCvQnGG1z", "devmaster");
         OkVerifyCallback okVerifyCallback = new OkVerifyCallback() {
             @Override
@@ -31,7 +33,7 @@ public class TestActivity extends AppCompatActivity {
         };
         OkVerify.verify(okVerifyCallback,"+254713567907","HIVDcSjFAg",-1.280196704121445,36.73125477907003);
         OkVerify.addressdetails("HIVDcSjFAg","Ndwaru Shopping Center, Ndwaru Road", "Ndwaru Road");
-*/
+
 
 /*
         Location locationA = new Location("A");

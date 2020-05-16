@@ -72,7 +72,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
      */
     public static void enqueueWork(Context context, Intent intent) {
         enqueueWork(context, GeofenceTransitionsJobIntentService.class, JOB_ID, intent);
-        //context = context;
+        //this.context = context;
         dataProvider = new io.okverify.android.database.DataProvider(context);
         //phonenumber = dataProvider.getPropertyValue("phonenumber");
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -1037,7 +1037,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         else{
             orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
         }
-        
+
         displayLog("orderitems "+orderItems.size());
         if(orderItems != null){
             displayLog("five");
@@ -1057,7 +1057,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     }
                     else{
                         displayLog("one");
-                        sendTransit(parseObject,lat,lng);
+                        //sendTransit(parseObject,lat,lng);
                     }
                 }
                 else {
@@ -1145,9 +1145,20 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                 displayLog("addressitems != null");
                 if(addressItems.size() > 0){
                     displayLog("addressitem.size "+addressItems.size());
-                    String title = parseObject.get("transition") +" "+addressItems.get(0).getTitle();
+                    String title;
+                    if(parseObject.getString("transition").equalsIgnoreCase("exit")){
+                        title = "Exited";
+                    }
+                    else if(parseObject.getString("transition").equalsIgnoreCase("enter")){
+                        title = "Entered";
+                    } else if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
+                        title = "Staying at ";
+                    } else {
+                        title = parseObject.getString("transition");
+                    }
+                    String display = title+" "+addressItems.get(0).getTitle();
                     String text = "Please take a second to give us some feedback";
-                    sendNotification(title, text, parseObject.getString("ualId"));
+                    sendNotification(display, text, parseObject.getString("ualId"));
                 }
                 else{
                     displayLog("addressitem is zero");
@@ -1401,6 +1412,15 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     }
     */
 
+    private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
+        try {
+
+            //io.okverify.android.utilities.OkAnalytics okAnalytics = new io.okverify.android.utilities.OkAnalytics(GeofenceTransitionsJobIntentService.this);
+            //okAnalytics.sendToAnalytics(parameters, loans);
+        } catch (Exception e) {
+            displayLog("error sending  analytics event " + e.toString());
+        }
+    }
     private void displayLog(String log) {
         //Log.i(TAG, log);
     }
