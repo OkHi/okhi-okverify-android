@@ -109,6 +109,24 @@ public class OkAnalytics {
     }
     */
 
+    public OkAnalytics(Context context) {
+        this.context = context;
+        uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
+        try {
+            //WindowManager wm = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+            //DisplayMetrics dm = new DisplayMetrics();
+            //wm.getDefaultDisplay().getMetrics(dm);
+            //setScreenwidth(dm.widthPixels);
+            //setScreenheight(dm.heightPixels);
+        } catch (Exception e) {
+            displayLog("Error initializing stuff " + e.toString());
+        }
+        eventProperties = new Properties();
+        initializeStaticParameters("DEVMASTER");
+        initializeProperties();
+        populateProperties();
+    }
+
     public OkAnalytics(Context context, String environment) {
         this.context = context;
         uniqueId = Settings.Secure.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
@@ -122,7 +140,7 @@ public class OkAnalytics {
             displayLog("Error initializing stuff " + e.toString());
         }
         eventProperties = new Properties();
-        initializeStaticParameters(environment);
+        initializeStaticParameters("DEVMASTER");
         initializeProperties();
         populateProperties();
     }
@@ -511,6 +529,217 @@ public class OkAnalytics {
         //getSubmit().clear();
     }
 
+    public void sendToAnalytics(HashMap<String, String> parameters, HashMap<String, String> loans) {
+
+        try {
+            setSubmit(loans);
+        } catch (Exception e) {
+            displayLog(" setSubmit error " + e.toString());
+        }
+        try {
+            if (parameters.containsKey("view")) {
+                setView(parameters.get("view"));
+            }
+            contextdeviceandproduct.putValue("view", getView());
+        } catch (Exception e) {
+            displayLog(" contextdeviceandproduct error " + e.toString());
+        }
+        try {
+            eventProperties.putValue("timestamp", Constants.getUTCtimestamp());
+        } catch (Exception e) {
+            displayLog(" Constants.getUTCtimestamp() error " + e.toString());
+        }
+        if (parameters.containsKey("customString")) {
+            eventProperties.putValue("customString", parameters.get("customString"));
+        }
+        if (parameters.containsKey("address")) {
+            eventProperties.putValue("address", parameters.get("address"));
+        }
+        if (parameters.containsKey("latitude")) {
+            eventProperties.putValue("latitude", parameters.get("latitude"));
+        }
+        if (parameters.containsKey("longitude")) {
+            eventProperties.putValue("longitude", parameters.get("longitude"));
+        }
+        if (parameters.containsKey("gpsAccuracy")) {
+            eventProperties.putValue("gpsAccuracy", parameters.get("gpsAccuracy"));
+        }
+        if (parameters.containsKey("address")) {
+            eventProperties.putValue("address", parameters.get("address"));
+        }
+        if (parameters.containsKey("verified")) {
+            eventProperties.putValue("verified", parameters.get("verified"));
+        }
+        if (parameters.containsKey("distance")) {
+            eventProperties.putValue("distance", parameters.get("distance"));
+        }
+        if (parameters.containsKey("batteryLevel")) {
+            eventProperties.putValue("batteryLevel", parameters.get("batteryLevel"));
+        }
+        if (parameters.containsKey("isPlugged")) {
+            eventProperties.putValue("isPlugged", parameters.get("isPlugged"));
+        }
+        if (parameters.containsKey("isCharging")) {
+            eventProperties.putValue("isCharging", parameters.get("isCharging"));
+        }
+        if (parameters.containsKey("usbCharge")) {
+            eventProperties.putValue("usbCharge", parameters.get("usbCharge"));
+        }
+        if (parameters.containsKey("acCharge")) {
+            eventProperties.putValue("acCharge", parameters.get("acCharge"));
+        }
+        if (parameters.containsKey("remoteGPSAccuracy")) {
+            eventProperties.putValue("remoteGPSAccuracy", parameters.get("remoteGPSAccuracy"));
+        }
+        if (parameters.containsKey("uniqueId")) {
+            eventProperties.putValue("uniqueId", parameters.get("uniqueId"));
+        }
+        if (parameters.containsKey("phone")) {
+            eventProperties.putValue("phone", parameters.get("phone"));
+            eventProperties.putValue("phonenumber", parameters.get("phonenumber"));
+        }
+        if (parameters.containsKey("phonenumber")) {
+            eventProperties.putValue("phone", parameters.get("phone"));
+            eventProperties.putValue("phonenumber", parameters.get("phonenumber"));
+        }
+        if (parameters.containsKey("appKey")) {
+            eventProperties.putValue("appKey", parameters.get("appKey"));
+        }
+        if (parameters.containsKey("verify")) {
+            eventProperties.putValue("verify", parameters.get("verify"));
+        }
+
+        if (parameters.containsKey("geoPointSource")) {
+            eventProperties.putValue("geoPointSource", parameters.get("geoPointSource"));
+        }
+        if (parameters.containsKey("error")) {
+            eventProperties.putValue("error", parameters.get("error"));
+        }
+        if (parameters.containsKey("shortUrl")) {
+            eventProperties.putValue("lookupId", parameters.get("shortUrl"));
+        }
+        if (parameters.containsKey("isOkAppUser")) {
+            eventProperties.putValue("isOkAppUser", parameters.get("isOkAppUser"));
+        }
+        if (parameters.containsKey("isOddress")) {
+            eventProperties.putValue("isOddress", parameters.get("isOddress"));
+        }
+        if (parameters.containsKey("deliveryId")) {
+            eventProperties.putValue("deliveryId", parameters.get("deliveryId"));
+        }
+        if (parameters.containsKey("branch")) {
+            eventProperties.putValue("branch", parameters.get("branch"));
+        }
+        if (parameters.containsKey("addressUrl")) {
+            pageUrl.putValue("raw", parameters.get("addressUrl"));
+        }
+        if (parameters.containsKey("expanded")) {
+            eventProperties.putValue("expanded", parameters.get("expanded"));
+        }
+        if (parameters.containsKey("ualId")) {
+            eventProperties.putValue("ualId", parameters.get("ualId"));
+        }
+        if (parameters.containsKey("type")) {
+            eventProperties.putValue("type", parameters.get("type"));
+        }
+        if (parameters.containsKey("subtype")) {
+            eventProperties.putValue("subtype", parameters.get("subtype"));
+        }
+        if (parameters.containsKey("onObject")) {
+            eventProperties.putValue("onObject", parameters.get("onObject"));
+        }
+        if (parameters.containsKey("orderId")) {
+            eventProperties.putValue("orderId", parameters.get("orderId"));
+        }
+        if (parameters.containsKey("secondLine")) {
+            eventProperties.putValue("secondLine", parameters.get("secondLine"));
+        }
+        if (parameters.containsKey("firstLine")) {
+            eventProperties.putValue("firstLine", parameters.get("firstLine"));
+        }
+        if (parameters.containsKey("minimized")) {
+            eventProperties.putValue("minimized", parameters.get("minimized"));
+        }
+        if (parameters.containsKey("label")) {
+            eventProperties.putValue("label", parameters.get("label"));
+        }
+        if (parameters.containsKey("appKey")) {
+            eventProperties.putValue("appKey", parameters.get("appKey"));
+        }
+        try {
+            if (parameters.containsKey("location")) {
+                eventProperties.put("location", parameters.get("location"));
+            }
+
+        } catch (Exception e) {
+            displayLog("error setting geohash location " + e.toString());
+        }
+        try {
+            if (parameters.containsKey("userAffiliation")) {
+                eventProperties.put("userAffiliation", parameters.get("userAffiliation"));
+            }
+
+        } catch (Exception e) {
+            displayLog("error getting userAffiliation " + e.toString());
+        }
+
+        try {
+            if (parameters.containsKey("customString")) {
+                eventProperties.put("customString", parameters.get("customString"));
+            }
+
+        } catch (Exception e) {
+            displayLog("error setting geohash location " + e.toString());
+        }
+        try {
+            if (parameters.containsKey("transition")) {
+                eventProperties.put("transition", parameters.get("transition"));
+            }
+
+        } catch (Exception e) {
+            displayLog("error getting userAffiliation " + e.toString());
+        }
+        eventProperties.putValue("userId", userId);
+        eventProperties.putValue("environment", "DEVMASTER");
+        /*
+        if(productionVersion){
+            eventProperties.putValue("environment", "PROD");
+        }
+        else if(DEVMASTER){
+            eventProperties.putValue("environment", "DEVMASTER");
+        }else if(SANDBOX){
+            eventProperties.putValue("environment", "SANDBOX");
+        }
+        else{
+            eventProperties.putValue("environment", "PROD");
+        }
+        */
+        eventProperties.putValue("userRoles", userRoles);
+        eventProperties.putValue("customerCode", customerCode);
+        eventProperties.putValue("event", getEvent());
+        eventProperties.putValue("appLayer", io.okverify.android.utilities.Constants.appLayer);
+        eventProperties.putValue("product", io.okverify.android.utilities.Constants.product);
+        eventProperties.putValue("productVersion", productVersion);
+        eventProperties.putValue("clientProduct", io.okverify.android.utilities.Constants.product);
+        eventProperties.putValue("clientProductVersion", productVersion);
+        eventProperties.putValue("context", contextdeviceandproduct);
+        eventProperties.putValue("waybill", waybill);
+        eventProperties.putValue("pageUrl", pageUrl);
+        //Options options = new Options();
+        //options.setIntegration(Options.ALL_INTEGRATIONS_KEY,false);
+        //options.setIntegration("OkAnalytics DEV",true);
+        //Analytics analytics = new Analytics.Builder(context, ANALYTICS_WRITE_KEY).tag("devomtmindex").build();
+        //Analytics.setSingletonInstance(null);
+        //Analytics.setSingletonInstance(analytics);
+        //displayLog("before sending");
+        Analytics.with(context).track(parameters.get("eventName"), eventProperties);
+        //OkVerifyApplication.getAnalytics().with(context).track(parameters.get("eventName"), eventProperties);
+        //getCommunication().clear();
+        //getSubmit().clear();
+        //displayLog("after sending");
+    }
+
+
     public void sendToAnalytics(HashMap<String, String> parameters, HashMap<String, String> loans, String environment) {
 
         try {
@@ -682,7 +911,7 @@ public class OkAnalytics {
             displayLog("error getting userAffiliation " + e.toString());
         }
         eventProperties.putValue("userId", userId);
-        eventProperties.putValue("environment", environment);
+        eventProperties.putValue("environment", "DEVMASTER");
         /*
         if(productionVersion){
             eventProperties.putValue("environment", "PROD");
@@ -720,7 +949,6 @@ public class OkAnalytics {
         //getSubmit().clear();
         //displayLog("after sending");
     }
-
 
     /*
     public void sendToOMTM(Context context1, String event, Traits traits, Properties eventproperties2) {

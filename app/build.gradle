@@ -24,8 +24,8 @@ android {
         //applicationId "io.okverify.android"
         minSdkVersion 23
         targetSdkVersion 29
-        versionCode 26
-        versionName "2.0.17"
+        versionCode 27
+        versionName "2.0.18"
         signingConfig signingConfigs.config
     }
     buildTypes {

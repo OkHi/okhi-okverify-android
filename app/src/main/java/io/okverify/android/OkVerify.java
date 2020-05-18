@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.Toast;
 
@@ -20,6 +21,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.work.WorkManager;
 
 import com.parse.Parse;
+import com.parse.ParseUser;
 import com.segment.analytics.Analytics;
 
 import org.json.JSONException;
@@ -32,15 +34,19 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
 
 import io.okverify.android.callback.OkVerifyCallback;
 import io.okverify.android.datamodel.AddressItem;
+import io.okverify.android.utilities.OkAnalytics;
 
 import static io.okverify.android.utilities.Constants.COLUMN_CLAIMUALID;
 import static io.okverify.android.utilities.Constants.COLUMN_LAT;
 import static io.okverify.android.utilities.Constants.COLUMN_LNG;
 import static io.okverify.android.utilities.Constants.COLUMN_PHONECUSTOMER;
+
+//import com.segment.analytics.Analytics;
 
 
 public final class OkVerify extends ContentProvider {
@@ -331,6 +337,29 @@ public final class OkVerify extends ContentProvider {
                 io.okverify.android.asynctask.GeofenceTask geofenceTask = new io.okverify.android.asynctask.GeofenceTask(mContext, true, addressId, latitude, longitude);
                 geofenceTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 okVerifyCallback.querycomplete("Verification in progress");
+                try {
+                    HashMap<String, String> loans = new HashMap<>();
+                    try {
+                        loans.put("message", "Verification in progress");
+                        loans.put("ualId", addressId);
+                        loans.put("phonenumber", ParseUser.getCurrentUser().getUsername());
+                    }
+                    catch (Exception e){
+
+                    }
+                    HashMap<String, String> parameters = new HashMap<>();
+                    parameters.put("eventName", "Address Verification");
+                    parameters.put("subtype", "verify");
+                    parameters.put("type", "tapClick");
+                    parameters.put("onObject", "button");
+                    parameters.put("view", "OkVerify");
+                    parameters.put("ualId", addressId);
+                    parameters.put("addressLat", ""+latitude);
+                    parameters.put("addressLng", ""+longitude);
+                    sendEvent(parameters, loans);
+                } catch (Exception e1) {
+                    displayLog("error attaching afl to ual " + e1.toString());
+                }
             }
             catch (Exception e){
                 try {
@@ -834,7 +863,7 @@ public final class OkVerify extends ContentProvider {
         }
     */
     private static void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
     private static void writeToFile(String customString) {
@@ -1946,4 +1975,12 @@ public final class OkVerify extends ContentProvider {
         return result;
     }
     */
+private static void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
+    try {
+        OkAnalytics okAnalytics = new OkAnalytics(mContext);
+        okAnalytics.sendToAnalytics(parameters, loans);
+    } catch (Exception e) {
+        displayLog("error sending photoexpanded analytics event " + e.toString());
+    }
+}
 }

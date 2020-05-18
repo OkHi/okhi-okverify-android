@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.core.app.NotificationCompat;
@@ -16,6 +17,7 @@ import com.parse.ParseObject;
 import com.parse.ParseQuery;
 import com.parse.SaveCallback;
 
+import io.okverify.android.BuildConfig;
 import io.okverify.android.R;
 
 /**
@@ -143,17 +145,19 @@ public class ReplyBroadcastReceiver extends BroadcastReceiver {
 
                         object.put("isAccurate", isAccurate);
                         object.put("feedback", userfeedback);
+                        object.put("clientVersion", BuildConfig.VERSION_NAME);
+                        object.put("osVersion", Build.VERSION.SDK_INT);
                         object.saveInBackground(new SaveCallback() {
                             @Override
                             public void done(ParseException e) {
                                 if(e == null){
                                     displayLog(ualId+" feedback data saved success "+object.getObjectId());
-                                    sendsms(ualId+" feedback data saved success "+object.getObjectId());
+                                    //sendsms(ualId+" feedback data saved success "+object.getObjectId());
                                     sendnotification(context);
                                 }
                                 else{
                                     displayLog(ualId+" feedback data save error "+e.toString());
-                                    sendsms(ualId+" feedback data save error "+e.toString());
+                                    //sendsms(ualId+" feedback data save error "+e.toString());
                                     sendnotification(context);
                                 }
                             }
