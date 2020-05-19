@@ -255,7 +255,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
 
                 // Set the transition types of interest. Alerts are only generated for these
                 // transition. We track entry and exit transitions in this sample.
-                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_DWELL)
+                .setTransitionTypes(Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT | Geofence.GEOFENCE_TRANSITION_DWELL)
 
                 // Create the geofence.
                 .build());
@@ -400,7 +400,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private GeofencingRequest getGeofencingRequest() {
         displayLog("getGeofencingRequest");
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER);
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER );
         builder.addGeofences(mGeofenceList);
         return builder.build();
     }

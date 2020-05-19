@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit;
 
 import io.okverify.android.BuildConfig;
 import io.okverify.android.callback.TransitsCallBack;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -34,7 +33,8 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
     private int responseCode;
     //private Context context;
     private String environment;
-    private JSONObject jsonObject, finalObject;
+    private JSONArray transitsArray;
+    private JSONObject jsonObject, finalObject, meta, lib;
     //private String applicationkey, branchid;
     private String token;
     //private io.okverify.android.database.DataProvider dataProvider;
@@ -56,7 +56,7 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             geoPoint.put("lat", parseObject.get("latitude"));
             geoPoint.put("lon", parseObject.get("longitude"));
             jsonObject = new JSONObject();
-            JSONArray transitsArray = new JSONArray();
+            transitsArray = new JSONArray();
             //JSONObject actualObject = new JSONObject();
             JSONArray idsArray = new JSONArray();
             idsArray.put(parseObject.get("ualId"));
@@ -85,6 +85,13 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             transitsArray.put(jsonObject);
             finalObject = new JSONObject();
             finalObject.put("transits", transitsArray);
+            JSONObject lib = new JSONObject();
+            lib.put("name", "okVerifyAndroid");
+            lib.put("version", BuildConfig.VERSION_NAME);
+            meta = new JSONObject();
+            meta.put("lib", lib);
+            finalObject.put("transits",transitsArray);
+            finalObject.put("meta", meta);
             displayLog(finalObject.toString());
             //jsonObject.put("transits", transitsArray);
 
@@ -125,9 +132,12 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             MediaType JSON = MediaType.parse("application/json; charset=utf-8");
             RequestBody body = RequestBody.create(JSON, finalObject.toString());
 
+            /*
             RequestBody formBody = new FormBody.Builder()
-                    .add("transits", finalObject.toString())
+                    .add("meta", meta.toString())
+                    .add("transits", transitsArray.toString())
                     .build();
+            */
 
             Request request = new Request.Builder()
                     .url(urlString)
@@ -213,7 +223,7 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
 
     private void sendEvent(HashMap<String, String> parameters, HashMap<String, String> loans) {
         try {
-            //OkAnalytics okAnalytics = new OkAnalytics(context, environment);
+            //OkAnalytics okAnalytics = new OkAnalytics();
             //okAnalytics.sendToAnalytics(parameters, loans, environment);
         } catch (Exception e) {
             displayLog("error sending photoexpanded analytics event " + e.toString());

@@ -1051,13 +1051,15 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     displayLog(""+eventtime);
                     Long duration = System.currentTimeMillis() - eventtime;
                     displayLog(""+duration);
-                    if(duration <= 2400000){
+                    if(duration <= 86400000){
                         displayLog("duration is less than 40mins");
                         //sendTransit(parseObject,lat,lng);
+                        sendSMS(parseObject.getString("ualId")+" "+parseObject.getString("transition"));
                     }
                     else{
                         displayLog("one");
                         //sendTransit(parseObject,lat,lng);
+                        sendSMS(parseObject.getString("ualId")+" "+parseObject.getString("transition"));
                     }
                 }
                 else {
