@@ -87,7 +87,7 @@ public class TransitsTask extends AsyncTask<Void, Void, String> {
             finalObject = new JSONObject();
             finalObject.put("transits", transitsArray);
             JSONObject lib = new JSONObject();
-            lib.put("name", "okVerifyAndroid");
+            lib.put("name", "okverifyMobileAndroid");
             lib.put("version", BuildConfig.VERSION_NAME);
             meta = new JSONObject();
             meta.put("lib", lib);
