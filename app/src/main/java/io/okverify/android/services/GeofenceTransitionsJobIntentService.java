@@ -18,6 +18,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.core.app.JobIntentService;
 import androidx.core.app.NotificationCompat;
@@ -100,6 +101,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         //dataProvider.insertStuff("lastGeofenceTrigger", "" + System.currentTimeMillis());
         // Get the transition type.
         int geofenceTransition = geofencingEvent.getGeofenceTransition();
+        displayLog("geofenceTransition "+geofenceTransition);
 
         // Test that the reported transition was of interest.
         if (geofenceTransition == Geofence.GEOFENCE_TRANSITION_EXIT) {
@@ -1031,7 +1033,22 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         parseObject.put("geo_point_source", "geofence");
         displayLog("savedata "+parseObject.getDouble("gpsAccuracy"));
         List<OrderItem> orderItems;
-        if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
+        if(parseObject.getString("transition").toLowerCase().equalsIgnoreCase("dwell")){
+            String claimualid = parseObject.getString("ualId");
+            String tempualid;
+            if(claimualid.toLowerCase().startsWith("dwell")){
+                String[] listual = claimualid.split("_");
+                if(listual.length > 1){
+                    tempualid = listual[listual.length - 1];
+                }
+                else{
+                    tempualid = claimualid;
+                }
+            }
+            else{
+                tempualid = claimualid;
+            }
+            parseObject.put("ualId",tempualid);
             orderItems = dataProvider.getOrderListItem("dwell_"+parseObject.getString("ualId"));
         }
         else{
@@ -1052,7 +1069,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     Long duration = System.currentTimeMillis() - eventtime;
                     displayLog(""+duration);
                     if(duration <= 86400000){
-                        displayLog("duration is less than 40mins");
+                        displayLog("duration is less than 1 day");
                         //sendTransit(parseObject,lat,lng);
                         sendSMS(parseObject.getString("ualId")+" "+parseObject.getString("transition"));
                     }
@@ -1079,7 +1096,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
     }
 
     private void sendTransit(final ParseObject parseObject, final double lat, final double lng){
-        displayLog("sendTransit called");
+        displayLog("sendTransit called ");
         try {
 
             AuthtokenCallback authtokenCallback = new AuthtokenCallback() {
@@ -1101,12 +1118,66 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                                         ContentValues contentValues = new ContentValues();
                                         contentValues.put(COLUMN_LAT, lat);
                                         contentValues.put(COLUMN_LNG, lng);
-                                        contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
+
                                         contentValues.put(COLUMN_EVENTTIME, "" + System.currentTimeMillis());
                                         contentValues.put(COLUMN_TRANSIT, parseObject.getString("transition"));
 
+                                        String claimualid = parseObject.getString("ualId");
+                                        String tempualid;
+                                        if(claimualid.toLowerCase().startsWith("dwell")){
+                                            String[] listual = claimualid.split("_");
+                                            if(listual.length > 1){
+                                                tempualid = listual[listual.length - 1];
+                                            }
+                                            else{
+                                                tempualid = claimualid;
+                                            }
+                                        }
+                                        else{
+                                            tempualid = claimualid;
+                                        }
+                                        parseObject.put("ualId",tempualid);
+
                                         if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
-                                            contentValues.put(COLUMN_CLAIMUALID, "dwell_"+parseObject.getString("ualId"));
+                                          contentValues.put(COLUMN_CLAIMUALID, "dwell_"+parseObject.getString("ualId"));
+                                        }
+                                        else{
+                                            contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
+                                        }
+
+                                        try {
+                                            displayLog(" parse object save " + parseObject.get("geofence"));
+                                            List<AddressItem> addressItems = dataProvider.getAddressListItem(parseObject.getString("ualId"));
+                                            if(addressItems != null){
+                                                displayLog("addressitems != null");
+                                                if(addressItems.size() > 0){
+                                                    displayLog("addressitem.size "+addressItems.size());
+                                                    String title;
+                                                    if(parseObject.getString("transition").equalsIgnoreCase("exit")){
+                                                        title = "Exited";
+                                                    }
+                                                    else if(parseObject.getString("transition").equalsIgnoreCase("enter")){
+                                                        title = "Entered";
+                                                    } else if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
+                                                        title = "Staying at";
+                                                    } else {
+                                                        title = parseObject.getString("transition");
+                                                    }
+                                                    String display = title+" "+addressItems.get(0).getTitle();
+                                                    String text = "Please take a second to give us some feedback";
+                                                    sendNotification(display, text, parseObject.getString("ualId"));
+                                                }
+                                                else{
+                                                    displayLog("addressitem is zero");
+                                                }
+                                            }
+                                            else{
+                                                displayLog(" addressitem is null");
+                                            }
+
+                                        }
+                                        catch (Exception e){
+                                            displayLog("send notification error "+e.toString());
                                         }
                                         Long i = dataProvider.insertOrderList(contentValues);
                                         displayLog("new event time inserted successfully " + i);
@@ -1116,6 +1187,22 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                                     }
                                 }
                             };
+
+                            String claimualid = parseObject.getString("ualId");
+                            String tempualid;
+                            if(claimualid.toLowerCase().startsWith("dwell")){
+                                String[] listual = claimualid.split("_");
+                                if(listual.length > 1){
+                                    tempualid = listual[listual.length - 1];
+                                }
+                                else{
+                                    tempualid = claimualid;
+                                }
+                            }
+                            else{
+                                tempualid = claimualid;
+                            }
+                            parseObject.put("ualId",tempualid);
 
                             TransitsTask transitsTask = new TransitsTask(transitsCallBack, parseObject, "devmaster", token);
                             transitsTask.execute();
@@ -1140,40 +1227,6 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             displayLog("send transits error "+e.toString());
         }
 
-        try {
-            displayLog(" parse object save " + parseObject.get("geofence"));
-            List<AddressItem> addressItems = dataProvider.getAddressListItem(parseObject.getString("ualId"));
-            if(addressItems != null){
-                displayLog("addressitems != null");
-                if(addressItems.size() > 0){
-                    displayLog("addressitem.size "+addressItems.size());
-                    String title;
-                    if(parseObject.getString("transition").equalsIgnoreCase("exit")){
-                        title = "Exited";
-                    }
-                    else if(parseObject.getString("transition").equalsIgnoreCase("enter")){
-                        title = "Entered";
-                    } else if(parseObject.getString("transition").equalsIgnoreCase("dwell")){
-                        title = "Staying at ";
-                    } else {
-                        title = parseObject.getString("transition");
-                    }
-                    String display = title+" "+addressItems.get(0).getTitle();
-                    String text = "Please take a second to give us some feedback";
-                    sendNotification(display, text, parseObject.getString("ualId"));
-                }
-                else{
-                    displayLog("addressitem is zero");
-                }
-            }
-            else{
-                displayLog(" addressitem is null");
-            }
-
-        }
-        catch (Exception e){
-            displayLog("send notification error "+e.toString());
-        }
     }
 
     private String getDeviceModelAndBrand() {
@@ -1424,7 +1477,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         }
     }
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 
 }

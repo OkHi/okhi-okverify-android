@@ -41,7 +41,22 @@ public class ReplyBroadcastReceiver extends BroadcastReceiver {
     public void onReceive(Context context, Intent intent) {
         // Enqueues a JobIntentService passing the context and intent as parameters
         try {
-            String ualId = intent.getStringExtra("ualId");
+
+            String claimualid = intent.getStringExtra("ualId");
+            String tempualid;
+            if(claimualid.toLowerCase().startsWith("dwell")){
+                String[] listual = claimualid.split("_");
+                if(listual.length > 1){
+                    tempualid = listual[listual.length - 1];
+                }
+                else{
+                    tempualid = claimualid;
+                }
+            }
+            else{
+                tempualid = claimualid;
+            }
+            String ualId = tempualid;
             //String title = intent.getStringExtra("title");
             //String subtitle = intent.getStringExtra("subtitle");
             displayLog("ualId "+ualId);
@@ -69,7 +84,7 @@ public class ReplyBroadcastReceiver extends BroadcastReceiver {
                     if(charSequence.length() > 0) {
                         displayLog("charSequence bad (charSequence.length() > 0)");
                         sendsms(ualId+" Bad " + charSequence.toString());
-                        savetobackend(true, charSequence.toString(), ualId, context);
+                        savetobackend(false, charSequence.toString(), ualId, context);
                     }
                     else{
                         charSequence = remoteInput.getCharSequence(KEY_GOOD_REPLY);
@@ -81,6 +96,14 @@ public class ReplyBroadcastReceiver extends BroadcastReceiver {
                                 sendsms(ualId+" Good " + charSequence.toString());
                                 savetobackend(true, charSequence.toString(), ualId, context);
                             }
+                            else{
+                                sendsms(ualId+" Bad No comment");
+                                savetobackend(false, "No comment", ualId, context);
+                            }
+                        }
+                        else {
+                            sendsms(ualId+" Bad No comment");
+                            savetobackend(false, "No comment", ualId, context);
                         }
                     }
                 }
@@ -95,6 +118,14 @@ public class ReplyBroadcastReceiver extends BroadcastReceiver {
                             sendsms(ualId+" Good " + charSequence.toString());
                             savetobackend(true, charSequence.toString(), ualId, context);
                         }
+                        else{
+                            sendsms(ualId+" Good No comment");
+                            savetobackend(true, "No comment", ualId, context);
+                        }
+                    }
+                    else{
+                        sendsms(ualId+" Good No comment");
+                        savetobackend(true, "No comment", ualId, context);
                     }
                 }
             }

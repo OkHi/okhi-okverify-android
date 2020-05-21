@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.provider.Settings;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.BackoffPolicy;
@@ -44,14 +45,27 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private Double lat, lng;
     private WorkManager workManager6hour, workManager30minute;
 
-    public GeofenceTask(Context context, Boolean skipTimerCheck, String ualId, Double lat, Double lng) {
+    public GeofenceTask(Context context, Boolean skipTimerCheck, String claimualid, Double lat, Double lng) {
         displayLog("GeofenceTask called");
         this.context = context;
         this.dataProvider = new io.okverify.android.database.DataProvider(context);
         this.skiptimercheck = skipTimerCheck;
         this.lat = lat;
         this.lng = lng;
-        this.ualId = ualId;
+        if(claimualid.toLowerCase().startsWith("dwell")){
+            String[] listual = claimualid.split("_");
+            if(listual.length > 1){
+                this.ualId = listual[listual.length - 1];
+            }
+            else{
+                this.ualId = claimualid;
+            }
+        }
+        else{
+            this.ualId = claimualid;
+        }
+        displayLog("claimualid "+claimualid+" ualid "+ualId);
+
         mGeofenceList = new ArrayList<>();
         workManager30minute = WorkManager.getInstance(context);
         workManager6hour = WorkManager.getInstance(context);
@@ -400,7 +414,7 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     private GeofencingRequest getGeofencingRequest() {
         displayLog("getGeofencingRequest");
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER );
+        builder.setInitialTrigger( Geofence.GEOFENCE_TRANSITION_DWELL  );
         builder.addGeofences(mGeofenceList);
         return builder.build();
     }
@@ -486,6 +500,6 @@ public class GeofenceTask extends AsyncTask<Void, Void, String> {
     }
 
     private void displayLog(String log) {
-        //Log.i(TAG, log);
+        Log.i(TAG, log);
     }
 }
