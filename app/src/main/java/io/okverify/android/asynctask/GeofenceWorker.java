@@ -3,6 +3,7 @@ package io.okverify.android.asynctask;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.work.ListenableWorker;
@@ -113,10 +114,11 @@ public class GeofenceWorker extends Worker {
                         // Set the request ID of the geofence. This is a string to identify this
                         // geofence.
                         .setRequestId(orderItem.getClaimualid())
-                        .setNotificationResponsiveness(12000)
+                        //.setNotificationResponsiveness(12000)
                         // Set the circular region of this geofence.
                         .setCircularRegion(orderItem.getLat(), orderItem.getLng(), 500)
-                        .setLoiteringDelay(30000)
+                        .setNotificationResponsiveness(60000)
+                        .setLoiteringDelay(3600000)
                         // Set the expiration duration of the geofence. This geofence gets automatically
                         // removed after this period of time.
                         .setExpirationDuration(NEVER_EXPIRE)
@@ -152,9 +154,13 @@ public class GeofenceWorker extends Worker {
                             } else {
                                 //displayLog("addgeofences is not successful ");
                                 // Get the status code for the error and log it using a user-friendly message.
-                                String errorMessage = io.okverify.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
-                                //Log.w(TAG, errorMessage);
-                                displayLog("addgeofence error " + errorMessage);
+                                try {
+                                    String errorMessage = io.okverify.android.utilities.GeofenceErrorMessages.getErrorString(context, task.getException());
+                                    //Log.w(TAG, errorMessage);
+                                    displayLog("addgeofence error " + errorMessage);
+                                } catch (Exception e){
+
+                                }
                             }
 
                         }
@@ -192,13 +198,13 @@ public class GeofenceWorker extends Worker {
     private GeofencingRequest getGeofencingRequest() {
         displayLog("getGeofencingRequest");
         GeofencingRequest.Builder builder = new GeofencingRequest.Builder();
-        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER | GeofencingRequest.INITIAL_TRIGGER_DWELL);
+        builder.setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_DWELL);
         builder.addGeofences(mGeofenceList);
         return builder.build();
     }
 
     private void displayLog(String log){
-        //Log.i("GeofenceWorker", log);
+        Log.i("GeofenceWorker", log);
     }
 
 }

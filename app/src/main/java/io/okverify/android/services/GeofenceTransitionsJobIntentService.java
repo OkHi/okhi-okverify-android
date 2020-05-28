@@ -166,11 +166,10 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
             }
 
             // Get the geofences that were triggered. A single event can trigger multiple geofences.
-            List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
+            //List<Geofence> triggeringGeofences = geofencingEvent.getTriggeringGeofences();
 
             // Get the transition details as a String.
-            String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition,
-                    triggeringGeofences);
+            //String geofenceTransitionDetails = getGeofenceTransitionDetails(geofenceTransition, triggeringGeofences);
 
             // Send notification and log the transition details.
             /*
@@ -253,7 +252,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
      * Posts a notification in the notification bar when a transition is detected.
      * If the user clicks the notification, control goes to the MainActivity.
      */
-    private void sendNotification(String notificationDetails) {
+    private void sendNotificationDeprecated(String notificationDetails) {
         displayLog(notificationDetails);
         /*
         // Get an instance of the Notification manager
@@ -1032,7 +1031,9 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         parseObject.put("geofence", "geofence");
         parseObject.put("geo_point_source", "geofence");
         displayLog("savedata "+parseObject.getDouble("gpsAccuracy"));
+                /*
         List<OrderItem> orderItems;
+
         if(parseObject.getString("transition").toLowerCase().equalsIgnoreCase("dwell")){
             String claimualid = parseObject.getString("ualId");
             String tempualid;
@@ -1054,12 +1055,13 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
         else{
             orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
         }
-
+*/
+        List<OrderItem> orderItems = dataProvider.getOrderListItem(parseObject.getString("ualId"));
         displayLog("orderitems "+orderItems.size());
         if(orderItems != null){
             displayLog("five");
             if(orderItems.size() > 0){
-                displayLog("six");
+                displayLog("six ");
                 String previousevent = orderItems.get(0).getState();
                 displayLog(previousevent);
                 if(previousevent.equalsIgnoreCase(parseObject.getString("transition"))){
@@ -1118,10 +1120,11 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                                         ContentValues contentValues = new ContentValues();
                                         contentValues.put(COLUMN_LAT, lat);
                                         contentValues.put(COLUMN_LNG, lng);
-
+                                        contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
                                         contentValues.put(COLUMN_EVENTTIME, "" + System.currentTimeMillis());
                                         contentValues.put(COLUMN_TRANSIT, parseObject.getString("transition"));
 
+                                        /*
                                         String claimualid = parseObject.getString("ualId");
                                         String tempualid;
                                         if(claimualid.toLowerCase().startsWith("dwell")){
@@ -1144,6 +1147,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                                         else{
                                             contentValues.put(COLUMN_CLAIMUALID, parseObject.getString("ualId"));
                                         }
+                                        */
 
                                         try {
                                             displayLog(" parse object save " + parseObject.get("geofence"));
@@ -1189,6 +1193,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                             };
 
                             String claimualid = parseObject.getString("ualId");
+                            /*
                             String tempualid;
                             if(claimualid.toLowerCase().startsWith("dwell")){
                                 String[] listual = claimualid.split("_");
@@ -1202,7 +1207,8 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                             else{
                                 tempualid = claimualid;
                             }
-                            parseObject.put("ualId",tempualid);
+                            */
+                            parseObject.put("ualId",claimualid);
 
                             TransitsTask transitsTask = new TransitsTask(transitsCallBack, parseObject, "devmaster", token);
                             transitsTask.execute();
@@ -1243,93 +1249,104 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
 
     private void sendNotification(String title, String message, String ualId) {
 
-        displayLog("sendNotification title "+title+" message "+message+" ualid "+ualId);
-        try {
-            Bundle bundle = new Bundle();
-            bundle.putString("ualId", ualId);
+        if((ualId.equalsIgnoreCase("HIVDcSjFAg")) ||
+                (ualId.equalsIgnoreCase("CxDNoHNNtE")) ||
+                (ualId.equalsIgnoreCase("sPAtNOVIKu")) ||
+                (ualId.equalsIgnoreCase("lhGu4XASow")) ||
+                (ualId.equalsIgnoreCase("J9i2Zr5oDQ")) ||
+                (ualId.equalsIgnoreCase("LhX0mxxTmD")) ||
+                (ualId.equalsIgnoreCase("rm1FX7SSlo"))) {
 
-            String replyLabel = "Enter your feedback here";
-            RemoteInput remoteGoodInput =
-                    new RemoteInput.Builder(KEY_GOOD_REPLY)
-                            .setLabel(replyLabel)
-                            .build();
-            RemoteInput remoteBadInput =
-                    new RemoteInput.Builder(KEY_BAD_REPLY)
-                            .setLabel(replyLabel)
-                            .build();
+            displayLog("sendNotification title "+title+" message "+message+" ualid "+ualId);
+            try {
+                Bundle bundle = new Bundle();
+                bundle.putString("ualId", ualId);
 
-            Intent goodIntent = new Intent(this, ReplyBroadcastReceiver.class);
-            goodIntent.putExtra("ualId", ualId);
+                String replyLabel = "Enter your feedback here";
+                RemoteInput remoteGoodInput =
+                        new RemoteInput.Builder(KEY_GOOD_REPLY)
+                                .setLabel(replyLabel)
+                                .build();
+                RemoteInput remoteBadInput =
+                        new RemoteInput.Builder(KEY_BAD_REPLY)
+                                .setLabel(replyLabel)
+                                .build();
 
-            goodIntent.setAction("Good");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                goodIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+                Intent goodIntent = new Intent(this, ReplyBroadcastReceiver.class);
+                goodIntent.putExtra("ualId", ualId);
+
+                goodIntent.setAction("Good");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    goodIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+                }
+
+                PendingIntent goodPendingIntent = PendingIntent.getBroadcast(this, 0, goodIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+                Intent badIntent = new Intent(this, ReplyBroadcastReceiver.class);
+                badIntent.putExtra("ualId", ualId);
+                badIntent.setAction("Bad");
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    badIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
+                }
+
+                PendingIntent badPendingIntent = PendingIntent.getBroadcast(this, 0, badIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+
+                NotificationCompat.Action replyGoodAction =
+                        new NotificationCompat.Action.Builder(
+                                R.drawable.ic_stat_ic_notification,
+                                "Good", goodPendingIntent)
+                                .addRemoteInput(remoteGoodInput)
+                                .build();
+
+
+                NotificationCompat.Action replyBadAction =
+                        new NotificationCompat.Action.Builder(  R.drawable.ic_stat_ic_notification,
+                                "Bad", badPendingIntent)
+                                .addRemoteInput(remoteBadInput)
+                                .build();
+
+                String channelId = getString(R.string.default_notification_channel_id);
+                Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                NotificationCompat.Builder notificationBuilder =
+                        new NotificationCompat.Builder(this, channelId)
+                                .setSmallIcon(R.mipmap.ic_launcher_round)
+                                .setContentTitle(title)
+                                .setContentText(message)
+                                .setAutoCancel(true)
+                                .setOngoing(true)
+                                .setPriority(NotificationManager.IMPORTANCE_HIGH)
+                                .setTicker(title)
+                                .addExtras(bundle)
+                                .setLights(rgb(255, 0, 0), 2000, 1000)
+                                .setSound(defaultSoundUri)
+                                .addAction(replyGoodAction)
+                                .addAction(replyBadAction);
+                //.setContentIntent(pendingIntent);
+
+
+                NotificationManager notificationManager =
+                        (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                // Since android Oreo notification channel is needed.
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    NotificationChannel channel = new NotificationChannel(channelId, "OkVerify", NotificationManager.IMPORTANCE_HIGH);
+                    channel.enableLights(true);
+                    channel.enableVibration(true);
+                    channel.setLightColor(rgb(255, 0, 0));
+                    channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
+                    channel.setBypassDnd(true);
+                    channel.setShowBadge(true);
+                    notificationManager.createNotificationChannel(channel);
+                }
+                notificationManager.notify(0, notificationBuilder.build());
+            }
+            catch (Exception e){
+                displayLog("send notification error "+e.toString());
             }
 
-            PendingIntent goodPendingIntent = PendingIntent.getBroadcast(this, 0, goodIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-            Intent badIntent = new Intent(this, ReplyBroadcastReceiver.class);
-            badIntent.putExtra("ualId", ualId);
-            badIntent.setAction("Bad");
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                badIntent.putExtra(EXTRA_NOTIFICATION_ID, 0);
-            }
-
-            PendingIntent badPendingIntent = PendingIntent.getBroadcast(this, 0, badIntent, PendingIntent.FLAG_UPDATE_CURRENT);
-
-
-            NotificationCompat.Action replyGoodAction =
-                    new NotificationCompat.Action.Builder(
-                            R.drawable.ic_stat_ic_notification,
-                            "Good", goodPendingIntent)
-                            .addRemoteInput(remoteGoodInput)
-                            .build();
-
-
-            NotificationCompat.Action replyBadAction =
-                    new NotificationCompat.Action.Builder(  R.drawable.ic_stat_ic_notification,
-                            "Bad", badPendingIntent)
-                            .addRemoteInput(remoteBadInput)
-                            .build();
-
-            String channelId = getString(R.string.default_notification_channel_id);
-            Uri defaultSoundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            NotificationCompat.Builder notificationBuilder =
-                    new NotificationCompat.Builder(this, channelId)
-                            .setSmallIcon(R.mipmap.ic_launcher_round)
-                            .setContentTitle(title)
-                            .setContentText(message)
-                            .setAutoCancel(true)
-                            .setOngoing(true)
-                            .setPriority(NotificationManager.IMPORTANCE_HIGH)
-                            .setTicker(title)
-                            .addExtras(bundle)
-                            .setLights(rgb(255, 0, 0), 2000, 1000)
-                            .setSound(defaultSoundUri)
-                            .addAction(replyGoodAction)
-                            .addAction(replyBadAction);
-            //.setContentIntent(pendingIntent);
-
-
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-            // Since android Oreo notification channel is needed.
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                NotificationChannel channel = new NotificationChannel(channelId, "OkVerify", NotificationManager.IMPORTANCE_HIGH);
-                channel.enableLights(true);
-                channel.enableVibration(true);
-                channel.setLightColor(rgb(255, 0, 0));
-                channel.setImportance(NotificationManager.IMPORTANCE_HIGH);
-                channel.setBypassDnd(true);
-                channel.setShowBadge(true);
-                notificationManager.createNotificationChannel(channel);
-            }
-            notificationManager.notify(0, notificationBuilder.build());
         }
-        catch (Exception e){
-            displayLog("send notification error "+e.toString());
-        }
+
     }
 
     private Float getDistance(Double latA, Double lngA, Double latB, Double lngB) {
