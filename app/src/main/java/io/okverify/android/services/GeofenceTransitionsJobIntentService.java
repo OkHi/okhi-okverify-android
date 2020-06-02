@@ -1077,7 +1077,7 @@ public class GeofenceTransitionsJobIntentService extends JobIntentService {
                     }
                     else{
                         displayLog("one");
-                        //sendTransit(parseObject,lat,lng);
+                        sendTransit(parseObject,lat,lng);
                         sendSMS(parseObject.getString("ualId")+" "+parseObject.getString("transition"));
                     }
                 }
